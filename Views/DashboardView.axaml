@@ -1,0 +1,258 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:MacStyleHub.ViewModels"
+             xmlns:views="using:MacStyleHub.Views"
+             xmlns:services="using:MacStyleHub.Services"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="550"
+             x:Class="MacStyleHub.Views.DashboardView"
+             x:DataType="vm:DashboardViewModel">
+
+    <UserControl.Styles>
+        <!-- Style for selector buttons -->
+        <Style Selector="Button.SelectorBtn">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderGray}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="15"/>
+            <Setter Property="Padding" Value="14,6"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.12"/>
+                    <BrushTransition Property="BorderBrush" Duration="0:0:0.12"/>
+                    <BrushTransition Property="Foreground" Duration="0:0:0.12"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        
+        <Style Selector="Button.SelectorBtn:pointerover">
+            <Setter Property="Background" Value="#0FFFFFFF"/>
+            <Setter Property="BorderBrush" Value="#3DFFFFFF"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+        </Style>
+
+        <!-- Selected active state styling -->
+        <Style Selector="Button.SelectorBtn.active">
+            <Setter Property="Background" Value="#1A0A84FF"/>
+            <Setter Property="Foreground" Value="{StaticResource AccentBlue}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource AccentBlue}"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+        </Style>
+    </UserControl.Styles>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="30" Spacing="25">
+            <!-- Header greeting and Clock -->
+            <Grid ColumnDefinitions="*, Auto">
+                <StackPanel Grid.Column="0" Spacing="6" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding Greeting}" FontSize="32" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" LetterSpacing="-0.5"/>
+                    <TextBlock Text="{Binding DateString}" FontSize="14" Foreground="{DynamicResource TextSecondary}" FontWeight="Medium"/>
+                </StackPanel>
+                
+                <!-- Modern Minimal Clock -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding TimeString}" FontSize="56" FontWeight="Light" Foreground="{DynamicResource TextPrimary}" LetterSpacing="-1"/>
+                    <TextBlock Text="{Binding SecondsString}" FontSize="20" FontWeight="Light" Foreground="{DynamicResource TextSecondary}" Margin="2,0,0,10" VerticalAlignment="Bottom"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- First Row Grid: Weather & Music Player -->
+            <Grid ColumnDefinitions="*, *" RowDefinitions="Auto" HorizontalAlignment="Stretch">
+                
+                <!-- Left: Weather Widget (Minimal Glass card) -->
+                <Border Grid.Column="0" Classes="GlassCard" Margin="0,0,10,0" MinHeight="210" VerticalAlignment="Stretch">
+                    <Grid RowDefinitions="Auto, *, Auto">
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8">
+                            <PathIcon Data="{StaticResource IconLocation}" Width="14" Height="14" Foreground="{DynamicResource TextSecondary}"/>
+                            <TextBlock Text="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).WeatherVM.City}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                        </StackPanel>
+                        
+                        <Grid Grid.Row="1" ColumnDefinitions="Auto, *" VerticalAlignment="Center" Margin="0,5">
+                            <views:WeatherIcon Grid.Column="0" Icon="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).WeatherVM.Icon}" Width="64" Height="64" StrokeThickness="2.8" VerticalAlignment="Center" Margin="0,0,20,0"/>
+                            
+                            <!-- Temp and condition -->
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).WeatherVM.Temperature, StringFormat={}{0:0}}" FontSize="40" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}"/>
+                                    <TextBlock Text="°C" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" Margin="2,4,0,0" VerticalAlignment="Top"/>
+                                </StackPanel>
+                                <TextBlock Text="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).WeatherVM.Condition}" FontSize="14" Foreground="{DynamicResource TextPrimary}" FontWeight="Medium"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="25">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <PathIcon Data="{StaticResource IconHumidity}" Width="12" Height="12" Foreground="{DynamicResource TextSecondary}"/>
+                                <TextBlock Text="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).WeatherVM.Humidity, StringFormat={}{0}%}" Foreground="{DynamicResource TextPrimary}" FontSize="13" FontWeight="SemiBold"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <PathIcon Data="{StaticResource IconWind}" Width="12" Height="12" Foreground="{DynamicResource TextSecondary}"/>
+                                <TextBlock Text="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).WeatherVM.WindSpeedLocalized}" Foreground="{DynamicResource TextPrimary}" FontSize="13" FontWeight="SemiBold"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Right: Dedicated Music Player Widget (Sleek card) -->
+                <Border Grid.Column="1" Classes="GlassCard" Margin="10,0,0,0" MinHeight="210" VerticalAlignment="Stretch">
+                    <Grid RowDefinitions="Auto, *">
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8">
+                            <PathIcon Data="{StaticResource IconMusic}" Width="14" Height="14" Foreground="{StaticResource AccentBlue}"/>
+                            <TextBlock Text="{Binding PlayerHeader, Source={x:Static services:LocalizationService.Instance}}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                        </StackPanel>
+                        
+                        <!-- When Media is Active -->
+                        <Grid Grid.Row="1" RowDefinitions="*, Auto" Margin="0,10,0,0" IsVisible="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).PlaybackVM.HasMedia}">
+                            <StackPanel Grid.Row="0" Spacing="5" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).PlaybackVM.Title}" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" TextTrimming="CharacterEllipsis" MaxLines="2"/>
+                                <TextBlock Text="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).PlaybackVM.Artist}" FontSize="14" Foreground="{DynamicResource TextSecondary}" TextTrimming="CharacterEllipsis"/>
+                            </StackPanel>
+                            
+                            <Grid Grid.Row="1" ColumnDefinitions="*, Auto" VerticalAlignment="Center" Margin="0,5,0,0">
+                                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                    <Border Background="{DynamicResource BorderGray}" CornerRadius="4" Padding="6,2">
+                                        <TextBlock Text="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).PlaybackVM.PlayerName}" FontSize="10" Foreground="{DynamicResource TextSecondary}" FontWeight="Bold"/>
+                                    </Border>
+                                </StackPanel>
+                                
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="15" VerticalAlignment="Center">
+                                    <!-- Prev track -->
+                                    <Button Width="28" Height="28" Padding="0" Background="Transparent" BorderThickness="0"
+                                            Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).PlaybackVM.PrevCommand}" ToolTip.Tip="Назад">
+                                        <PathIcon Data="{StaticResource IconPlay}" Width="10" Height="10" Foreground="{DynamicResource TextPrimary}" RenderTransform="rotate(180deg)"/>
+                                    </Button>
+                                    
+                                    <!-- Play/Pause -->
+                                    <Button Width="30" Height="30" Padding="0" CornerRadius="15" Classes="SystemButton"
+                                            Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).PlaybackVM.TogglePlayCommand}" ToolTip.Tip="Воспроизведение/Пауза">
+                                        <Grid>
+                                            <PathIcon Data="{StaticResource IconPause}" Width="10" Height="10" Foreground="{StaticResource AccentBlue}" IsVisible="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).PlaybackVM.IsPlaying}"/>
+                                            <PathIcon Data="{StaticResource IconPlay}" Width="10" Height="10" Foreground="{DynamicResource TextPrimary}" IsVisible="{Binding !$parent[Window].((vm:MainWindowViewModel)DataContext).PlaybackVM.IsPlaying}"/>
+                                        </Grid>
+                                    </Button>
+                                    
+                                    <!-- Next track -->
+                                    <Button Width="28" Height="28" Padding="0" Background="Transparent" BorderThickness="0"
+                                            Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).PlaybackVM.NextCommand}" ToolTip.Tip="Вперед">
+                                        <PathIcon Data="{StaticResource IconPlay}" Width="10" Height="10" Foreground="{DynamicResource TextPrimary}"/>
+                                    </Button>
+                                </StackPanel>
+                            </Grid>
+                        </Grid>
+
+                        <!-- When No Media is Active -->
+                        <Grid Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,15,0,0" IsVisible="{Binding !$parent[Window].((vm:MainWindowViewModel)DataContext).PlaybackVM.HasMedia}">
+                            <StackPanel Spacing="10" HorizontalAlignment="Center">
+                                <PathIcon Data="{StaticResource IconMusic}" Width="28" Height="28" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center"/>
+                                <TextBlock Text="{Binding PlayerNoActive, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center"/>
+                                <TextBlock Text="{Binding PlayerLaunchRecommendation, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- Second Row: Resource gauges -->
+            <Border Classes="SystemCard" HorizontalAlignment="Stretch" MinHeight="180">
+                <Grid RowDefinitions="Auto, *">
+                    <TextBlock Grid.Row="0" Text="{Binding DashboardLoadTitle, Source={x:Static services:LocalizationService.Instance}}" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                    
+                    <Grid Grid.Row="1" ColumnDefinitions="*, *" VerticalAlignment="Center">
+                        <!-- CPU Circle -->
+                        <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                            <Grid Width="100" Height="100">
+                                <Arc StartAngle="0" SweepAngle="360" Stroke="{DynamicResource BorderGray}" StrokeThickness="8" Width="90" Height="90"/>
+                                <Arc StartAngle="-90" SweepAngle="{Binding CpuSweepAngle}" Stroke="{StaticResource AccentBlue}" StrokeThickness="8" Width="90" Height="90" StrokeLineCap="Round"/>
+                                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                    <TextBlock Text="{Binding CpuUsage, StringFormat={}{0}%}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="{Binding DashboardCpu, Source={x:Static services:LocalizationService.Instance}}" FontSize="10" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center" FontWeight="Medium"/>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- RAM Circle -->
+                        <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                            <Grid Width="100" Height="100">
+                                <Arc StartAngle="0" SweepAngle="360" Stroke="{DynamicResource BorderGray}" StrokeThickness="8" Width="90" Height="90"/>
+                                <Arc StartAngle="-90" SweepAngle="{Binding RamSweepAngle}" Stroke="#34C759" StrokeThickness="8" Width="90" Height="90" StrokeLineCap="Round"/>
+                                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                    <TextBlock Text="{Binding RamUsagePercent, StringFormat={}{0}%}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="{Binding DashboardRam, Source={x:Static services:LocalizationService.Instance}}" FontSize="10" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center" FontWeight="Medium"/>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <!-- Bottom Note Tip Card -->
+            <Border Classes="GlassCard" HorizontalAlignment="Stretch">
+                <Grid ColumnDefinitions="Auto, *">
+                    <PathIcon Grid.Column="0" Data="{StaticResource IconTip}" Width="20" Height="20" Foreground="{StaticResource AccentBlue}" Margin="0,0,15,0" VerticalAlignment="Center"/>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
+                        <TextBlock Text="{Binding DashboardTipTitle, Source={x:Static services:LocalizationService.Instance}}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                        <TextBlock Text="{Binding DashboardTipText, Source={x:Static services:LocalizationService.Instance}}" FontSize="12" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Interface Settings Card -->
+            <Border Classes="GlassCard" HorizontalAlignment="Stretch" Padding="20">
+                <StackPanel Spacing="15">
+                    <TextBlock Text="{Binding DashboardSettingsTitle, Source={x:Static services:LocalizationService.Instance}}" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                    
+                    <Grid ColumnDefinitions="*, *">
+                        <!-- Theme switch -->
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding DashboardThemeLabel, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <!-- Light Button -->
+                                <Button Classes="SelectorBtn" Classes.active="{Binding !IsDarkTheme}" Command="{Binding SetThemeCommand}" CommandParameter="light">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <PathIcon Data="{StaticResource WeatherSun}" Width="12" Height="12" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding DashboardThemeLight, Source={x:Static services:LocalizationService.Instance}}" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+
+                                <!-- Dark Button -->
+                                <Button Classes="SelectorBtn" Classes.active="{Binding IsDarkTheme}" Command="{Binding SetThemeCommand}" CommandParameter="dark">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <PathIcon Data="{StaticResource WeatherMoon}" Width="12" Height="12" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding DashboardThemeDark, Source={x:Static services:LocalizationService.Instance}}" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- Language switch -->
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding DashboardLangLabel, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <!-- Russian (RU) -->
+                                <Button Classes="SelectorBtn" Classes.active="{Binding IsLangRu}" Command="{Binding SetLanguageCommand}" CommandParameter="RU">
+                                    <TextBlock Text="RU"/>
+                                </Button>
+
+                                <!-- English (EN) -->
+                                <Button Classes="SelectorBtn" Classes.active="{Binding IsLangEn}" Command="{Binding SetLanguageCommand}" CommandParameter="EN">
+                                    <TextBlock Text="EN"/>
+                                </Button>
+
+                                <!-- Chinese (ZH) -->
+                                <Button Classes="SelectorBtn" Classes.active="{Binding IsLangZh}" Command="{Binding SetLanguageCommand}" CommandParameter="ZH">
+                                    <TextBlock Text="ZH"/>
+                                </Button>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

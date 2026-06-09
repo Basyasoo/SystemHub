@@ -1,0 +1,135 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:MacStyleHub.ViewModels"
+             xmlns:services="using:MacStyleHub.Services"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="550"
+             x:Class="MacStyleHub.Views.CleanerView"
+             x:DataType="vm:CleanerViewModel">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="30" Spacing="25" HorizontalAlignment="Stretch">
+            <!-- Header -->
+            <StackPanel Spacing="5">
+                <TextBlock Text="{Binding CleanerHeader, Source={x:Static services:LocalizationService.Instance}}" FontSize="28" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" LetterSpacing="-0.5"/>
+                <TextBlock Text="{Binding CleanerSubheader, Source={x:Static services:LocalizationService.Instance}}" FontSize="14" Foreground="{DynamicResource TextSecondary}"/>
+            </StackPanel>
+
+            <!-- Large Circular Clean Button Area (Premium Glass card) -->
+            <Border Classes="GlassCard" Padding="30" HorizontalAlignment="Stretch" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderGray}">
+                <StackPanel Spacing="20" HorizontalAlignment="Center">
+                    <Grid Width="180" Height="180" HorizontalAlignment="Center">
+                        <!-- Background Circle/Ring -->
+                        <Ellipse Stroke="{DynamicResource BorderGray}" StrokeThickness="6" Width="170" Height="170"/>
+                        
+                        <!-- Rotating indicator during scan -->
+                        <Arc Stroke="{DynamicResource AccentBlue}" StrokeThickness="6" Width="170" Height="170" StartAngle="-90" SweepAngle="90" IsVisible="{Binding IsScanning}"/>
+                        <Arc Stroke="#34C759" StrokeThickness="6" Width="170" Height="170" StartAngle="-90" SweepAngle="360" IsVisible="{Binding IsCleaning}"/>
+
+                        <!-- Main Circular Button -->
+                        <Button Width="150" Height="150" CornerRadius="75" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                Command="{Binding ScanCommand}" IsEnabled="{Binding !IsCleaning}">
+                            <Button.Styles>
+                                <Style Selector="Button">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="BorderBrush" Value="{DynamicResource BorderGray}"/>
+                                    <Setter Property="BorderThickness" Value="1"/>
+                                </Style>
+                                <Style Selector="Button:pointerover">
+                                    <Setter Property="Background" Value="{DynamicResource SidebarHoverBg}"/>
+                                    <Setter Property="BorderBrush" Value="{DynamicResource AccentBlue}"/>
+                                </Style>
+                            </Button.Styles>
+                            
+                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="6">
+                                <PathIcon Data="{StaticResource IconCleaner}" Width="32" Height="32" Foreground="{DynamicResource AccentBlue}"/>
+                                <TextBlock Text="{Binding CleanerScanBtn, Source={x:Static services:LocalizationService.Instance}}" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" HorizontalAlignment="Center" IsVisible="{Binding !IsScanning}"/>
+                                <TextBlock Text="{Binding CleanerScanningBtn, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center" IsVisible="{Binding IsScanning}"/>
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+
+                    <!-- Total Space to Clean -->
+                    <StackPanel HorizontalAlignment="Center" Spacing="4">
+                        <TextBlock Text="{Binding TotalSize}" FontSize="36" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" HorizontalAlignment="Center" LetterSpacing="-0.5"/>
+                        <TextBlock Text="{Binding CleanerFoundFiles, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center"/>
+                    </StackPanel>
+
+                    <!-- Clean Button triggered after Scan -->
+                    <Button Classes="SystemButton" HorizontalAlignment="Center" Width="180" Height="40" Background="#1FFF3B30" BorderBrush="#3FFF3B30"
+                            Command="{Binding CleanCommand}"
+                            IsVisible="{Binding ScanCompleted}" IsEnabled="{Binding !IsCleaning}">
+                        <Button.Styles>
+                            <Style Selector="Button:pointerover">
+                                <Setter Property="Background" Value="#2FFF3B30"/>
+                                <Setter Property="BorderBrush" Value="#5FFF3B30"/>
+                            </Style>
+                        </Button.Styles>
+                        <TextBlock Text="{Binding CleanerClean, Source={x:Static services:LocalizationService.Instance}}" VerticalAlignment="Center" HorizontalAlignment="Center" FontWeight="SemiBold" Foreground="#FF453A"/>
+                    </Button>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="8" IsVisible="{Binding CleanCompleted}">
+                        <PathIcon Data="{StaticResource IconSettings}" Width="14" Height="14" Foreground="#34C759" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding CleanerCleanCompleted, Source={x:Static services:LocalizationService.Instance}}" FontSize="14" FontWeight="Medium" Foreground="#34C759" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Detailed Categories Cards -->
+            <StackPanel Spacing="12">
+                <TextBlock Text="{Binding CleanerCategoriesHeader, Source={x:Static services:LocalizationService.Instance}}" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                
+                <Grid ColumnDefinitions="*, *" RowDefinitions="Auto, Auto" HorizontalAlignment="Stretch">
+                    <!-- User Temp -->
+                    <Border Grid.Column="0" Grid.Row="0" Classes="SystemCard" Margin="0,0,10,12" Padding="15" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderGray}">
+                        <Grid ColumnDefinitions="Auto, *, Auto">
+                            <PathIcon Grid.Column="0" Data="{StaticResource IconFolder}" Width="20" Height="20" Foreground="{DynamicResource TextSecondary}" Margin="0,0,14,0" VerticalAlignment="Center"/>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding CleanerUserTempTitle, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                                <TextBlock Text="{Binding CleanerUserTempDesc, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" Foreground="{DynamicResource TextSecondary}"/>
+                            </StackPanel>
+                            <TextBlock Grid.Column="2" Text="{Binding UserTempSize}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- System Temp -->
+                    <Border Grid.Column="1" Grid.Row="0" Classes="SystemCard" Margin="10,0,0,12" Padding="15" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderGray}">
+                        <Grid ColumnDefinitions="Auto, *, Auto">
+                            <PathIcon Grid.Column="0" Data="{StaticResource IconCpu}" Width="20" Height="20" Foreground="{DynamicResource TextSecondary}" Margin="0,0,14,0" VerticalAlignment="Center"/>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding CleanerSystemTempTitle, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                                <TextBlock Text="{Binding CleanerSystemTempDesc, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" Foreground="{DynamicResource TextSecondary}"/>
+                            </StackPanel>
+                            <TextBlock Grid.Column="2" Text="{Binding SystemTempSize}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Prefetch -->
+                    <Border Grid.Column="0" Grid.Row="1" Classes="SystemCard" Margin="0,0,10,0" Padding="15" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderGray}">
+                        <Grid ColumnDefinitions="Auto, *, Auto">
+                            <PathIcon Grid.Column="0" Data="{StaticResource IconFlash}" Width="20" Height="20" Foreground="{DynamicResource TextSecondary}" Margin="0,0,14,0" VerticalAlignment="Center"/>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding CleanerPrefetchTitle, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                                <TextBlock Text="{Binding CleanerPrefetchDesc, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" Foreground="{DynamicResource TextSecondary}"/>
+                            </StackPanel>
+                            <TextBlock Grid.Column="2" Text="{Binding PrefetchSize}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Recycle Bin -->
+                    <Border Grid.Column="1" Grid.Row="1" Classes="SystemCard" Margin="10,0,0,0" Padding="15" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderGray}">
+                        <Grid ColumnDefinitions="Auto, *, Auto">
+                            <PathIcon Grid.Column="0" Data="{StaticResource IconTrash}" Width="20" Height="20" Foreground="{DynamicResource TextSecondary}" Margin="0,0,14,0" VerticalAlignment="Center"/>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding CleanerRecycleBinTitle, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                                <TextBlock Text="{Binding CleanerRecycleBinDesc, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" Foreground="{DynamicResource TextSecondary}"/>
+                            </StackPanel>
+                            <TextBlock Grid.Column="2" Text="{Binding RecycleBinSize}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

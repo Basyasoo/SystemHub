@@ -1,0 +1,200 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:MacStyleHub.ViewModels"
+        xmlns:services="using:MacStyleHub.Services"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="1050" d:DesignHeight="680"
+        Width="1050" Height="680"
+        x:Class="MacStyleHub.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/app.ico"
+        Title="SystemHub"
+        WindowDecorations="None"
+        WindowStartupLocation="CenterScreen"
+        TransparencyLevelHint="Mica,AcrylicBlur"
+        Background="Transparent">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <!-- Main Window Border with Rounded Corners -->
+    <Border CornerRadius="10" ClipToBounds="True" Background="{DynamicResource MainBg}" BorderBrush="{DynamicResource BorderGray}" BorderThickness="1">
+        <Grid ColumnDefinitions="230, 1, *">
+            
+            <!-- Left Sidebar (macOS style) -->
+            <Grid Grid.Column="0" RowDefinitions="Auto, *, Auto" Background="{DynamicResource SidebarBg}">
+                
+                <!-- Custom Title Bar with traffic lights controls -->
+                <Grid Grid.Row="0" Height="50" Background="Transparent" Name="TitleBar" PointerPressed="TitleBar_OnPointerPressed">
+                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="20,0,0,0" VerticalAlignment="Center">
+                        <!-- Red Button (Close) -->
+                        <Button Width="12" Height="12" CornerRadius="6" Background="#FF5F56" BorderThickness="0" Padding="0" Click="Close_OnClick" ToolTip.Tip="Закрыть">
+                            <Button.Styles>
+                                <Style Selector="Button:pointerover">
+                                    <Setter Property="Background" Value="#E04C40"/>
+                                </Style>
+                            </Button.Styles>
+                        </Button>
+                        <!-- Yellow Button (Minimize) -->
+                        <Button Width="12" Height="12" CornerRadius="6" Background="#FFBD2E" BorderThickness="0" Padding="0" Click="Minimize_OnClick" ToolTip.Tip="Свернуть">
+                            <Button.Styles>
+                                <Style Selector="Button:pointerover">
+                                    <Setter Property="Background" Value="#DE9E1B"/>
+                                </Style>
+                            </Button.Styles>
+                        </Button>
+                        <!-- Green Button (Maximize) -->
+                        <Button Width="12" Height="12" CornerRadius="6" Background="#27C93F" BorderThickness="0" Padding="0" Click="Maximize_OnClick" ToolTip.Tip="Развернуть">
+                            <Button.Styles>
+                                <Style Selector="Button:pointerover">
+                                    <Setter Property="Background" Value="#1FA330"/>
+                                </Style>
+                            </Button.Styles>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Sidebar Menu ListBox -->
+                <ListBox Grid.Row="1" Background="Transparent" BorderThickness="0" Margin="12,10,12,10"
+                         SelectedIndex="{Binding SelectedMenuIndex}">
+                    
+                    <!-- Local styling for Sidebar items -->
+                    <ListBox.Styles>
+                        <Style Selector="ListBoxItem">
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="Foreground" Value="#8E8E93"/>
+                            <Setter Property="CornerRadius" Value="6"/>
+                            <Setter Property="Margin" Value="0,3"/>
+                            <Setter Property="Padding" Value="12,10"/>
+                            <Setter Property="Transitions">
+                                <Transitions>
+                                    <BrushTransition Property="Background" Duration="0:0:0.1"/>
+                                    <BrushTransition Property="Foreground" Duration="0:0:0.1"/>
+                                </Transitions>
+                            </Setter>
+                        </Style>
+                        <Style Selector="ListBoxItem:pointerover">
+                            <Setter Property="Background" Value="{DynamicResource SidebarHoverBg}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource SidebarHoverFg}"/>
+                        </Style>
+                        <Style Selector="ListBoxItem:selected">
+                            <Setter Property="Background" Value="{StaticResource AccentBlue}"/>
+                            <Setter Property="Foreground" Value="White"/>
+                        </Style>
+                        <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+                            <Setter Property="Background" Value="{StaticResource AccentBlue}"/>
+                            <Setter Property="Foreground" Value="White"/>
+                        </Style>
+                    </ListBox.Styles>
+
+                    <!-- Sidebar Menu Items (using vector icons) -->
+                    <ListBoxItem>
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <PathIcon Data="{StaticResource IconHome}" Width="16" Height="16" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding SidebarHome, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="Medium" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </ListBoxItem>
+                    
+                    <ListBoxItem>
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <PathIcon Data="{StaticResource IconMoon}" Width="16" Height="16" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding SidebarWeather, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="Medium" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </ListBoxItem>
+                    
+                    <ListBoxItem>
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <PathIcon Data="{StaticResource IconSystem}" Width="16" Height="16" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding SidebarSystem, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="Medium" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </ListBoxItem>
+                    
+                    <ListBoxItem>
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <PathIcon Data="{StaticResource IconCleaner}" Width="16" Height="16" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding SidebarCleaner, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="Medium" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </ListBoxItem>
+                    
+                    <ListBoxItem>
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <PathIcon Data="{StaticResource IconSettings}" Width="16" Height="16" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding SidebarStartup, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="Medium" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </ListBoxItem>
+
+                    <ListBoxItem>
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <PathIcon Data="{StaticResource IconMusic}" Width="16" Height="16" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding SidebarPlayer, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="Medium" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </ListBoxItem>
+
+                    <ListBoxItem>
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <PathIcon Data="{StaticResource IconTip}" Width="16" Height="16" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding SidebarAbout, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="Medium" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </ListBoxItem>
+                </ListBox>
+
+                <!-- Now Playing Widget (Footer) -->
+                <Border Grid.Row="2" Background="{DynamicResource SidebarBg}" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource BorderGray}" Padding="14,12" Height="68"
+                        IsVisible="{Binding PlaybackVM.HasMedia}">
+                    <Grid ColumnDefinitions="Auto, *, Auto" VerticalAlignment="Center">
+                        <!-- Playback indicator -->
+                        <Border Grid.Column="0" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderGray}" BorderThickness="1" Width="32" Height="32" CornerRadius="4" Margin="0,0,10,0">
+                            <PathIcon Data="{StaticResource IconMusic}" Width="14" Height="14" Foreground="{StaticResource AccentBlue}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        
+                        <!-- Song details -->
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                            <TextBlock Text="{Binding PlaybackVM.Title}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Text="{Binding PlaybackVM.Artist}" FontSize="10" Foreground="{DynamicResource TextSecondary}" TextTrimming="CharacterEllipsis"/>
+                        </StackPanel>
+
+                        <!-- Play/Pause indicators wrapper as Button -->
+                        <Button Grid.Column="2" Width="30" Height="30" Padding="0" CornerRadius="15" Background="Transparent" BorderThickness="0"
+                                Command="{Binding PlaybackVM.TogglePlayCommand}" Margin="5,0,0,0">
+                            <Grid>
+                                <PathIcon Data="{StaticResource IconPause}" Width="12" Height="12" Foreground="{StaticResource AccentBlue}" IsVisible="{Binding PlaybackVM.IsPlaying}"/>
+                                <PathIcon Data="{StaticResource IconPlay}" Width="12" Height="12" Foreground="{StaticResource TextSecondary}" IsVisible="{Binding !PlaybackVM.IsPlaying}"/>
+                            </Grid>
+                        </Button>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- Sidebar Separator Line -->
+            <Border Grid.Column="1" Width="1" Background="{DynamicResource BorderGray}" VerticalAlignment="Stretch"/>
+
+            <!-- Right Main Content Panel -->
+            <Grid Grid.Column="2" RowDefinitions="Auto, *" Background="{DynamicResource MainBg}">
+                
+                <!-- Titlebar extension for dragging main window area -->
+                <Grid Grid.Row="0" Height="40" Background="Transparent" Name="RightTitleBar" PointerPressed="TitleBar_OnPointerPressed">
+                    <TextBlock Text="SystemHub" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.9" LetterSpacing="-0.2"/>
+                </Grid>
+                
+                <!-- Main Content Body with smooth page transitions -->
+                <TransitioningContentControl Grid.Row="1" Content="{Binding CurrentPageViewModel}" ClipToBounds="True">
+                    <TransitioningContentControl.PageTransition>
+                        <CompositePageTransition>
+                            <PageSlide Duration="0:0:0.35" Orientation="Horizontal">
+                                <PageSlide.SlideInEasing>
+                                    <CubicEaseOut/>
+                                </PageSlide.SlideInEasing>
+                                <PageSlide.SlideOutEasing>
+                                    <CubicEaseOut/>
+                                </PageSlide.SlideOutEasing>
+                            </PageSlide>
+                            <CrossFade Duration="0:0:0.25"/>
+                        </CompositePageTransition>
+                    </TransitioningContentControl.PageTransition>
+                </TransitioningContentControl>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

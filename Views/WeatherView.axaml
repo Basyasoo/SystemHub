@@ -1,0 +1,102 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:MacStyleHub.ViewModels"
+             xmlns:views="using:MacStyleHub.Views"
+             xmlns:services="using:MacStyleHub.Services"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="550"
+             x:Class="MacStyleHub.Views.WeatherView"
+             x:DataType="vm:WeatherViewModel">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="30" Spacing="25">
+            <!-- Header -->
+            <Grid ColumnDefinitions="*, Auto">
+                <StackPanel Grid.Column="0" Spacing="5">
+                    <TextBlock Text="{Binding WeatherHeader, Source={x:Static services:LocalizationService.Instance}}" FontSize="28" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" LetterSpacing="-0.5"/>
+                    <TextBlock Text="{Binding WeatherDesc, Source={x:Static services:LocalizationService.Instance}}" FontSize="14" Foreground="{DynamicResource TextSecondary}"/>
+                </StackPanel>
+                
+                <Button Grid.Column="1" Classes="SystemButton" Command="{Binding LoadWeatherCommand}" Content="{Binding WeatherRefresh, Source={x:Static services:LocalizationService.Instance}}" VerticalAlignment="Center"/>
+            </Grid>
+
+            <!-- Main Weather Card -->
+            <Border Classes="GlassCard" HorizontalAlignment="Stretch" Padding="25" MinHeight="230" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderGray}">
+                <Grid RowDefinitions="Auto, *, Auto" ColumnDefinitions="*, Auto">
+                    <!-- Loading overlay -->
+                    <ProgressBar Grid.RowSpan="3" Grid.ColumnSpan="2" IsIndeterminate="True" IsVisible="{Binding IsLoading}" VerticalAlignment="Top" Background="Transparent" Foreground="{DynamicResource AccentBlue}"/>
+                    
+                    <StackPanel Grid.Row="0" Grid.Column="0" Spacing="4" IsVisible="{Binding !IsLoading}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <PathIcon Data="{StaticResource IconLocation}" Width="14" Height="14" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding CityLocalized}" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}"/>
+                        </StackPanel>
+                        <TextBlock Text="{Binding ConditionLocalized}" FontSize="15" Foreground="{DynamicResource TextSecondary}" FontWeight="Medium"/>
+                    </StackPanel>
+
+                    <!-- Large temperature display -->
+                    <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Margin="0,5" VerticalAlignment="Center" IsVisible="{Binding !IsLoading}">
+                        <TextBlock Text="{Binding Temperature, StringFormat={}{0:0}}" FontSize="64" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}"/>
+                        <TextBlock Text="°C" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" Margin="2,6,0,0" VerticalAlignment="Top"/>
+                    </StackPanel>
+
+                    <!-- Large weather condition SVG icon -->
+                    <views:WeatherIcon Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" Icon="{Binding Icon}" Width="110" Height="110" StrokeThickness="3.5" VerticalAlignment="Center" IsVisible="{Binding !IsLoading}"/>
+
+                    <!-- Details strip at bottom -->
+                    <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="40" Margin="0,10,0,0" IsVisible="{Binding !IsLoading}">
+                        <StackPanel Spacing="3">
+                            <TextBlock Text="{Binding WeatherHumidity, Source={x:Static services:LocalizationService.Instance}}" FontSize="10" Foreground="{DynamicResource TextSecondary}" FontWeight="Bold" LetterSpacing="0.5"/>
+                            <TextBlock Text="{Binding Humidity, StringFormat={}{0}%}" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                        </StackPanel>
+                        <StackPanel Spacing="3">
+                            <TextBlock Text="{Binding WeatherWind, Source={x:Static services:LocalizationService.Instance}}" FontSize="10" Foreground="{DynamicResource TextSecondary}" FontWeight="Bold" LetterSpacing="0.5"/>
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <TextBlock Text="{Binding WindSpeed, StringFormat={}{0:F1}}" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                                <TextBlock Text="{Binding WeatherWindUnit, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Bottom"/>
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel Spacing="3">
+                            <TextBlock Text="{Binding WeatherFeelsLike, Source={x:Static services:LocalizationService.Instance}}" FontSize="10" Foreground="{DynamicResource TextSecondary}" FontWeight="Bold" LetterSpacing="0.5"/>
+                            <TextBlock Text="{Binding Temperature, StringFormat={}{0:0} °C}" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- 5-Day Forecast -->
+            <StackPanel Spacing="12">
+                <TextBlock Text="{Binding WeatherForecastHeader, Source={x:Static services:LocalizationService.Instance}}" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" Margin="0,5,0,0"/>
+                
+                <ItemsControl ItemsSource="{Binding Forecast}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Columns="7" Rows="1"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Classes="SystemCard" Margin="4" Padding="14" Height="150" HorizontalAlignment="Stretch" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderGray}">
+                                <Grid RowDefinitions="Auto, Auto, Auto, *">
+                                    <TextBlock Grid.Row="0" Text="{Binding DayLocalized}" HorizontalAlignment="Center" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" FontSize="13"/>
+                                    
+                                    <!-- Dynamic SVG Vector Icon for forecast item -->
+                                    <views:WeatherIcon Grid.Row="1" Icon="{Binding Icon}" Width="36" Height="36" StrokeThickness="2.2" HorizontalAlignment="Center" Margin="0,8"/>
+                                    
+                                    <TextBlock Grid.Row="2" Text="{Binding ConditionLocalized}" HorizontalAlignment="Center" FontSize="11" Foreground="{DynamicResource TextSecondary}" TextAlignment="Center" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"/>
+                                    
+                                    <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                                        <TextBlock Text="{Binding MaxTemp, StringFormat={}{0:0}°}" Foreground="{DynamicResource TextPrimary}" FontWeight="Bold" FontSize="13"/>
+                                        <TextBlock Text=" / " Foreground="{DynamicResource TextSecondary}" FontSize="13"/>
+                                        <TextBlock Text="{Binding MinTemp, StringFormat={}{0:0}°}" Foreground="{DynamicResource TextSecondary}" FontSize="13"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

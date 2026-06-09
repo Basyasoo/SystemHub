@@ -1,0 +1,162 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:MacStyleHub.ViewModels"
+             xmlns:services="using:MacStyleHub.Services"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="550"
+             x:Class="MacStyleHub.Views.MediaPlaybackView"
+             x:DataType="vm:MediaPlaybackViewModel">
+
+    <UserControl.Resources>
+        <!-- Phosphor Icons Paths local to MediaPlaybackView -->
+        <StreamGeometry x:Key="PhPlay">M80,224a16,16,0,0,1-16-16V48a16,16,0,0,1,24.16-13.8L224,114.2a16,16,0,0,1,0,27.6L88.16,221.8A15.82,15.82,0,0,1,80,224Z</StreamGeometry>
+        <StreamGeometry x:Key="PhPause">M200,48V208a16,16,0,0,1-16,16H152a16,16,0,0,1-16-16V48a16,16,0,0,1,16-16h32A16,16,0,0,1,200,48ZM104,32H72A16,16,0,0,0,56,48V208a16,16,0,0,0,16,16h32a16,16,0,0,0,16-16V48A16,16,0,0,0,104,32Z</StreamGeometry>
+        <StreamGeometry x:Key="PhNext">M208,40V216a8,8,0,0,1-16,0V139.73L74.63,222A16,16,0,0,1,48,209.12V46.88A16,16,0,0,1,74.63,34L192,116.27V40a8,8,0,0,1,16,0Z</StreamGeometry>
+        <StreamGeometry x:Key="PhPrev">M208,209.12A16,16,0,0,1,181.37,222L64,139.73V216a8,8,0,0,1-16,0V40a8,8,0,0,1,16,0V116.27L181.37,34A16,16,0,0,1,208,46.88Z</StreamGeometry>
+        <StreamGeometry x:Key="PhMusic">M216,40V168a48,48,0,1,1-48-48,47.4,47.4,0,0,1,32,12.33V80L96,96v88a48,48,0,1,1-48-48,47.4,47.4,0,0,1,32,12.33V56a16,16,0,0,1,12.48-15.6l96-24A16,16,0,0,1,216,40ZM120,184a32,32,0,1,0,32,32A32,32,0,0,0,120,184ZM48,184a32,32,0,1,0,32,32A32,32,0,0,0,48,184Z</StreamGeometry>
+    </UserControl.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="30" Spacing="25">
+            <!-- Header -->
+            <StackPanel Spacing="5">
+                <TextBlock Text="{Binding PlayerHeader, Source={x:Static services:LocalizationService.Instance}}" FontSize="28" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" LetterSpacing="-0.5"/>
+            </StackPanel>
+
+            <Grid ColumnDefinitions="*, 1.2*" RowDefinitions="Auto">
+                
+                <!-- Left Column: Active Player Visualizer & Controller -->
+                <Border Grid.Column="0" Classes="GlassCard" Margin="0,0,12,0" Padding="25" MinHeight="420" VerticalAlignment="Top">
+                    <Grid RowDefinitions="*, Auto, Auto, Auto">
+                        
+                        <!-- Vinyl Disk/Waveform Visualizer -->
+                        <Grid Grid.Row="0" Width="180" Height="180" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,20">
+                            <!-- Background shadow glow -->
+                            <Ellipse Width="170" Height="170" Fill="#10ffffff" Stroke="{StaticResource AccentBlue}" StrokeThickness="1" Opacity="0.5"/>
+                            <!-- Outer Vinyl Disk -->
+                            <Ellipse Width="160" Height="160" Fill="#111112" Stroke="#2C2C2E" StrokeThickness="4"/>
+                            <!-- Inner Grooves -->
+                            <Ellipse Width="120" Height="120" Stroke="#1C1C1E" StrokeThickness="1" Fill="Transparent"/>
+                            <Ellipse Width="90" Height="90" Stroke="#1C1C1E" StrokeThickness="1" Fill="Transparent"/>
+                            <!-- Center Label -->
+                            <Ellipse Width="50" Height="50" Fill="{StaticResource AccentBlue}"/>
+                            <PathIcon Data="{StaticResource PhMusic}" Width="18" Height="18" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Grid>
+
+                        <!-- Track Info -->
+                        <StackPanel Grid.Row="1" Spacing="5" HorizontalAlignment="Center" Margin="0,0,0,20" IsVisible="{Binding HasMedia}">
+                            <TextBlock Text="{Binding Title}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" TextAlignment="Center" TextTrimming="CharacterEllipsis" MaxLines="2"/>
+                            <TextBlock Text="{Binding Artist}" FontSize="14" Foreground="{DynamicResource TextSecondary}" TextAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                            <Border Background="{DynamicResource BorderGray}" CornerRadius="4" Padding="6,2" HorizontalAlignment="Center" Margin="0,5,0,0">
+                                <TextBlock Text="{Binding PlayerName}" FontSize="10" Foreground="{DynamicResource TextSecondary}" FontWeight="Bold"/>
+                            </Border>
+                        </StackPanel>
+
+                        <!-- Fallback/No Media State -->
+                        <StackPanel Grid.Row="1" Spacing="10" HorizontalAlignment="Center" Margin="0,10,0,30" IsVisible="{Binding !HasMedia}">
+                            <TextBlock Text="{Binding PlayerNoActive, Source={x:Static services:LocalizationService.Instance}}" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondary}" TextAlignment="Center"/>
+                            <TextBlock Text="{Binding PlayerLaunchRecommendation, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" Foreground="#5E5E62" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="220"/>
+                        </StackPanel>
+
+                        <!-- Controls -->
+                        <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="25" HorizontalAlignment="Center" Margin="0,0,0,10">
+                            <!-- Prev Button -->
+                            <Button Width="40" Height="40" Padding="0" CornerRadius="20" Background="Transparent" BorderThickness="0"
+                                    Command="{Binding PrevCommand}" ToolTip.Tip="Назад">
+                                <PathIcon Data="{StaticResource PhPrev}" Width="16" Height="16" Foreground="{DynamicResource TextPrimary}"/>
+                            </Button>
+                            
+                            <!-- Play/Pause Button -->
+                            <Button Width="56" Height="56" Padding="0" CornerRadius="28" Classes="SystemButton"
+                                    Command="{Binding TogglePlayCommand}">
+                                <Grid>
+                                    <PathIcon Data="{StaticResource PhPause}" Width="20" Height="20" Foreground="{StaticResource AccentBlue}" IsVisible="{Binding IsPlaying}"/>
+                                    <PathIcon Data="{StaticResource PhPlay}" Width="20" Height="20" Foreground="{DynamicResource TextPrimary}" Margin="2,0,0,0" IsVisible="{Binding !IsPlaying}"/>
+                                </Grid>
+                            </Button>
+                            
+                            <!-- Next Button -->
+                            <Button Width="40" Height="40" Padding="0" CornerRadius="20" Background="Transparent" BorderThickness="0"
+                                    Command="{Binding NextCommand}" ToolTip.Tip="Вперед">
+                                <PathIcon Data="{StaticResource PhNext}" Width="16" Height="16" Foreground="{DynamicResource TextPrimary}"/>
+                            </Button>
+                        </StackPanel>
+
+                        <!-- Volume Controls -->
+                        <Grid Grid.Row="3" ColumnDefinitions="Auto, *, Auto" Margin="20,10,20,0" VerticalAlignment="Center">
+                            <!-- Mute Toggle Button -->
+                            <Button Command="{Binding ToggleMuteCommand}" Width="32" Height="32" Padding="0" Background="Transparent" BorderThickness="0" CornerRadius="16" ToolTip.Tip="Громкость">
+                                <Grid>
+                                    <!-- Mute Icon -->
+                                    <Path Data="M3,7 H6 L9,4 V16 L6,13 H3 Z M11,6 L15,10 M15,6 L11,10" Stroke="{DynamicResource TextPrimary}" StrokeThickness="1.2" IsVisible="{Binding IsMuted}"/>
+                                    <!-- Low Volume Icon -->
+                                    <Path Data="M3,7 H6 L9,4 V16 L6,13 H3 Z M11,6 A3,3 0 0,1 11,10" Stroke="{DynamicResource TextPrimary}" StrokeThickness="1.2" IsVisible="{Binding !IsMuted}"/>
+                                </Grid>
+                            </Button>
+                            
+                            <!-- Volume Slider -->
+                            <Slider Grid.Column="1" Value="{Binding Volume, Mode=TwoWay}" Minimum="0" Maximum="100" Margin="10,0" Height="30" Foreground="{DynamicResource AccentBlue}"/>
+                            
+                            <!-- Volume Percent Text -->
+                            <TextBlock Grid.Column="2" Text="{Binding Volume, StringFormat={}{0:0}%}" Width="40" TextAlignment="Right" FontSize="12" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center"/>
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <!-- Right Column: List of All Active Media Sessions -->
+                <Border Grid.Column="1" Classes="GlassCard" Margin="12,0,0,0" Padding="25" MinHeight="420" VerticalAlignment="Stretch">
+                    <StackPanel Spacing="15">
+                        <TextBlock Text="{Binding PlayerActiveSessions, Source={x:Static services:LocalizationService.Instance}}" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                        
+                        <!-- List of items -->
+                        <ItemsControl ItemsSource="{Binding ActiveSessions}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Classes="SystemCard" Margin="0,0,0,10" Padding="14">
+                                        <Grid ColumnDefinitions="*, Auto">
+                                            <!-- Info -->
+                                            <StackPanel Grid.Column="0" Spacing="4" VerticalAlignment="Center" Margin="0,0,15,0">
+                                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                                    <Border Background="{DynamicResource BorderGray}" CornerRadius="4" Padding="6,2">
+                                                        <TextBlock Text="{Binding Name}" FontSize="10" Foreground="{DynamicResource AccentBlue}" FontWeight="Bold"/>
+                                                    </Border>
+                                                </StackPanel>
+                                                <TextBlock Text="{Binding Title}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" TextTrimming="CharacterEllipsis"/>
+                                                <TextBlock Text="{Binding Artist}" FontSize="11" Foreground="{DynamicResource TextSecondary}" TextTrimming="CharacterEllipsis"/>
+                                            </StackPanel>
+
+                                            <!-- Controls -->
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                                                <!-- Prev -->
+                                                <Button Width="30" Height="30" Padding="0" CornerRadius="15" Background="Transparent" BorderThickness="0"
+                                                        Command="{Binding PrevCommand}">
+                                                    <PathIcon Data="{StaticResource PhPrev}" Width="12" Height="12" Foreground="{DynamicResource TextPrimary}"/>
+                                                </Button>
+                                                
+                                                <!-- Play/Pause -->
+                                                <Button Width="34" Height="34" Padding="0" CornerRadius="17" Classes="SystemButton"
+                                                        Command="{Binding TogglePlayCommand}">
+                                                    <Grid>
+                                                        <PathIcon Data="{StaticResource PhPause}" Width="12" Height="12" Foreground="{StaticResource AccentBlue}" IsVisible="{Binding IsPlaying}"/>
+                                                        <PathIcon Data="{StaticResource PhPlay}" Width="12" Height="12" Foreground="{DynamicResource TextPrimary}" Margin="1,0,0,0" IsVisible="{Binding !IsPlaying}"/>
+                                                    </Grid>
+                                                </Button>
+                                                
+                                                <!-- Next -->
+                                                <Button Width="30" Height="30" Padding="0" CornerRadius="15" Background="Transparent" BorderThickness="0"
+                                                        Command="{Binding NextCommand}">
+                                                    <PathIcon Data="{StaticResource PhNext}" Width="12" Height="12" Foreground="{DynamicResource TextPrimary}"/>
+                                                </Button>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
