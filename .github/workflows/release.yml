@@ -17,9 +17,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Create Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: SystemHubSetup.exe
-          draft: false
-          prerelease: false
-          token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create ${{ github.ref_name }} SystemHubSetup.exe --title "Release ${{ github.ref_name }}" --notes "Automated release of version ${{ github.ref_name }}"
