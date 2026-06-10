@@ -528,6 +528,8 @@ namespace MacStyleHub.Services
                             File.Delete(tempZip);
                         if (Directory.Exists(tempExtractPath))
                             Directory.Delete(tempExtractPath, true);
+                        if (File.Exists(targetDesktopExe))
+                            File.Delete(targetDesktopExe);
                     }
                     catch { }
 
@@ -544,6 +546,10 @@ namespace MacStyleHub.Services
                             File.Delete(tempZip);
                         if (Directory.Exists(tempExtractPath))
                             Directory.Delete(tempExtractPath, true);
+                        string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                        string targetDesktopExe = Path.Combine(desktopPath, "Яндекс Музыка Setup 5.86.0.exe");
+                        if (File.Exists(targetDesktopExe))
+                            File.Delete(targetDesktopExe);
                     }
                     catch { }
 
