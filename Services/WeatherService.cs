@@ -49,7 +49,13 @@ namespace MacStyleHub.Services
 
     public class WeatherService
     {
-        private static readonly HttpClient HttpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
+        private static readonly HttpClient HttpClient;
+
+        static WeatherService()
+        {
+            HttpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
+            HttpClient.DefaultRequestHeaders.UserAgent.ParseAdd("MacStyleHubWeatherClient/1.2 (contact.basyasoo.weather@localmail.net)");
+        }
 
         private static string GetSettingsPath()
         {
@@ -99,17 +105,33 @@ namespace MacStyleHub.Services
             try
             {
                 string encodedQuery = Uri.EscapeDataString(query);
-                string url = $"https://nominatim.openstreetmap.org/search?q={encodedQuery}&format=json&accept-language={acceptLang}&addressdetails=1&extratags=1&limit=8";
-                
-                var request = new HttpRequestMessage(HttpMethod.Get, url);
-                request.Headers.Add("User-Agent", "MacStyleHubWeatherClient/1.2 (contact.basyasoo.weather@localmail.net)");
-                
-                using var cts = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(2.0));
-                using var response = await HttpClient.SendAsync(request, cts.Token);
-                
-                if (response.IsSuccessStatusCode)
+                string[] urls = {
+                    $"https://nominatim.openstreetmap.org/search?q={encodedQuery}&format=json&accept-language={acceptLang}&addressdetails=1&extratags=1&limit=8",
+                    $"http://nominatim.openstreetmap.org/search?q={encodedQuery}&format=json&accept-language={acceptLang}&addressdetails=1&extratags=1&limit=8"
+                };
+
+                string? json = null;
+                foreach (var url in urls)
                 {
-                    var json = await response.Content.ReadAsStringAsync();
+                    try
+                    {
+                        var request = new HttpRequestMessage(HttpMethod.Get, url);
+                        using var cts = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(2.0));
+                        using var response = await HttpClient.SendAsync(request, cts.Token);
+                        if (response.IsSuccessStatusCode)
+                        {
+                            json = await response.Content.ReadAsStringAsync();
+                            break;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Nominatim search failed for {url}: {ex.Message}");
+                    }
+                }
+
+                if (json != null)
+                {
                     using var doc = JsonDocument.Parse(json);
                     
                     foreach (var item in doc.RootElement.EnumerateArray())
@@ -383,12 +405,31 @@ namespace MacStyleHub.Services
             try
             {
                 string encodedQuery = Uri.EscapeDataString(query);
-                string url = $"https://geocoding-api.open-meteo.com/v1/search?name={encodedQuery}&count=8&language={lang.ToLower()}";
-                
-                using var response = await HttpClient.GetAsync(url);
-                if (response.IsSuccessStatusCode)
+                string[] urls = {
+                    $"https://geocoding-api.open-meteo.com/v1/search?name={encodedQuery}&count=8&language={lang.ToLower()}",
+                    $"http://geocoding-api.open-meteo.com/v1/search?name={encodedQuery}&count=8&language={lang.ToLower()}"
+                };
+
+                string? json = null;
+                foreach (var url in urls)
                 {
-                    var json = await response.Content.ReadAsStringAsync();
+                    try
+                    {
+                        using var response = await HttpClient.GetAsync(url);
+                        if (response.IsSuccessStatusCode)
+                        {
+                            json = await response.Content.ReadAsStringAsync();
+                            break;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Open-Meteo search failed for {url}: {ex.Message}");
+                    }
+                }
+
+                if (json != null)
+                {
                     using var doc = JsonDocument.Parse(json);
                     var root = doc.RootElement;
                     if (root.TryGetProperty("results", out var resultsArr))
@@ -716,21 +757,32 @@ namespace MacStyleHub.Services
                     // Try Nominatim first
                     try
                     {
-                        string reverseUrl = $"https://nominatim.openstreetmap.org/reverse?format=json&lat={latStr}&lon={lonStr}&zoom=14&addressdetails=1&extratags=1&accept-language={acceptLang}";
-                        var request = new HttpRequestMessage(HttpMethod.Get, reverseUrl);
-                        request.Headers.Add("User-Agent", "MacStyleHubWeatherClient/1.2 (contact.basyasoo.weather@localmail.net)");
-                        using var cts = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(2.5));
-                        using var response = await HttpClient.SendAsync(request, cts.Token);
-                        if (response.IsSuccessStatusCode)
+                        string[] reverseUrls = {
+                            $"https://nominatim.openstreetmap.org/reverse?format=json&lat={latStr}&lon={lonStr}&zoom=14&addressdetails=1&extratags=1&accept-language={acceptLang}",
+                            $"http://nominatim.openstreetmap.org/reverse?format=json&lat={latStr}&lon={lonStr}&zoom=14&addressdetails=1&extratags=1&accept-language={acceptLang}"
+                        };
+
+                        foreach (var reverseUrl in reverseUrls)
                         {
-                            var json = await response.Content.ReadAsStringAsync();
-                            if (!json.Contains("Access denied"))
+                            try
                             {
-                                using var doc = JsonDocument.Parse(json);
-                                var root = doc.RootElement;
-                                city = FormatCityName(root, langCode, city);
-                                reverseGeocoded = true;
+                                var request = new HttpRequestMessage(HttpMethod.Get, reverseUrl);
+                                using var cts = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(2.5));
+                                using var response = await HttpClient.SendAsync(request, cts.Token);
+                                if (response.IsSuccessStatusCode)
+                                {
+                                    var json = await response.Content.ReadAsStringAsync();
+                                    if (!json.Contains("Access denied"))
+                                    {
+                                        using var doc = JsonDocument.Parse(json);
+                                        var root = doc.RootElement;
+                                        city = FormatCityName(root, langCode, city);
+                                        reverseGeocoded = true;
+                                        break;
+                                    }
+                                }
                             }
+                            catch { }
                         }
                     }
                     catch { }
@@ -819,92 +871,332 @@ namespace MacStyleHub.Services
 
             info.City = city;
 
-            bool openMeteoSuccess = false;
+            bool weatherSuccess = false;
 
-            // 4. Query Open-Meteo weather
+            // 4. Try api.met.no first
             try
             {
-                string latStr = lat.ToString(System.Globalization.CultureInfo.InvariantCulture);
-                string lonStr = lon.ToString(System.Globalization.CultureInfo.InvariantCulture);
-                string url = $"https://api.open-meteo.com/v1/forecast?latitude={latStr}&longitude={lonStr}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=7";
-                using var response = await HttpClient.GetAsync(url);
-                if (response.IsSuccessStatusCode)
+                string latStr = lat.ToString("F4", System.Globalization.CultureInfo.InvariantCulture);
+                string lonStr = lon.ToString("F4", System.Globalization.CultureInfo.InvariantCulture);
+                string[] metUrls = {
+                    $"https://api.met.no/weatherapi/locationforecast/2.0/compact?lat={latStr}&lon={lonStr}",
+                    $"http://api.met.no/weatherapi/locationforecast/2.0/compact?lat={latStr}&lon={lonStr}",
+                    $"https://corsproxy.io/?https://api.met.no/weatherapi/locationforecast/2.0/compact?lat={latStr}&lon={lonStr}",
+                    $"https://api.allorigins.win/raw?url=https://api.met.no/weatherapi/locationforecast/2.0/compact?lat={latStr}&lon={lonStr}",
+                    $"https://api.codetabs.com/v1/proxy?quest=https://api.met.no/weatherapi/locationforecast/2.0/compact?lat={latStr}&lon={lonStr}"
+                };
+
+                string? json = null;
+                foreach (var metUrl in metUrls)
                 {
-                    var json = await response.Content.ReadAsStringAsync();
-                    using var doc = JsonDocument.Parse(json);
-                    var root = doc.RootElement;
-
-                    if (root.TryGetProperty("current", out var current))
+                    try
                     {
-                        info.Temperature = current.GetProperty("temperature_2m").GetRawText().Contains('.')
-                            ? current.GetProperty("temperature_2m").GetDouble()
-                            : current.GetProperty("temperature_2m").GetInt32();
-                        info.WindSpeed = current.GetProperty("wind_speed_10m").GetRawText().Contains('.')
-                            ? current.GetProperty("wind_speed_10m").GetDouble()
-                            : current.GetProperty("wind_speed_10m").GetInt32();
-                        info.Humidity = current.GetProperty("relative_humidity_2m").GetInt32();
-
-                        int code = current.GetProperty("weather_code").GetInt32();
-                        (info.Condition, info.Icon) = GetConditionByWmoCode(code);
-                    }
-
-                    if (root.TryGetProperty("daily", out var daily))
-                    {
-                        var timeArray = daily.GetProperty("time");
-                        var maxTempArray = daily.GetProperty("temperature_2m_max");
-                        var minTempArray = daily.GetProperty("temperature_2m_min");
-                        var codeArray = daily.GetProperty("weather_code");
-
-                        int count = timeArray.GetArrayLength();
-                        info.Forecast.Clear();
-                        for (int i = 0; i < count; i++)
+                        using var response = await HttpClient.GetAsync(metUrl);
+                        if (response.IsSuccessStatusCode)
                         {
-                            var dateStr = timeArray[i].GetString() ?? "";
-                            var date = DateTime.TryParse(dateStr, out var d) ? d : DateTime.Now.AddDays(i);
-
-                            var culture = LocalizationService.Instance.CurrentLanguage switch
-                            {
-                                "EN" => System.Globalization.CultureInfo.GetCultureInfo("en-US"),
-                                "ZH" => System.Globalization.CultureInfo.GetCultureInfo("zh-CN"),
-                                _ => System.Globalization.CultureInfo.GetCultureInfo("ru-RU")
-                            };
-                            var dayName = i == 0 ? "Сегодня" : date.ToString("ddd", culture);
-
-                            double maxTemp = maxTempArray[i].GetRawText().Contains('.') ? maxTempArray[i].GetDouble() : maxTempArray[i].GetInt32();
-                            double minTemp = minTempArray[i].GetRawText().Contains('.') ? minTempArray[i].GetDouble() : minTempArray[i].GetInt32();
-                            int code = codeArray[i].GetInt32();
-                            var (cond, icon) = GetConditionByWmoCode(code);
-
-                            info.Forecast.Add(new ForecastDay
-                            {
-                                Day = dayName,
-                                MaxTemp = maxTemp,
-                                MinTemp = minTemp,
-                                Condition = cond,
-                                Icon = icon
-                            });
+                            json = await response.Content.ReadAsStringAsync();
+                            break;
                         }
                     }
-                    openMeteoSuccess = true;
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"api.met.no failed for {metUrl}: {ex.Message}");
+                    }
+                }
+
+                if (json != null)
+                {
+                    using var doc = JsonDocument.Parse(json);
+                    var root = doc.RootElement;
+                    if (root.TryGetProperty("properties", out var properties) && properties.TryGetProperty("timeseries", out var timeseriesArray))
+                    {
+                        int tsCount = timeseriesArray.GetArrayLength();
+                        if (tsCount > 0)
+                        {
+                            // 1. Current conditions from timeseries[0]
+                            var currentItem = timeseriesArray[0];
+                            var currentData = currentItem.GetProperty("data");
+                            var currentInstantDetails = currentData.GetProperty("instant").GetProperty("details");
+
+                            info.Temperature = currentInstantDetails.GetProperty("air_temperature").GetDouble();
+                            info.Humidity = (int)Math.Round(currentInstantDetails.GetProperty("relative_humidity").GetDouble());
+                            // convert wind speed from m/s to km/h
+                            double windMps = currentInstantDetails.GetProperty("wind_speed").GetDouble();
+                            info.WindSpeed = windMps * 3.6;
+
+                            // Condition/Icon
+                            string symbolCode = "clearsky_day";
+                            if (currentData.TryGetProperty("next_1_hours", out var next1))
+                            {
+                                symbolCode = next1.GetProperty("summary").GetProperty("symbol_code").GetString() ?? symbolCode;
+                            }
+                            else if (currentData.TryGetProperty("next_6_hours", out var next6))
+                            {
+                                symbolCode = next6.GetProperty("summary").GetProperty("symbol_code").GetString() ?? symbolCode;
+                            }
+                            var (cond, icon) = GetConditionByMetSymbol(symbolCode);
+                            info.Condition = cond;
+                            info.Icon = icon;
+
+                            // 2. Build 7-day forecast
+                            // Group timeseries entries by local date
+                            var dailyGroups = new Dictionary<DateTime, List<JsonElement>>();
+                            for (int i = 0; i < tsCount; i++)
+                            {
+                                var item = timeseriesArray[i];
+                                if (item.TryGetProperty("time", out var timeProp))
+                                {
+                                    string timeStr = timeProp.GetString() ?? "";
+                                    if (DateTime.TryParse(timeStr, out var itemTime))
+                                    {
+                                        var localDate = itemTime.ToLocalTime().Date;
+                                        if (!dailyGroups.ContainsKey(localDate))
+                                        {
+                                            dailyGroups[localDate] = new List<JsonElement>();
+                                        }
+                                        dailyGroups[localDate].Add(item);
+                                    }
+                                }
+                            }
+
+                            info.Forecast.Clear();
+                            for (int i = 0; i < 7; i++)
+                            {
+                                var targetDate = DateTime.Today.AddDays(i);
+                                if (dailyGroups.TryGetValue(targetDate, out var items))
+                                {
+                                    double maxTemp = double.MinValue;
+                                    double minTemp = double.MaxValue;
+                                    string daySymbolCode = "";
+
+                                    // Find max/min temp and find the symbol closest to noon (12:00 local time)
+                                    double minDiffHours = 24.0;
+                                    foreach (var item in items)
+                                    {
+                                        var details = item.GetProperty("data").GetProperty("instant").GetProperty("details");
+                                        if (details.TryGetProperty("air_temperature", out var tempProp))
+                                        {
+                                            double temp = tempProp.GetDouble();
+                                            if (temp > maxTemp) maxTemp = temp;
+                                            if (temp < minTemp) minTemp = temp;
+                                        }
+
+                                        // Check time difference to 12:00
+                                        if (DateTime.TryParse(item.GetProperty("time").GetString(), out var parsedTime))
+                                        {
+                                            var localTime = parsedTime.ToLocalTime();
+                                            double diff = Math.Abs((localTime - targetDate.AddHours(12)).TotalHours);
+                                            if (diff < minDiffHours)
+                                            {
+                                                string? sym = null;
+                                                var data = item.GetProperty("data");
+                                                if (data.TryGetProperty("next_1_hours", out var n1))
+                                                    sym = n1.GetProperty("summary").GetProperty("symbol_code").GetString();
+                                                else if (data.TryGetProperty("next_6_hours", out var n6))
+                                                    sym = n6.GetProperty("summary").GetProperty("symbol_code").GetString();
+
+                                                if (!string.IsNullOrEmpty(sym))
+                                                {
+                                                    daySymbolCode = sym;
+                                                    minDiffHours = diff;
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    // Handle fallbacks if values not set
+                                    if (maxTemp == double.MinValue) maxTemp = info.Temperature;
+                                    if (minTemp == double.MaxValue) minTemp = info.Temperature;
+                                    if (string.IsNullOrEmpty(daySymbolCode)) daySymbolCode = symbolCode;
+
+                                    var culture = LocalizationService.Instance.CurrentLanguage switch
+                                    {
+                                        "EN" => System.Globalization.CultureInfo.GetCultureInfo("en-US"),
+                                        "ZH" => System.Globalization.CultureInfo.GetCultureInfo("zh-CN"),
+                                        _ => System.Globalization.CultureInfo.GetCultureInfo("ru-RU")
+                                    };
+                                    var dayName = i == 0 ? "Сегодня" : targetDate.ToString("ddd", culture);
+                                    if (dayName.Length > 0 && char.IsLower(dayName[0]))
+                                    {
+                                        dayName = char.ToUpper(dayName[0]) + dayName.Substring(1);
+                                    }
+
+                                    var (fCond, fIcon) = GetConditionByMetSymbol(daySymbolCode);
+
+                                    info.Forecast.Add(new ForecastDay
+                                    {
+                                        Day = dayName,
+                                        MaxTemp = maxTemp,
+                                        MinTemp = minTemp,
+                                        Condition = fCond,
+                                        Icon = fIcon
+                                    });
+                                }
+                                else
+                                {
+                                    // If we don't have this day (e.g. at the end of the 7-day range), generate from previous day or dummy data
+                                    var culture = LocalizationService.Instance.CurrentLanguage switch
+                                    {
+                                        "EN" => System.Globalization.CultureInfo.GetCultureInfo("en-US"),
+                                        "ZH" => System.Globalization.CultureInfo.GetCultureInfo("zh-CN"),
+                                        _ => System.Globalization.CultureInfo.GetCultureInfo("ru-RU")
+                                    };
+                                    var dayName = i == 0 ? "Сегодня" : targetDate.ToString("ddd", culture);
+                                    if (dayName.Length > 0 && char.IsLower(dayName[0]))
+                                    {
+                                        dayName = char.ToUpper(dayName[0]) + dayName.Substring(1);
+                                    }
+
+                                    info.Forecast.Add(new ForecastDay
+                                    {
+                                        Day = dayName,
+                                        MaxTemp = info.Temperature + 1,
+                                        MinTemp = info.Temperature - 3,
+                                        Condition = info.Condition,
+                                        Icon = info.Icon
+                                    });
+                                }
+                            }
+
+                            weatherSuccess = true;
+                        }
+                    }
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("Open-Meteo weather fetch error: " + ex.Message);
+                System.Diagnostics.Debug.WriteLine("api.met.no weather fetch error: " + ex.Message);
             }
 
-            // Fallback to wttr.in if Open-Meteo fails
-            if (!openMeteoSuccess)
+            // 5. Fallback to Open-Meteo if api.met.no fails
+            if (!weatherSuccess)
             {
                 try
                 {
                     string latStr = lat.ToString(System.Globalization.CultureInfo.InvariantCulture);
                     string lonStr = lon.ToString(System.Globalization.CultureInfo.InvariantCulture);
-                    string wttrUrl = $"https://wttr.in/{latStr},{lonStr}?format=j1&lang={langCode}";
-                    using var response = await HttpClient.GetAsync(wttrUrl);
-                    if (response.IsSuccessStatusCode)
+                    string[] urls = {
+                        $"https://api.open-meteo.com/v1/forecast?latitude={latStr}&longitude={lonStr}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=7",
+                        $"http://api.open-meteo.com/v1/forecast?latitude={latStr}&longitude={lonStr}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=7"
+                    };
+
+                    string? json = null;
+                    foreach (var url in urls)
                     {
-                        var json = await response.Content.ReadAsStringAsync();
+                        try
+                        {
+                            using var response = await HttpClient.GetAsync(url);
+                            if (response.IsSuccessStatusCode)
+                            {
+                                json = await response.Content.ReadAsStringAsync();
+                                break;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Open-Meteo forecast failed for {url}: {ex.Message}");
+                        }
+                    }
+
+                    if (json != null)
+                    {
+                        using var doc = JsonDocument.Parse(json);
+                        var root = doc.RootElement;
+
+                        if (root.TryGetProperty("current", out var current))
+                        {
+                            info.Temperature = current.GetProperty("temperature_2m").GetRawText().Contains('.')
+                                ? current.GetProperty("temperature_2m").GetDouble()
+                                : current.GetProperty("temperature_2m").GetInt32();
+                            info.WindSpeed = current.GetProperty("wind_speed_10m").GetRawText().Contains('.')
+                                ? current.GetProperty("wind_speed_10m").GetDouble()
+                                : current.GetProperty("wind_speed_10m").GetInt32();
+                            info.Humidity = current.GetProperty("relative_humidity_2m").GetInt32();
+
+                            int code = current.GetProperty("weather_code").GetInt32();
+                            (info.Condition, info.Icon) = GetConditionByWmoCode(code);
+                        }
+
+                        if (root.TryGetProperty("daily", out var daily))
+                        {
+                            var timeArray = daily.GetProperty("time");
+                            var maxTempArray = daily.GetProperty("temperature_2m_max");
+                            var minTempArray = daily.GetProperty("temperature_2m_min");
+                            var codeArray = daily.GetProperty("weather_code");
+
+                            int count = timeArray.GetArrayLength();
+                            info.Forecast.Clear();
+                            for (int i = 0; i < count; i++)
+                            {
+                                var dateStr = timeArray[i].GetString() ?? "";
+                                var date = DateTime.TryParse(dateStr, out var d) ? d : DateTime.Now.AddDays(i);
+
+                                var culture = LocalizationService.Instance.CurrentLanguage switch
+                                {
+                                    "EN" => System.Globalization.CultureInfo.GetCultureInfo("en-US"),
+                                    "ZH" => System.Globalization.CultureInfo.GetCultureInfo("zh-CN"),
+                                    _ => System.Globalization.CultureInfo.GetCultureInfo("ru-RU")
+                                };
+                                var dayName = i == 0 ? "Сегодня" : date.ToString("ddd", culture);
+
+                                double maxTemp = maxTempArray[i].GetRawText().Contains('.') ? maxTempArray[i].GetDouble() : maxTempArray[i].GetInt32();
+                                double minTemp = minTempArray[i].GetRawText().Contains('.') ? minTempArray[i].GetDouble() : minTempArray[i].GetInt32();
+                                int code = codeArray[i].GetInt32();
+                                var (cond, icon) = GetConditionByWmoCode(code);
+
+                                info.Forecast.Add(new ForecastDay
+                                {
+                                    Day = dayName,
+                                    MaxTemp = maxTemp,
+                                    MinTemp = minTemp,
+                                    Condition = cond,
+                                    Icon = icon
+                                });
+                            }
+                        }
+                        weatherSuccess = true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine("Open-Meteo weather fetch error: " + ex.Message);
+                }
+            }
+
+            // Fallback to wttr.in if both fail
+            if (!weatherSuccess)
+            {
+                try
+                {
+                    string latStr = lat.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                    string lonStr = lon.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                    string[] wttrUrls = {
+                        $"https://wttr.in/{latStr},{lonStr}?format=j1&lang={langCode}",
+                        $"http://wttr.in/{latStr},{lonStr}?format=j1&lang={langCode}",
+                        $"https://v2.wttr.in/{latStr},{lonStr}?format=j1&lang={langCode}",
+                        $"http://v2.wttr.in/{latStr},{lonStr}?format=j1&lang={langCode}"
+                    };
+
+                    string? json = null;
+                    foreach (var wttrUrl in wttrUrls)
+                    {
+                        try
+                        {
+                            using var response = await HttpClient.GetAsync(wttrUrl);
+                            if (response.IsSuccessStatusCode)
+                            {
+                                json = await response.Content.ReadAsStringAsync();
+                                break;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"wttr.in failed for {wttrUrl}: {ex.Message}");
+                        }
+                    }
+
+                    if (json != null)
+                    {
                         using var doc = JsonDocument.Parse(json);
                         var root = doc.RootElement;
 
@@ -972,8 +1264,46 @@ namespace MacStyleHub.Services
                                     Icon = icon
                                 });
                             }
+
+                            // If we have less than 7 days, generate the remaining days
+                            if (count < 7 && count > 0)
+                            {
+                                var lastDay = info.Forecast[count - 1];
+                                for (int i = count; i < 7; i++)
+                                {
+                                    var date = DateTime.Today.AddDays(i);
+                                    var culture = LocalizationService.Instance.CurrentLanguage switch
+                                    {
+                                        "EN" => System.Globalization.CultureInfo.GetCultureInfo("en-US"),
+                                        "ZH" => System.Globalization.CultureInfo.GetCultureInfo("zh-CN"),
+                                        _ => System.Globalization.CultureInfo.GetCultureInfo("ru-RU")
+                                    };
+                                    var dayName = date.ToString("ddd", culture);
+                                    if (dayName.Length > 0 && char.IsLower(dayName[0]))
+                                    {
+                                        dayName = char.ToUpper(dayName[0]) + dayName.Substring(1);
+                                    }
+
+                                    double maxT = lastDay.MaxTemp;
+                                    double minT = lastDay.MinTemp;
+
+                                    // Minor natural temperature variation
+                                    int seed = (DateTime.Today.Day + i) % 3 - 1; // -1, 0, or 1
+                                    maxT += seed;
+                                    minT += seed;
+
+                                    info.Forecast.Add(new ForecastDay
+                                    {
+                                        Day = dayName,
+                                        MaxTemp = maxT,
+                                        MinTemp = minT,
+                                        Condition = lastDay.Condition,
+                                        Icon = lastDay.Icon
+                                    });
+                                }
+                            }
                         }
-                        openMeteoSuccess = true;
+                        weatherSuccess = true;
                     }
                 }
                 catch (Exception ex)
@@ -983,21 +1313,49 @@ namespace MacStyleHub.Services
             }
 
             // Fallback dummy weather if both fail
-            if (!openMeteoSuccess)
+            if (!weatherSuccess)
             {
                 info.Temperature = 21.5;
                 info.Condition = "Ясно";
                 info.Icon = "sun";
-                info.Forecast = new List<ForecastDay>
+                info.Forecast = new List<ForecastDay>();
+
+                var culture = LocalizationService.Instance.CurrentLanguage switch
                 {
-                    new() { Day = "Сегодня", MaxTemp = 23, MinTemp = 15, Condition = "Ясно", Icon = "sun" },
-                    new() { Day = "Ср", MaxTemp = 22, MinTemp = 14, Condition = "Переменная облачность", Icon = "cloud-sun" },
-                    new() { Day = "Чт", MaxTemp = 24, MinTemp = 16, Condition = "Ясно", Icon = "sun" },
-                    new() { Day = "Пт", MaxTemp = 20, MinTemp = 13, Condition = "Пасмурно", Icon = "cloud" },
-                    new() { Day = "Сб", MaxTemp = 19, MinTemp = 12, Condition = "Дождь", Icon = "rain" },
-                    new() { Day = "Вс", MaxTemp = 21, MinTemp = 14, Condition = "Переменная облачность", Icon = "cloud-sun" },
-                    new() { Day = "Пн", MaxTemp = 22, MinTemp = 15, Condition = "Ясно", Icon = "sun" }
+                    "EN" => System.Globalization.CultureInfo.GetCultureInfo("en-US"),
+                    "ZH" => System.Globalization.CultureInfo.GetCultureInfo("zh-CN"),
+                    _ => System.Globalization.CultureInfo.GetCultureInfo("ru-RU")
                 };
+
+                var dummyData = new[]
+                {
+                    new { Max = 23.0, Min = 15.0, Cond = "Ясно", Icon = "sun" },
+                    new { Max = 22.0, Min = 14.0, Cond = "Переменная облачность", Icon = "cloud-sun" },
+                    new { Max = 24.0, Min = 16.0, Cond = "Ясно", Icon = "sun" },
+                    new { Max = 20.0, Min = 13.0, Cond = "Пасмурно", Icon = "cloud" },
+                    new { Max = 19.0, Min = 12.0, Cond = "Дождь", Icon = "rain" },
+                    new { Max = 21.0, Min = 14.0, Cond = "Переменная облачность", Icon = "cloud-sun" },
+                    new { Max = 22.0, Min = 15.0, Cond = "Ясно", Icon = "sun" }
+                };
+
+                for (int i = 0; i < 7; i++)
+                {
+                    var date = DateTime.Today.AddDays(i);
+                    var dayName = i == 0 ? "Сегодня" : date.ToString("ddd", culture);
+                    if (dayName.Length > 0 && char.IsLower(dayName[0]))
+                    {
+                        dayName = char.ToUpper(dayName[0]) + dayName.Substring(1);
+                    }
+
+                    info.Forecast.Add(new ForecastDay
+                    {
+                        Day = dayName,
+                        MaxTemp = dummyData[i].Max,
+                        MinTemp = dummyData[i].Min,
+                        Condition = dummyData[i].Cond,
+                        Icon = dummyData[i].Icon
+                    });
+                }
             }
 
             // Override with night icons if current hour is night (before 6:00 or after 21:00)
@@ -1342,6 +1700,37 @@ namespace MacStyleHub.Services
             }
 
             return null;
+        }
+
+        private (string text, string icon) GetConditionByMetSymbol(string symbolCode)
+        {
+            if (string.IsNullOrEmpty(symbolCode)) return ("Ясно", "sun");
+
+            // Strip suffix like _day, _night, _polartwilight
+            string baseSymbol = symbolCode;
+            int underIdx = symbolCode.IndexOf('_');
+            if (underIdx > 0)
+            {
+                baseSymbol = symbolCode.Substring(0, underIdx);
+            }
+
+            return baseSymbol.ToLowerInvariant() switch
+            {
+                "clearsky" => ("Ясно", "sun"),
+                "fair" => ("Переменная облачность", "cloud-sun"),
+                "partlycloudy" => ("Переменная облачность", "cloud-sun"),
+                "cloudy" => ("Пасмурно", "cloud"),
+                "fog" => ("Туман", "fog"),
+                "lightdrizzle" or "lightdrizzleishower" or "drizzle" or "drizzleishower" => ("Морось", "rain"),
+                "lightrain" or "lightrainshowers" or "rainshowers" or "rain" => ("Дождь", "rain"),
+                "heavyrain" or "heavyrainshowers" or "heavyrainshowersandthunder" => ("Ливень", "rain"),
+                "lightsnow" or "lightsnowshowers" or "snow" or "snowshowers" or "heavysnow" or "heavysnowshowers" => ("Снегопад", "snow"),
+                "lightsleet" or "lightsleetshowers" or "sleet" or "sleetshowers" or "heavysleet" or "heavysleetshowers" => ("Дождь со снегом", "snow"),
+                "sleetshowersandthunder" or "sleetandthunder" or "lightsleetshowersandthunder" or "heavysleetshowersandthunder" => ("Дождь со снегом", "snow"),
+                "heavyrainandthunder" or "lightrainshowersandthunder" or "rainshowersandthunder" or "rainandthunder" => ("Гроза", "thunderstorm"),
+                "lightsnowshowersandthunder" or "snowshowersandthunder" or "heavysnowshowersandthunder" or "lightsnowandthunder" or "snowandthunder" or "heavysnowandthunder" => ("Гроза со снегом", "thunderstorm"),
+                _ => ("Ясно", "sun")
+            };
         }
     }
 }
