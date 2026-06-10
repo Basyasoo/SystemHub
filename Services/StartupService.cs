@@ -120,5 +120,39 @@ namespace MacStyleHub.Services
 
             return list;
         }
+
+        public bool RemoveStartupItem(string name, string location)
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                return false;
+
+            try
+            {
+                bool isSystem = (location == LocalizationService.Instance.StartupLocationSystem);
+                if (isSystem)
+                {
+                    using var key = Registry.LocalMachine.OpenSubKey(RunRegistryKey, true);
+                    if (key != null)
+                    {
+                        key.DeleteValue(name, false);
+                        return true;
+                    }
+                }
+                else
+                {
+                    using var key = Registry.CurrentUser.OpenSubKey(RunRegistryKey, true);
+                    if (key != null)
+                    {
+                        key.DeleteValue(name, false);
+                        return true;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Error removing registry startup item: " + ex.Message);
+            }
+            return false;
+        }
     }
 }

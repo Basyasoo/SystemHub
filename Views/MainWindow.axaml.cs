@@ -17,6 +17,27 @@ namespace MacStyleHub.Views
             BeginMoveDrag(e);
         }
 
+        private bool _isExiting = false;
+
+        public void ExitApp()
+        {
+            _isExiting = true;
+            Close();
+        }
+
+        protected override void OnClosing(WindowClosingEventArgs e)
+        {
+            if (!_isExiting)
+            {
+                e.Cancel = true;
+                Hide();
+            }
+            else
+            {
+                base.OnClosing(e);
+            }
+        }
+
         private void Close_OnClick(object? sender, RoutedEventArgs e)
         {
             Close();

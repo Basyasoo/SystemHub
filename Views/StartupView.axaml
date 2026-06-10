@@ -42,19 +42,26 @@
                 <ItemsControl ItemsSource="{Binding StartupItems}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Border Classes="SystemCard" Margin="0,0,0,8" Padding="14" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderGray}">
-                                <Grid ColumnDefinitions="*, Auto">
-                                    <StackPanel Grid.Column="0" Spacing="6" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
-                                        <TextBlock Text="{Binding Command}" FontSize="11" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap"/>
-                                    </StackPanel>
-                                    
-                                    <!-- Location Badge -->
-                                    <Border Grid.Column="1" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderGray}" BorderThickness="1" CornerRadius="4" Padding="8,4" VerticalAlignment="Center" Margin="15,0,0,0">
-                                        <TextBlock Text="{Binding Location}" FontSize="11" Foreground="{DynamicResource AccentBlue}" FontWeight="Medium"/>
-                                    </Border>
-                                </Grid>
-                            </Border>
+                             <Border Classes="SystemCard" Margin="0,0,0,8" Padding="14" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderGray}">
+                                 <Grid ColumnDefinitions="*, Auto, Auto">
+                                     <StackPanel Grid.Column="0" Spacing="6" VerticalAlignment="Center">
+                                         <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                                         <TextBlock Text="{Binding Command}" FontSize="11" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap"/>
+                                     </StackPanel>
+                                     
+                                     <!-- Location Badge -->
+                                     <Border Grid.Column="1" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderGray}" BorderThickness="1" CornerRadius="4" Padding="8,4" VerticalAlignment="Center" Margin="15,0,0,0">
+                                         <TextBlock Text="{Binding Location}" FontSize="11" Foreground="{DynamicResource AccentBlue}" FontWeight="Medium"/>
+                                     </Border>
+
+                                     <!-- Remove Button -->
+                                     <Button Grid.Column="2" Classes="SystemButton" 
+                                             Command="{Binding $parent[UserControl].((vm:StartupViewModel)DataContext).RemoveItemCommand}"
+                                             CommandParameter="{Binding}"
+                                             Content="{Binding StartupBtnDelete, Source={x:Static services:LocalizationService.Instance}}" 
+                                             VerticalAlignment="Center" Margin="15,0,0,0"/>
+                                 </Grid>
+                             </Border>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>

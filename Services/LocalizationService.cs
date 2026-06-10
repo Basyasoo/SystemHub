@@ -404,6 +404,27 @@ namespace MacStyleHub.Services
             _ => "Системный (HKLM)"
         };
 
+        public string StartupBtnDelete => CurrentLanguage switch
+        {
+            "EN" => "Remove",
+            "ZH" => "删除",
+            _ => "Удалить"
+        };
+
+        public string TrayMenuOpen => CurrentLanguage switch
+        {
+            "EN" => "Open",
+            "ZH" => "打开",
+            _ => "Открыть"
+        };
+
+        public string TrayMenuExit => CurrentLanguage switch
+        {
+            "EN" => "Exit",
+            "ZH" => "退出",
+            _ => "Выйти"
+        };
+
         // About
         public string AboutHeader => CurrentLanguage switch
         {

@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
@@ -27,5 +28,46 @@ public partial class App : Application
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private void OnTrayIconClicked(object? sender, System.EventArgs e)
+    {
+        ShowMainWindow();
+    }
+
+    private void OnMenuOpenClick(object? sender, System.EventArgs e)
+    {
+        ShowMainWindow();
+    }
+
+    private void OnMenuExitClick(object? sender, System.EventArgs e)
+    {
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            if (desktop.MainWindow is MainWindow mainWindow)
+            {
+                mainWindow.ExitApp();
+            }
+            else
+            {
+                desktop.Shutdown();
+            }
+        }
+    }
+
+    private void ShowMainWindow()
+    {
+        if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            if (desktop.MainWindow is MainWindow mainWindow)
+            {
+                mainWindow.Show();
+                if (mainWindow.WindowState == WindowState.Minimized)
+                {
+                    mainWindow.WindowState = WindowState.Normal;
+                }
+                mainWindow.Activate();
+            }
+        }
     }
 }

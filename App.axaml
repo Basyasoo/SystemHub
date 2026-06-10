@@ -2,11 +2,28 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="MacStyleHub.App"
              xmlns:local="using:MacStyleHub"
+             xmlns:services="using:MacStyleHub.Services"
              RequestedThemeVariant="Dark">
 
     <Application.DataTemplates>
         <local:ViewLocator/>
     </Application.DataTemplates>
+
+    <TrayIcon.Icons>
+        <TrayIcons>
+            <TrayIcon Icon="avares://SystemHub/Assets/app.ico" 
+                      ToolTipText="SystemHub"
+                      Clicked="OnTrayIconClicked">
+                <TrayIcon.Menu>
+                    <NativeMenu>
+                        <NativeMenuItem Header="{Binding TrayMenuOpen, Source={x:Static services:LocalizationService.Instance}}" Click="OnMenuOpenClick"/>
+                        <NativeMenuItemSeparator/>
+                        <NativeMenuItem Header="{Binding TrayMenuExit, Source={x:Static services:LocalizationService.Instance}}" Click="OnMenuExitClick"/>
+                    </NativeMenu>
+                </TrayIcon.Menu>
+            </TrayIcon>
+        </TrayIcons>
+    </TrayIcon.Icons>
   
     <Application.Styles>
         <FluentTheme />

@@ -46,5 +46,13 @@ namespace MacStyleHub.ViewModels
                 StartupItems.Add(item);
             }
         }
+
+        [RelayCommand]
+        private void RemoveItem(StartupItem item)
+        {
+            if (item == null) return;
+            _startupService.RemoveStartupItem(item.Name, item.Location);
+            RefreshStartupItems();
+        }
     }
 }
