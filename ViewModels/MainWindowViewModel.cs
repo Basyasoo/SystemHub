@@ -12,6 +12,9 @@ namespace MacStyleHub.ViewModels
         [ObservableProperty]
         private int _selectedMenuIndex;
 
+        [ObservableProperty]
+        private bool _isAppLoading = true;
+
         public DashboardViewModel DashboardVM { get; } = new();
         public WeatherViewModel WeatherVM { get; } = new();
         public SystemInfoViewModel SystemInfoVM { get; } = new();
@@ -29,6 +32,13 @@ namespace MacStyleHub.ViewModels
         {
             _currentPageViewModel = DashboardVM;
             _selectedMenuIndex = 0;
+            _ = StartLoadingTimer();
+        }
+
+        private async System.Threading.Tasks.Task StartLoadingTimer()
+        {
+            await System.Threading.Tasks.Task.Delay(1800);
+            IsAppLoading = false;
         }
 
         partial void OnSelectedMenuIndexChanged(int value)

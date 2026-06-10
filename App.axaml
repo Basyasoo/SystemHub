@@ -147,6 +147,43 @@
             <Setter Property="Padding" Value="12,8"/>
         </Style>
         
+        <!-- Shimmering Skeleton Loader Styles -->
+        <Style Selector="Border.Skeleton">
+            <Setter Property="Background" Value="{DynamicResource SkeletonBrush}"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Height" Value="14"/>
+            <Style.Animations>
+                <Animation Duration="0:0:1.4" IterationCount="Infinite" Easing="SineEaseInOut">
+                    <KeyFrame Cue="0%">
+                        <Setter Property="Opacity" Value="0.5"/>
+                    </KeyFrame>
+                    <KeyFrame Cue="50%">
+                        <Setter Property="Opacity" Value="1.0"/>
+                    </KeyFrame>
+                    <KeyFrame Cue="100%">
+                        <Setter Property="Opacity" Value="0.5"/>
+                    </KeyFrame>
+                </Animation>
+            </Style.Animations>
+        </Style>
+
+        <Style Selector="Border.SkeletonCircle">
+            <Setter Property="Background" Value="{DynamicResource SkeletonBrush}"/>
+            <Setter Property="CornerRadius" Value="100"/>
+            <Style.Animations>
+                <Animation Duration="0:0:1.4" IterationCount="Infinite" Easing="SineEaseInOut">
+                    <KeyFrame Cue="0%">
+                        <Setter Property="Opacity" Value="0.5"/>
+                    </KeyFrame>
+                    <KeyFrame Cue="50%">
+                        <Setter Property="Opacity" Value="1.0"/>
+                    </KeyFrame>
+                    <KeyFrame Cue="100%">
+                        <Setter Property="Opacity" Value="0.5"/>
+                    </KeyFrame>
+                </Animation>
+            </Style.Animations>
+        </Style>
     </Application.Styles>
 
     <Application.Resources>
@@ -174,6 +211,12 @@
                     
                     <SolidColorBrush x:Key="SidebarHoverBg" Color="#12000000"/>
                     <SolidColorBrush x:Key="SidebarHoverFg" Color="#1C1C1E"/>
+                    
+                    <LinearGradientBrush x:Key="SkeletonBrush" StartPoint="0%,0%" EndPoint="100%,0%">
+                        <GradientStop Offset="0.0" Color="#E5E5EA"/>
+                        <GradientStop Offset="0.5" Color="#F2F2F7"/>
+                        <GradientStop Offset="1.0" Color="#E5E5EA"/>
+                    </LinearGradientBrush>
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="Dark">
                     <!-- Dark theme -->
@@ -194,6 +237,12 @@
                     
                     <SolidColorBrush x:Key="SidebarHoverBg" Color="#15FFFFFF"/>
                     <SolidColorBrush x:Key="SidebarHoverFg" Color="#FFFFFF"/>
+                    
+                    <LinearGradientBrush x:Key="SkeletonBrush" StartPoint="0%,0%" EndPoint="100%,0%">
+                        <GradientStop Offset="0.0" Color="#242426"/>
+                        <GradientStop Offset="0.5" Color="#2C2C2E"/>
+                        <GradientStop Offset="1.0" Color="#242426"/>
+                    </LinearGradientBrush>
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
 

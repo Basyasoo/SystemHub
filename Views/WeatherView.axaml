@@ -21,6 +21,74 @@
                 <Button Grid.Column="1" Classes="SystemButton" Command="{Binding LoadWeatherCommand}" Content="{Binding WeatherRefresh, Source={x:Static services:LocalizationService.Instance}}" VerticalAlignment="Center"/>
             </Grid>
 
+            <!-- Location Settings / Search Expander -->
+            <Expander Header="Настройка местоположения / Location Settings" 
+                      HorizontalAlignment="Stretch"
+                      Background="{DynamicResource CardBg}"
+                      BorderBrush="{DynamicResource BorderGray}"
+                      BorderThickness="1"
+                      CornerRadius="8">
+                <StackPanel Spacing="15" Margin="5,10,5,5">
+                    <!-- Search City Row -->
+                    <Grid ColumnDefinitions="*, Auto, Auto" RowDefinitions="Auto">
+                        <TextBox Grid.Column="0" 
+                                 Text="{Binding SearchQuery, Mode=TwoWay}" 
+                                 Watermark="{Binding WeatherSearchWatermark, Source={x:Static services:LocalizationService.Instance}}" 
+                                 VerticalAlignment="Center" 
+                                 Margin="0,0,10,0"/>
+                        <Button Grid.Column="1" 
+                                Classes="SystemButton" 
+                                Command="{Binding SearchCityCommand}" 
+                                Content="{Binding WeatherSearchBtn, Source={x:Static services:LocalizationService.Instance}}" 
+                                Margin="0,0,10,0" 
+                                IsDefault="True"/>
+                        <Button Grid.Column="2" 
+                                Classes="SystemButton" 
+                                Command="{Binding ResetLocationCommand}" 
+                                Content="{Binding WeatherResetLocation, Source={x:Static services:LocalizationService.Instance}}"/>
+                    </Grid>
+
+                    <!-- Coordinates Row -->
+                    <Grid ColumnDefinitions="*, Auto" RowDefinitions="Auto">
+                        <TextBox Grid.Column="0" 
+                                 Text="{Binding CoordinatesInput, Mode=TwoWay}" 
+                                 Watermark="{Binding WeatherCoordinatesWatermark, Source={x:Static services:LocalizationService.Instance}}" 
+                                 VerticalAlignment="Center" 
+                                 Margin="0,0,10,0"/>
+                        <Button Grid.Column="1" 
+                                Classes="SystemButton" 
+                                Command="{Binding SetCoordinatesCommand}" 
+                                Content="{Binding WeatherCoordinatesBtn, Source={x:Static services:LocalizationService.Instance}}"/>
+                    </Grid>
+                    
+                    <TextBlock Text="{Binding WeatherCoordinatesError, Source={x:Static services:LocalizationService.Instance}}" 
+                               Foreground="#FF453A" 
+                               FontSize="12" 
+                               IsVisible="{Binding IsInvalidInputError}"/>
+
+                    <!-- Search Results -->
+                    <StackPanel Spacing="8" IsVisible="{Binding HasSearchResults}">
+                        <TextBlock Text="{Binding WeatherSearchResultsTitle, Source={x:Static services:LocalizationService.Instance}}" 
+                                   FontWeight="SemiBold" 
+                                   Foreground="{DynamicResource TextPrimary}"/>
+                        <ScrollViewer MaxHeight="150">
+                            <ItemsControl ItemsSource="{Binding SearchResults}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button Classes="SystemButton" 
+                                                HorizontalAlignment="Stretch" 
+                                                HorizontalContentAlignment="Left" 
+                                                Command="{Binding $parent[UserControl].((vm:WeatherViewModel)DataContext).SelectCityCommand}" 
+                                                CommandParameter="{Binding}" 
+                                                Content="{Binding DisplayName}" 
+                                                Margin="0,2"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </StackPanel>
+                </StackPanel>
+            </Expander>
 
             <!-- Main Weather Card -->
             <Border Classes="GlassCard" HorizontalAlignment="Stretch" Padding="25" MinHeight="230" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderGray}">
@@ -66,7 +134,7 @@
                 </Grid>
             </Border>
 
-            <!-- 5-Day Forecast -->
+            <!-- 7-Day Forecast -->
             <StackPanel Spacing="12">
                 <TextBlock Text="{Binding WeatherForecastHeader, Source={x:Static services:LocalizationService.Instance}}" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" Margin="0,5,0,0"/>
                 
@@ -78,7 +146,7 @@
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Border Classes="SystemCard" Margin="4" Padding="14" Height="150" HorizontalAlignment="Stretch" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderGray}">
+                            <Border Classes="SystemCard" Margin="4" Padding="14" Height="165" HorizontalAlignment="Stretch" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderGray}">
                                 <Grid RowDefinitions="Auto, Auto, Auto, *">
                                     <TextBlock Grid.Row="0" Text="{Binding DayLocalized}" HorizontalAlignment="Center" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" FontSize="13"/>
                                     

@@ -1114,6 +1114,42 @@ namespace MacStyleHub.Services
             "ZH" => "查看完整列表",
             _ => "Открыть полный список"
         };
+
+        // Media player launcher localizations
+        public string PlayerOpenSpotify => CurrentLanguage switch
+        {
+            "EN" => "Open Spotify",
+            "ZH" => "打开 Spotify",
+            _ => "Открыть Spotify"
+        };
+
+        public string PlayerOpenYandex => CurrentLanguage switch
+        {
+            "EN" => "Open Yandex Music",
+            "ZH" => "打开 Yandex 音乐",
+            _ => "Открыть Яндекс.Музыку"
+        };
+
+        public string PlayerOpenApp => CurrentLanguage switch
+        {
+            "EN" => "Desktop App",
+            "ZH" => "桌面应用",
+            _ => "Приложение"
+        };
+
+        public string PlayerOpenWeb => CurrentLanguage switch
+        {
+            "EN" => "Web Version",
+            "ZH" => "Веб-версия",
+            _ => "Веб-версия"
+        };
+
+        public string PlayerSessionsToggle => CurrentLanguage switch
+        {
+            "EN" => "Show/Hide Active Sessions",
+            "ZH" => "显示/隐藏活动会话",
+            _ => "Свернуть/развернуть активные сессии"
+        };
     }
 }
 

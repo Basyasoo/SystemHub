@@ -55,10 +55,15 @@ namespace MacStyleHub.ViewModels
 
         public WeatherViewModel()
         {
-            // Force auto-location (search is disabled, app auto-detects coordinates)
-            _useAutoLocation = true;
-            _customLat = null;
-            _customLon = null;
+            // Load saved settings
+            var settings = WeatherService.LoadSettings();
+            _useAutoLocation = settings.UseAutoLocation;
+            _customLat = settings.Latitude;
+            _customLon = settings.Longitude;
+            if (!_useAutoLocation && !string.IsNullOrEmpty(settings.CustomCityName))
+            {
+                City = settings.CustomCityName;
+            }
 
             LoadWeatherCommand = new AsyncRelayCommand(LoadWeatherAsync);
             _ = LoadWeatherAsync();

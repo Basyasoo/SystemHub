@@ -406,7 +406,7 @@ namespace MacStyleHub.Services
             {
                 string latStr = lat.ToString(System.Globalization.CultureInfo.InvariantCulture);
                 string lonStr = lon.ToString(System.Globalization.CultureInfo.InvariantCulture);
-                string url = $"https://api.open-meteo.com/v1/forecast?latitude={latStr}&longitude={lonStr}&current_weather=true&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=7";
+                string url = $"https://api.open-meteo.com/v1/forecast?latitude={latStr}&longitude={lonStr}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=7";
                 using var response = await HttpClient.GetAsync(url);
                 if (response.IsSuccessStatusCode)
                 {
@@ -414,31 +414,34 @@ namespace MacStyleHub.Services
                     using var doc = JsonDocument.Parse(json);
                     var root = doc.RootElement;
 
-                    if (root.TryGetProperty("current_weather", out var current))
+                    if (root.TryGetProperty("current", out var current))
                     {
-                        info.Temperature = current.GetProperty("temperature").GetDouble();
-                        info.WindSpeed = current.GetProperty("windspeed").GetDouble();
-                        int code = current.GetProperty("weathercode").GetInt32();
-                        (info.Condition, info.Icon) = GetConditionByCode(code);
-                    }
+                        info.Temperature = current.GetProperty("temperature_2m").GetRawText().Contains('.')
+                            ? current.GetProperty("temperature_2m").GetDouble()
+                            : current.GetProperty("temperature_2m").GetInt32();
+                        info.WindSpeed = current.GetProperty("wind_speed_10m").GetRawText().Contains('.')
+                            ? current.GetProperty("wind_speed_10m").GetDouble()
+                            : current.GetProperty("wind_speed_10m").GetInt32();
+                        info.Humidity = current.GetProperty("relative_humidity_2m").GetInt32();
 
-                    info.Humidity = 60; // Estimated fallback
+                        int code = current.GetProperty("weather_code").GetInt32();
+                        (info.Condition, info.Icon) = GetConditionByWmoCode(code);
+                    }
 
                     if (root.TryGetProperty("daily", out var daily))
                     {
-                        var times = daily.GetProperty("time");
-                        var maxTemps = daily.GetProperty("temperature_2m_max");
-                        var minTemps = daily.GetProperty("temperature_2m_min");
-                        var codes = daily.GetProperty("weathercode");
+                        var timeArray = daily.GetProperty("time");
+                        var maxTempArray = daily.GetProperty("temperature_2m_max");
+                        var minTempArray = daily.GetProperty("temperature_2m_min");
+                        var codeArray = daily.GetProperty("weather_code");
 
-                        int count = Math.Min(7, times.GetArrayLength());
+                        int count = timeArray.GetArrayLength();
                         info.Forecast.Clear();
                         for (int i = 0; i < count; i++)
                         {
-                            var dateStr = times[i].GetString() ?? "";
+                            var dateStr = timeArray[i].GetString() ?? "";
                             var date = DateTime.TryParse(dateStr, out var d) ? d : DateTime.Now.AddDays(i);
-                            
-                            // Day name translations
+
                             var culture = LocalizationService.Instance.CurrentLanguage switch
                             {
                                 "EN" => System.Globalization.CultureInfo.GetCultureInfo("en-US"),
@@ -447,13 +450,16 @@ namespace MacStyleHub.Services
                             };
                             var dayName = i == 0 ? "Сегодня" : date.ToString("ddd", culture);
 
-                            var (cond, icon) = GetConditionByCode(codes[i].GetInt32());
+                            double maxTemp = maxTempArray[i].GetRawText().Contains('.') ? maxTempArray[i].GetDouble() : maxTempArray[i].GetInt32();
+                            double minTemp = minTempArray[i].GetRawText().Contains('.') ? minTempArray[i].GetDouble() : minTempArray[i].GetInt32();
+                            int code = codeArray[i].GetInt32();
+                            var (cond, icon) = GetConditionByWmoCode(code);
 
                             info.Forecast.Add(new ForecastDay
                             {
                                 Day = dayName,
-                                MaxTemp = maxTemps[i].GetDouble(),
-                                MinTemp = minTemps[i].GetDouble(),
+                                MaxTemp = maxTemp,
+                                MinTemp = minTemp,
                                 Condition = cond,
                                 Icon = icon
                             });
@@ -491,7 +497,6 @@ namespace MacStyleHub.Services
                 }
                 else if (info.Icon == "cloud-sun")
                 {
-                    info.Icon = "cloud-moon";
                     if (info.Condition == "Переменная облачность")
                         info.Condition = "Переменная облачность (ночь)";
                 }
@@ -500,7 +505,7 @@ namespace MacStyleHub.Services
             return info;
         }
 
-        private (string text, string icon) GetConditionByCode(int code)
+        private (string text, string icon) GetConditionByWmoCode(int code)
         {
             return code switch
             {
@@ -509,11 +514,16 @@ namespace MacStyleHub.Services
                 3 => ("Пасмурно", "cloud"),
                 45 or 48 => ("Туман", "fog"),
                 51 or 53 or 55 => ("Морось", "rain"),
+                56 or 57 => ("Морось", "rain"), // Freezing drizzle
                 61 or 63 or 65 => ("Дождь", "rain"),
+                66 or 67 => ("Дождь", "rain"), // Freezing rain
                 71 or 73 or 75 => ("Снегопад", "snow"),
+                77 => ("Снегопад", "snow"),
                 80 or 81 or 82 => ("Ливень", "rain"),
-                95 or 96 or 99 => ("Гроза", "thunderstorm"),
-                _ => ("Неизвестно", "sun")
+                85 or 86 => ("Снегопад", "snow"),
+                95 => ("Гроза", "thunderstorm"),
+                96 or 99 => ("Гроза", "thunderstorm"),
+                _ => ("Ясно", "sun")
             };
         }
 

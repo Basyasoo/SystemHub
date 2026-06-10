@@ -234,8 +234,17 @@ namespace MacStyleHub.ViewModels
             catch { }
         }
 
+        [ObservableProperty]
+        private bool _isSessionsExpanded = true;
+
         [RelayCommand]
-        public void LaunchSpotify()
+        public void ToggleSessions()
+        {
+            IsSessionsExpanded = !IsSessionsExpanded;
+        }
+
+        [RelayCommand]
+        public void LaunchSpotifyApp()
         {
             try
             {
@@ -243,27 +252,48 @@ namespace MacStyleHub.ViewModels
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("Launch Spotify failed: " + ex.Message);
+                System.Diagnostics.Debug.WriteLine("Launch Spotify App failed: " + ex.Message);
+                LaunchSpotifyWeb(); // Fallback to web
             }
         }
 
         [RelayCommand]
-        public void LaunchYandexMusic()
+        public void LaunchSpotifyWeb()
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("https://open.spotify.com") { UseShellExecute = true });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Launch Spotify Web failed: " + ex.Message);
+            }
+        }
+
+        [RelayCommand]
+        public void LaunchYandexMusicApp()
         {
             try
             {
                 System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("yandexmusic:") { UseShellExecute = true });
             }
-            catch
+            catch (Exception ex)
             {
-                try
-                {
-                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("https://music.yandex.ru") { UseShellExecute = true });
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine("Launch Yandex Music failed: " + ex.Message);
-                }
+                System.Diagnostics.Debug.WriteLine("Launch Yandex Music App failed: " + ex.Message);
+                LaunchYandexMusicWeb(); // Fallback to web
+            }
+        }
+
+        [RelayCommand]
+        public void LaunchYandexMusicWeb()
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("https://music.yandex.ru") { UseShellExecute = true });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Launch Yandex Music Web failed: " + ex.Message);
             }
         }
 

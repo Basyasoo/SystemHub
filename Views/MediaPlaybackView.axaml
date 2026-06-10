@@ -17,9 +17,39 @@
         <StreamGeometry x:Key="PhMusic">M216,40V168a48,48,0,1,1-48-48,47.4,47.4,0,0,1,32,12.33V80L96,96v88a48,48,0,1,1-48-48,47.4,47.4,0,0,1,32,12.33V56a16,16,0,0,1,12.48-15.6l96-24A16,16,0,0,1,216,40ZM120,184a32,32,0,1,0,32,32A32,32,0,0,0,120,184ZM48,184a32,32,0,1,0,32,32A32,32,0,0,0,48,184Z</StreamGeometry>
         <StreamGeometry x:Key="SpotifyLogo">M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0m3.669 11.538a.5.5 0 0 1-.686.165c-1.879-1.147-4.243-1.407-7.028-.77a.499.499 0 0 1-.222-.973c3.048-.696 5.662-.397 7.77.892a.5.5 0 0 1 .166.686m.979-2.178a.624.624 0 0 1-.858.205c-2.15-1.321-5.428-1.704-7.972-.932a.625.625 0 0 1-.362-1.194c2.905-.881 6.517-.454 8.986 1.063a.624.624 0 0 1 .206.858m.084-2.268C10.154 5.56 5.9 5.419 3.438 6.166a.748.748 0 1 1-.434-1.432c2.825-.857 7.523-.692 10.492 1.07a.747.747 0 1 1-.764 1.288</StreamGeometry>
         <StreamGeometry x:Key="YandexMusicLogo">m 51.62106,27.246576 -0.15602,-0.775668 -6.59622,-1.152272 3.832962,-5.185702 -0.445616,-0.487482 -5.637864,2.70361 0.712978,-7.180076 -0.57941,-0.332162 -3.431792,5.805814 -3.85495,-8.642522 h -0.668534 l 0.913678,8.354572 -9.69351,-7.756214 -0.824558,0.243742 7.464988,9.37398 -14.774185,-4.919736 -0.668534,0.753444 13.192207,7.512706 -18.206214,1.506424 -0.200467,1.13052 18.919191,2.060806 -15.77722,13.05256 0.668534,0.908524 18.785388,-10.215842 -3.721146,17.994282 h 1.1366 l 7.19762,-16.930662 4.389916,13.252084 0.78011,-0.598354 -1.805132,-13.473608 6.841128,7.756212 0.445846,-0.709238 -5.236928,-9.617718 7.309196,2.703608 0.0669,-0.819878 -6.551544,-4.831084 6.172832,-1.484668 z</StreamGeometry>
+        <StreamGeometry x:Key="IconList">M32,64a8,8,0,0,1,8-8H216a8,8,0,0,1,0,16H40A8,8,0,0,1,32,64Zm8,56H216a8,8,0,0,0,0-16H40a8,8,0,0,0,0,16Zm176,32H40a8,8,0,0,0,0,16H216a8,8,0,0,0,0-16Z</StreamGeometry>
     </UserControl.Resources>
 
     <UserControl.Styles>
+        <Style Selector="Border.PlayerCard">
+            <Setter Property="Grid.Column" Value="0"/>
+            <Setter Property="Grid.ColumnSpan" Value="1"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="Margin" Value="0,0,12,0"/>
+        </Style>
+        <Style Selector="Border.PlayerCard.Centered">
+            <Setter Property="Grid.ColumnSpan" Value="2"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Width" Value="420"/>
+            <Setter Property="Margin" Value="0"/>
+        </Style>
+
+        <Style Selector="Border.SessionsCard">
+            <Setter Property="Opacity" Value="0"/>
+            <Setter Property="RenderTransform" Value="scale(0.96) translate(50px, 0)"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <DoubleTransition Property="Opacity" Duration="0:0:0.4" Easing="CubicEaseOut"/>
+                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.4" Easing="CubicEaseOut"/>
+                </Transitions>
+            </Setter>
+        </Style>
+
+        <Style Selector="Border.SessionsCard[IsVisible=True]">
+            <Setter Property="Opacity" Value="1"/>
+            <Setter Property="RenderTransform" Value="scale(1.0) translate(0, 0)"/>
+        </Style>
+
         <Style Selector="Button.SpotifyLaunch">
             <Setter Property="Background" Value="#1DB954"/>
             <Setter Property="Foreground" Value="White"/>
@@ -70,15 +100,65 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="30" Spacing="25">
             <!-- Header -->
-            <StackPanel Spacing="5">
-                <TextBlock Text="{Binding PlayerHeader, Source={x:Static services:LocalizationService.Instance}}" FontSize="28" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" LetterSpacing="-0.5"/>
-            </StackPanel>
+            <Grid ColumnDefinitions="*, Auto" Margin="0,0,0,10">
+                <TextBlock Grid.Column="0" Text="{Binding PlayerHeader, Source={x:Static services:LocalizationService.Instance}}" FontSize="28" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" LetterSpacing="-0.5" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,15,0"/>
+                
+                <!-- Grouped buttons on the right to prevent overlaps -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                    <Button Classes="SpotifyLaunch" Height="36" ToolTip.Tip="Spotify">
+                        <Button.Flyout>
+                            <Flyout Placement="Bottom" ShowMode="Transient">
+                                <Border Padding="12" Background="{DynamicResource CardBg}" CornerRadius="8" BorderBrush="{DynamicResource BorderGray}" BorderThickness="1">
+                                    <StackPanel Spacing="8" Width="180">
+                                        <TextBlock Text="{Binding PlayerOpenSpotify, Source={x:Static services:LocalizationService.Instance}}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" HorizontalAlignment="Center" Margin="0,0,0,4"/>
+                                        <Button Classes="SystemButton" Content="{Binding PlayerOpenApp, Source={x:Static services:LocalizationService.Instance}}" Command="{Binding LaunchSpotifyAppCommand}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
+                                        <Button Classes="SystemButton" Content="{Binding PlayerOpenWeb, Source={x:Static services:LocalizationService.Instance}}" Command="{Binding LaunchSpotifyWebCommand}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+                            </Flyout>
+                        </Button.Flyout>
+                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <PathIcon Data="{StaticResource SpotifyLogo}" Width="14" Height="14" Foreground="White"/>
+                            <TextBlock Text="Spotify" FontSize="12" FontWeight="SemiBold" Foreground="White"/>
+                        </StackPanel>
+                    </Button>
+                    
+                    <Button Classes="YandexLaunch" Height="36" ToolTip.Tip="Яндекс.Музыка">
+                        <Button.Flyout>
+                            <Flyout Placement="Bottom" ShowMode="Transient">
+                                <Border Padding="12" Background="{DynamicResource CardBg}" CornerRadius="8" BorderBrush="{DynamicResource BorderGray}" BorderThickness="1">
+                                    <StackPanel Spacing="8" Width="180">
+                                        <TextBlock Text="{Binding PlayerOpenYandex, Source={x:Static services:LocalizationService.Instance}}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" HorizontalAlignment="Center" Margin="0,0,0,4"/>
+                                        <Button Classes="SystemButton" Content="{Binding PlayerOpenApp, Source={x:Static services:LocalizationService.Instance}}" Command="{Binding LaunchYandexMusicAppCommand}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
+                                        <Button Classes="SystemButton" Content="{Binding PlayerOpenWeb, Source={x:Static services:LocalizationService.Instance}}" Command="{Binding LaunchYandexMusicWebCommand}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+                            </Flyout>
+                        </Button.Flyout>
+                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <PathIcon Data="{StaticResource YandexMusicLogo}" Width="14" Height="14" Foreground="#111111"/>
+                            <TextBlock Text="{Binding YandexMusicLabel, Source={x:Static services:LocalizationService.Instance}}" FontSize="12" FontWeight="SemiBold" Foreground="#111111"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Classes="SystemButton" 
+                            Command="{Binding ToggleSessionsCommand}" 
+                            IsVisible="{Binding !IsSessionsExpanded}" 
+                            VerticalAlignment="Center"
+                            ToolTip.Tip="{Binding PlayerSessionsToggle, Source={x:Static services:LocalizationService.Instance}}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <PathIcon Data="{StaticResource IconList}" Width="16" Height="16" Foreground="{DynamicResource AccentBlue}"/>
+                            <TextBlock Text="{Binding PlayerActiveSessions, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
 
             <Grid ColumnDefinitions="*, 1.2*" RowDefinitions="Auto">
                 
                 <!-- Left Column: Active Player Visualizer & Controller -->
-                <Border Grid.Column="0" Classes="GlassCard" Margin="0,0,12,0" Padding="25" MinHeight="420" VerticalAlignment="Top">
-                    <Grid RowDefinitions="*, Auto, Auto, Auto, Auto">
+                <Border Grid.Column="0" Classes="GlassCard PlayerCard" Classes.Centered="{Binding !IsSessionsExpanded}" Padding="25" MinHeight="420" VerticalAlignment="Top">
+                    <Grid RowDefinitions="*, Auto, Auto, Auto">
                         
                         <!-- Vinyl Disk/Waveform Visualizer -->
                         <Grid Grid.Row="0" Width="180" Height="180" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,20">
@@ -150,31 +230,21 @@
                             
                             <!-- Volume Percent Text -->
                             <TextBlock Grid.Column="2" Text="{Binding Volume, StringFormat={}{0:0}%}" Width="40" TextAlignment="Right" FontSize="12" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center"/>
-                        </Grid>
-
-                        <!-- Launch Shortcuts -->
-                        <Grid Grid.Row="4" ColumnDefinitions="*, *" Margin="10,24,10,0" ColumnSpacing="12">
-                            <Button Grid.Column="0" Classes="SpotifyLaunch" Command="{Binding LaunchSpotifyCommand}" HorizontalAlignment="Stretch" Height="36" ToolTip.Tip="Запустить Spotify">
-                                <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <PathIcon Data="{StaticResource SpotifyLogo}" Width="14" Height="14" Foreground="White"/>
-                                    <TextBlock Text="Spotify" FontSize="12" FontWeight="SemiBold" Foreground="White"/>
-                                </StackPanel>
-                            </Button>
-                            
-                            <Button Grid.Column="1" Classes="YandexLaunch" Command="{Binding LaunchYandexMusicCommand}" HorizontalAlignment="Stretch" Height="36" ToolTip.Tip="Запустить Яндекс.Музыку">
-                                <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <PathIcon Data="{StaticResource YandexMusicLogo}" Width="14" Height="14" Foreground="#111111"/>
-                                    <TextBlock Text="{Binding YandexMusicLabel, Source={x:Static services:LocalizationService.Instance}}" FontSize="12" FontWeight="SemiBold" Foreground="#111111"/>
-                                </StackPanel>
-                            </Button>
+                        <!-- Volume Controls closing Grid -->
                         </Grid>
                     </Grid>
                 </Border>
 
                 <!-- Right Column: List of All Active Media Sessions -->
-                <Border Grid.Column="1" Classes="GlassCard" Margin="12,0,0,0" Padding="25" MinHeight="420" VerticalAlignment="Stretch">
+                <Border Grid.Column="1" Classes="GlassCard SessionsCard" Margin="12,0,0,0" Padding="25" MinHeight="420" VerticalAlignment="Stretch" IsVisible="{Binding IsSessionsExpanded}">
                     <StackPanel Spacing="15">
-                        <TextBlock Text="{Binding PlayerActiveSessions, Source={x:Static services:LocalizationService.Instance}}" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                        <!-- Header with Collapse Button -->
+                        <Grid ColumnDefinitions="*, Auto" Margin="0,0,0,5">
+                            <TextBlock Grid.Column="0" Text="{Binding PlayerActiveSessions, Source={x:Static services:LocalizationService.Instance}}" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" VerticalAlignment="Center"/>
+                            <Button Grid.Column="1" Classes="SystemButton" Padding="8,6" Command="{Binding ToggleSessionsCommand}" ToolTip.Tip="Свернуть">
+                                <PathIcon Data="{StaticResource IconClose}" Width="10" Height="10"/>
+                            </Button>
+                        </Grid>
                         
                         <!-- List of items -->
                         <ItemsControl ItemsSource="{Binding ActiveSessions}">
@@ -221,8 +291,6 @@
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
-
-
                     </StackPanel>
                 </Border>
             </Grid>
