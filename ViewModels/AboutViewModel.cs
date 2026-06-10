@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -92,9 +93,32 @@ namespace MacStyleHub.ViewModels
                                 if (latestVersion != currentVersion && !string.IsNullOrEmpty(latestVersion))
                                 {
                                     UpdateAvailable = true;
-                                    if (root.TryGetProperty("html_url", out var urlProp))
+                                    string directUrl = "";
+                                    if (root.TryGetProperty("assets", out var assetsProp) && assetsProp.ValueKind == JsonValueKind.Array)
                                     {
-                                        DownloadUrl = urlProp.GetString() ?? "";
+                                        foreach (var asset in assetsProp.EnumerateArray())
+                                        {
+                                            if (asset.TryGetProperty("name", out var nameProp) && 
+                                                asset.TryGetProperty("browser_download_url", out var downloadProp))
+                                            {
+                                                var name = nameProp.GetString();
+                                                if (name != null && name.Equals("SystemHubSetup.exe", StringComparison.OrdinalIgnoreCase))
+                                                {
+                                                    directUrl = downloadProp.GetString() ?? "";
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    if (!string.IsNullOrEmpty(directUrl))
+                                    {
+                                        DownloadUrl = directUrl;
+                                    }
+                                    else
+                                    {
+                                        // Fallback to direct raw download from the Git repository tag since we commit it there
+                                        DownloadUrl = $"https://github.com/Basyasoo/SystemHub/raw/{latestVersion}/SystemHubSetup.exe";
                                     }
 
                                     UpdateStatus = LocalizationService.Instance.CurrentLanguage switch
@@ -143,20 +167,129 @@ namespace MacStyleHub.ViewModels
             }
         }
 
+        [ObservableProperty]
+        private double _downloadProgress;
+
+        [ObservableProperty]
+        private bool _isDownloading;
+
+        [ObservableProperty]
+        private string _downloadStatus = "";
+
         [RelayCommand]
-        public void DownloadUpdate()
+        public async Task DownloadUpdateAsync()
         {
             if (string.IsNullOrEmpty(DownloadUrl)) return;
+
+            // If it is not a direct installer exe link, fallback to opening in browser
+            if (!DownloadUrl.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
+            {
+                try
+                {
+                    var psi = new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = DownloadUrl,
+                        UseShellExecute = true
+                    };
+                    System.Diagnostics.Process.Start(psi);
+                }
+                catch { }
+                return;
+            }
+
+            if (IsDownloading) return;
+
+            IsDownloading = true;
+            DownloadProgress = 0;
+            DownloadStatus = LocalizationService.Instance.CurrentLanguage switch
+            {
+                "EN" => "Preparing download...",
+                "ZH" => "准备下载...",
+                _ => "Подготовка к скачиванию..."
+            };
+
             try
             {
+                var tempPath = Path.Combine(Path.GetTempPath(), "SystemHubSetup.exe");
+                
+                using (var client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.Add("User-Agent", "MacStyleHub-App");
+                    using (var response = await client.GetAsync(DownloadUrl, HttpCompletionOption.ResponseHeadersRead))
+                    {
+                        response.EnsureSuccessStatusCode();
+                        var totalBytes = response.Content.Headers.ContentLength ?? -1L;
+
+                        using (var contentStream = await response.Content.ReadAsStreamAsync())
+                        using (var fileStream = new FileStream(tempPath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
+                        {
+                            var buffer = new byte[8192];
+                            long totalRead = 0;
+                            int bytesRead;
+
+                            while ((bytesRead = await contentStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                            {
+                                await fileStream.WriteAsync(buffer, 0, bytesRead);
+                                totalRead += bytesRead;
+
+                                if (totalBytes > 0)
+                                {
+                                    DownloadProgress = (double)totalRead * 100 / totalBytes;
+                                    DownloadStatus = LocalizationService.Instance.CurrentLanguage switch
+                                    {
+                                        "EN" => $"Downloading: {DownloadProgress:F0}% ({totalRead / 1024 / 1024}MB / {totalBytes / 1024 / 1024}MB)",
+                                        "ZH" => $"正在下载: {DownloadProgress:F0}% ({totalRead / 1024 / 1024}MB / {totalBytes / 1024 / 1024}MB)",
+                                        _ => $"Скачивание: {DownloadProgress:F0}% ({totalRead / 1024 / 1024}МБ / {totalBytes / 1024 / 1024}МБ)"
+                                    };
+                                }
+                                else
+                                {
+                                    DownloadStatus = LocalizationService.Instance.CurrentLanguage switch
+                                    {
+                                        "EN" => $"Downloading... ({totalRead / 1024 / 1024}MB)",
+                                        "ZH" => $"正在下载... ({totalRead / 1024 / 1024}MB)",
+                                        _ => $"Скачивание... ({totalRead / 1024 / 1024}МБ)"
+                                    };
+                                }
+                            }
+                        }
+                    }
+                }
+
+                DownloadStatus = LocalizationService.Instance.CurrentLanguage switch
+                {
+                    "EN" => "Download complete. Starting installer...",
+                    "ZH" => "下载完成，启动安装...",
+                    _ => "Скачивание завершено. Запуск установки..."
+                };
+
+                await Task.Delay(1000);
+
                 var psi = new System.Diagnostics.ProcessStartInfo
                 {
-                    FileName = DownloadUrl,
-                    UseShellExecute = true
+                    FileName = tempPath,
+                    UseShellExecute = true,
+                    Verb = "runas" // Request administrator privileges explicitly
                 };
                 System.Diagnostics.Process.Start(psi);
+                
+                // Close the application to allow the installer to replace the files
+                Environment.Exit(0);
             }
-            catch { }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Download failed: " + ex.Message);
+                DownloadStatus = LocalizationService.Instance.CurrentLanguage switch
+                {
+                    "EN" => "Download failed: " + ex.Message,
+                    "ZH" => "下载失败: " + ex.Message,
+                    _ => "Ошибка скачивания: " + ex.Message
+                };
+            }
+            finally
+            {
+                IsDownloading = false;
+            }
         }
     }
 }

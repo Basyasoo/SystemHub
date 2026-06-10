@@ -142,6 +142,19 @@ namespace MacStyleHub.Services
         int GetMute(out bool pbMute);
     }
 
+    [ComImport]
+    [Guid("C02216F6-8C67-4B5B-9D00-D008E73E0064")]
+    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    public interface IAudioMeterInformation
+    {
+        [PreserveSig]
+        int GetPeakValue(out float pfPeak);
+        [PreserveSig]
+        int GetChannelsPeakValues(uint u32ChannelCount, [Out] float[] afPeakValues);
+        [PreserveSig]
+        int QueryHardwareSupport(out uint pdwHardwareSupportMask);
+    }
+
     public enum AudioSessionState
     {
         AudioSessionStateInactive = 0,
@@ -189,6 +202,49 @@ namespace MacStyleHub.Services
 
     public static class VolumeService
     {
+        public static float GetAudioPeak()
+        {
+            try
+            {
+                var enumerator = new MMDeviceEnumerator();
+                IntPtr pEnumerator = Marshal.GetIUnknownForObject(enumerator);
+                if (pEnumerator == IntPtr.Zero) return 0f;
+
+                IntPtr vtable = Marshal.ReadIntPtr(pEnumerator);
+                IntPtr pGetDefaultAudioEndpoint = Marshal.ReadIntPtr(vtable, 4 * IntPtr.Size);
+                var getDefaultAudioEndpoint = Marshal.GetDelegateForFunctionPointer<GetDefaultAudioEndpointDelegate>(pGetDefaultAudioEndpoint);
+
+                int hr = getDefaultAudioEndpoint(pEnumerator, 0, 0, out IntPtr pDevice);
+                Marshal.Release(pEnumerator);
+
+                if (hr != 0 || pDevice == IntPtr.Zero) return 0f;
+
+                IntPtr deviceVtable = Marshal.ReadIntPtr(pDevice);
+                IntPtr pActivate = Marshal.ReadIntPtr(deviceVtable, 3 * IntPtr.Size);
+                var activate = Marshal.GetDelegateForFunctionPointer<ActivateDelegate>(pActivate);
+
+                var iid = new Guid("C02216F6-8C67-4B5B-9D00-D008E73E0064"); // IID_IAudioMeterInformation
+                hr = activate(pDevice, ref iid, 1, IntPtr.Zero, out IntPtr pMeter);
+                Marshal.Release(pDevice);
+
+                if (hr != 0 || pMeter == IntPtr.Zero) return 0f;
+
+                var meterObj = Marshal.GetObjectForIUnknown(pMeter) as IAudioMeterInformation;
+                float peak = 0f;
+                if (meterObj != null)
+                {
+                    meterObj.GetPeakValue(out peak);
+                }
+
+                Marshal.Release(pMeter);
+                return peak;
+            }
+            catch
+            {
+                return 0f;
+            }
+        }
+
         private static IntPtr GetVolumeControl()
         {
             try

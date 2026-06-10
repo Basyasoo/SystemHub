@@ -12,6 +12,24 @@ namespace MacStyleHub.Services
         public event Action<string, string, bool, string>? MediaChanged;
         public event Action? SessionsListChanged;
 
+        private string? _selectedAppId;
+        private GlobalSystemMediaTransportControlsSession? _activeSubscribedSession;
+
+        public string? SelectedAppId
+        {
+            get => _selectedAppId;
+            set
+            {
+                if (_selectedAppId != value)
+                {
+                    _selectedAppId = value;
+                    UpdateCurrentSession();
+                }
+            }
+        }
+
+        public string? ActiveSessionAppId => _activeSubscribedSession?.SourceAppUserModelId;
+
         public async Task InitializeAsync()
         {
             try
@@ -29,6 +47,7 @@ namespace MacStyleHub.Services
 
         private void OnSessionsChanged(GlobalSystemMediaTransportControlsSessionManager sender, SessionsChangedEventArgs args)
         {
+            UpdateCurrentSession();
             SessionsListChanged?.Invoke();
         }
 
@@ -43,17 +62,54 @@ namespace MacStyleHub.Services
 
             try
             {
-                var session = _manager.GetCurrentSession();
-                if (session != null)
+                GlobalSystemMediaTransportControlsSession? session = null;
+                if (!string.IsNullOrEmpty(_selectedAppId))
                 {
-                    // Unsubscribe to avoid double events
-                    session.MediaPropertiesChanged -= OnMediaPropertiesChanged;
-                    session.PlaybackInfoChanged -= OnPlaybackInfoChanged;
+                    foreach (var s in _manager.GetSessions())
+                    {
+                        if (s.SourceAppUserModelId == _selectedAppId)
+                        {
+                            session = s;
+                            break;
+                        }
+                    }
+                }
 
-                    session.MediaPropertiesChanged += OnMediaPropertiesChanged;
-                    session.PlaybackInfoChanged += OnPlaybackInfoChanged;
+                // If selected app not found or not set, fallback to default current session
+                if (session == null)
+                {
+                    session = _manager.GetCurrentSession();
+                    if (!string.IsNullOrEmpty(_selectedAppId))
+                    {
+                        _selectedAppId = null;
+                    }
+                }
 
-                    _ = TriggerUpdateAsync(session);
+                // Unsubscribe from previous session if it's changing
+                if (_activeSubscribedSession != session)
+                {
+                    if (_activeSubscribedSession != null)
+                    {
+                        try
+                        {
+                            _activeSubscribedSession.MediaPropertiesChanged -= OnMediaPropertiesChanged;
+                            _activeSubscribedSession.PlaybackInfoChanged -= OnPlaybackInfoChanged;
+                        }
+                        catch { }
+                    }
+
+                    _activeSubscribedSession = session;
+
+                    if (_activeSubscribedSession != null)
+                    {
+                        _activeSubscribedSession.MediaPropertiesChanged += OnMediaPropertiesChanged;
+                        _activeSubscribedSession.PlaybackInfoChanged += OnPlaybackInfoChanged;
+                    }
+                }
+
+                if (_activeSubscribedSession != null)
+                {
+                    _ = TriggerUpdateAsync(_activeSubscribedSession);
                 }
                 else
                 {
@@ -62,6 +118,7 @@ namespace MacStyleHub.Services
             }
             catch
             {
+                _activeSubscribedSession = null;
                 MediaChanged?.Invoke("", "", false, "");
             }
         }
@@ -89,7 +146,7 @@ namespace MacStyleHub.Services
                 // Refine player display names
                 if (player.Contains("Spotify", StringComparison.OrdinalIgnoreCase)) player = "Spotify";
                 else if (player.Contains("Chrome", StringComparison.OrdinalIgnoreCase)) player = "Google Chrome";
-                else if (player.Contains("YandexMusic", StringComparison.OrdinalIgnoreCase)) player = "Яндекс.Музыка";
+                else if (player.Contains("YandexMusic", StringComparison.OrdinalIgnoreCase) || (player.Contains("Yandex", StringComparison.OrdinalIgnoreCase) && player.Contains("music", StringComparison.OrdinalIgnoreCase))) player = "Яндекс.Музыка";
                 else if (player.Contains("VLC", StringComparison.OrdinalIgnoreCase)) player = "VLC Media Player";
                 else if (player.Contains("Telegram", StringComparison.OrdinalIgnoreCase)) player = "Telegram";
                 else if (player.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
@@ -127,7 +184,7 @@ namespace MacStyleHub.Services
         {
             try
             {
-                var session = _manager?.GetCurrentSession();
+                var session = _activeSubscribedSession;
                 if (session != null)
                 {
                     await session.TryTogglePlayPauseAsync();
@@ -147,7 +204,7 @@ namespace MacStyleHub.Services
         {
             try
             {
-                var session = _manager?.GetCurrentSession();
+                var session = _activeSubscribedSession;
                 if (session != null)
                 {
                     await session.TrySkipNextAsync();
@@ -167,7 +224,7 @@ namespace MacStyleHub.Services
         {
             try
             {
-                var session = _manager?.GetCurrentSession();
+                var session = _activeSubscribedSession;
                 if (session != null)
                 {
                     await session.TrySkipPreviousAsync();

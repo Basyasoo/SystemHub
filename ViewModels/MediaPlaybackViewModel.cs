@@ -62,6 +62,19 @@ namespace MacStyleHub.ViewModels
     {
         private readonly MediaPlaybackService _playbackService = new();
         private readonly DispatcherTimer _sessionRefreshTimer;
+        private readonly DispatcherTimer _visualizerTimer;
+        private double _smoothPeak = 0.0;
+        private double _maxRecentPeak = 0.05;
+        private readonly Queue<double> _peakHistory = new();
+
+        [ObservableProperty]
+        private double _glowRingScale = 1.0;
+
+        [ObservableProperty]
+        private double _glowRingOpacity = 0.4;
+
+        [ObservableProperty]
+        private double _vinylDiskScale = 1.0;
 
         [ObservableProperty]
         private string _title = "";
@@ -118,6 +131,8 @@ namespace MacStyleHub.ViewModels
                 IsMuted = false;
             }
 
+            _displayVolume = IsMuted ? 0 : Volume;
+
             UpdateMediaText();
             LocalizationService.Instance.PropertyChanged += (sender, args) =>
             {
@@ -138,6 +153,13 @@ namespace MacStyleHub.ViewModels
                 RefreshVolumeSessions();
             };
             _sessionRefreshTimer.Start();
+
+            _visualizerTimer = new DispatcherTimer(DispatcherPriority.Render)
+            {
+                Interval = TimeSpan.FromMilliseconds(25)
+            };
+            _visualizerTimer.Tick += VisualizerTimer_Tick;
+            _visualizerTimer.Start();
         }
 
         private AppVolumeSessionViewModel? GetActivePlayerSession()
@@ -147,9 +169,12 @@ namespace MacStyleHub.ViewModels
             string name = PlayerName.ToLower();
 
             // Explicit check for Yandex Music
-            if (name.Contains("яндекс.музыка") || name.Contains("yandexmusic"))
+            if (name.Contains("яндекс") || name.Contains("yandex"))
             {
-                var yandexSession = AppVolumeSessions.FirstOrDefault(s => s.ProcessName.ToLower().Contains("yandex"));
+                var yandexSession = AppVolumeSessions.FirstOrDefault(s => 
+                    s.ProcessName.ToLower().Contains("yandex") || 
+                    s.ProcessName.ToLower().Contains("яндекс")
+                );
                 if (yandexSession != null) return yandexSession;
             }
 
@@ -181,7 +206,7 @@ namespace MacStyleHub.ViewModels
                         _isUpdatingVolumeFromSystem = false;
                     }
                 }
-                else if (!HasMedia)
+                else
                 {
                     var sysVol = VolumeService.GetVolume();
                     var sysMute = VolumeService.GetMute();
@@ -198,8 +223,77 @@ namespace MacStyleHub.ViewModels
             catch {}
         }
 
+        private bool _isMutingOrUnmuting;
+        private double _displayVolume;
+        private System.Threading.CancellationTokenSource? _animCts;
+
+        public double DisplayVolume
+        {
+            get => _displayVolume;
+            set
+            {
+                if (Math.Abs(_displayVolume - value) < 0.01) return;
+                _displayVolume = value;
+                OnPropertyChanged(nameof(DisplayVolume));
+
+                if (!_isMutingOrUnmuting && !_isUpdatingVolumeFromSystem)
+                {
+                    if (_displayVolume > 0 && IsMuted)
+                    {
+                        IsMuted = false;
+                    }
+                    Volume = _displayVolume;
+                }
+            }
+        }
+
+        private void AnimateVolume(double from, double to)
+        {
+            _animCts?.Cancel();
+            _animCts = new System.Threading.CancellationTokenSource();
+            var token = _animCts.Token;
+
+            _isMutingOrUnmuting = true;
+
+            Task.Run(async () =>
+            {
+                int steps = 12;
+                int duration = 180; // 180 ms
+                int delay = duration / steps;
+
+                for (int i = 1; i <= steps; i++)
+                {
+                    if (token.IsCancellationRequested) return;
+
+                    double progress = (double)i / steps;
+                    double t = 1 - Math.Pow(1 - progress, 3); // cubic ease out
+                    double current = from + (to - from) * t;
+
+                    await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
+                    {
+                        _displayVolume = current;
+                        OnPropertyChanged(nameof(DisplayVolume));
+                    });
+
+                    await Task.Delay(delay);
+                }
+
+                await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    _displayVolume = to;
+                    OnPropertyChanged(nameof(DisplayVolume));
+                    _isMutingOrUnmuting = false;
+                });
+            }, token);
+        }
+
         partial void OnVolumeChanged(double value)
         {
+            if (!_isMutingOrUnmuting)
+            {
+                _displayVolume = IsMuted ? 0 : value;
+                OnPropertyChanged(nameof(DisplayVolume));
+            }
             if (_isUpdatingVolumeFromSystem) return;
             try
             {
@@ -208,7 +302,7 @@ namespace MacStyleHub.ViewModels
                 {
                     activeSession.Volume = value;
                 }
-                else if (!HasMedia)
+                else
                 {
                     VolumeService.SetVolume((float)value);
                 }
@@ -218,20 +312,31 @@ namespace MacStyleHub.ViewModels
 
         partial void OnIsMutedChanged(bool value)
         {
-            if (_isUpdatingVolumeFromSystem) return;
-            try
+            if (!_isUpdatingVolumeFromSystem)
             {
-                var activeSession = GetActivePlayerSession();
-                if (activeSession != null)
+                try
                 {
-                    activeSession.IsMuted = value;
+                    var activeSession = GetActivePlayerSession();
+                    if (activeSession != null)
+                    {
+                        activeSession.IsMuted = value;
+                    }
+                    else
+                    {
+                        VolumeService.SetMute(value);
+                    }
                 }
-                else if (!HasMedia)
-                {
-                    VolumeService.SetMute(value);
-                }
+                catch { }
             }
-            catch { }
+
+            if (value)
+            {
+                AnimateVolume(Volume, 0);
+            }
+            else
+            {
+                AnimateVolume(0, Volume);
+            }
         }
 
         [ObservableProperty]
@@ -303,6 +408,18 @@ namespace MacStyleHub.ViewModels
             IsMuted = !IsMuted;
         }
 
+        [RelayCommand]
+        public void SelectSession(string appId)
+        {
+            _playbackService.SelectedAppId = appId;
+            
+            // Immediately update selection status in our ActiveSessions list
+            foreach (var s in ActiveSessions)
+            {
+                s.IsSelected = (s.AppId == appId);
+            }
+        }
+
         private void UpdateMediaText()
         {
             if (HasMedia)
@@ -353,7 +470,7 @@ namespace MacStyleHub.ViewModels
                     string player = appId;
                     if (player.Contains("Spotify", StringComparison.OrdinalIgnoreCase)) player = "Spotify";
                     else if (player.Contains("Chrome", StringComparison.OrdinalIgnoreCase)) player = "Google Chrome";
-                    else if (player.Contains("YandexMusic", StringComparison.OrdinalIgnoreCase)) player = "Яндекс.Музыка";
+                    else if (player.Contains("YandexMusic", StringComparison.OrdinalIgnoreCase) || (player.Contains("Yandex", StringComparison.OrdinalIgnoreCase) && player.Contains("music", StringComparison.OrdinalIgnoreCase))) player = "Яндекс.Музыка";
                     else if (player.Contains("VLC", StringComparison.OrdinalIgnoreCase)) player = "VLC Media Player";
                     else if (player.Contains("Telegram", StringComparison.OrdinalIgnoreCase)) player = "Telegram";
                     else if (player.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
@@ -371,6 +488,7 @@ namespace MacStyleHub.ViewModels
                         Title = props.Title ?? "Unknown Track",
                         Artist = props.Artist ?? "Unknown Artist",
                         IsPlaying = isPlaying,
+                        IsSelected = appId == _playbackService.ActiveSessionAppId,
                         TogglePlayCommand = new AsyncRelayCommand(() => _playbackService.TogglePlayPauseSessionAsync(appId)),
                         NextCommand = new AsyncRelayCommand(() => _playbackService.SkipNextSessionAsync(appId)),
                         PrevCommand = new AsyncRelayCommand(() => _playbackService.SkipPreviousSessionAsync(appId))
@@ -432,15 +550,79 @@ namespace MacStyleHub.ViewModels
             }
             catch { }
         }
+
+        private void VisualizerTimer_Tick(object? sender, EventArgs e)
+        {
+            if (!IsPlaying || !HasMedia)
+            {
+                if (_smoothPeak > 0.01)
+                {
+                    _smoothPeak *= 0.85;
+                }
+                else
+                {
+                    _smoothPeak = 0.0;
+                }
+            }
+            else
+            {
+                try
+                {
+                    double rawPeak = VolumeService.GetAudioPeak();
+
+                    // Maintain a history of the last 2 seconds of peaks (80 ticks at 25ms interval)
+                    _peakHistory.Enqueue(rawPeak);
+                    if (_peakHistory.Count > 80)
+                    {
+                        _peakHistory.Dequeue();
+                    }
+
+                    // Find the max peak in the recent history (with a minimum floor to avoid noise boosting)
+                    double maxInHistory = _peakHistory.Max();
+                    _maxRecentPeak = Math.Max(0.05, maxInHistory);
+
+                    // Normalize the current peak relative to the recent maximum
+                    double normalizedPeak = Math.Min(1.0, rawPeak / _maxRecentPeak);
+
+                    // Mix 60% linear tracking (for smooth melody, vocals, and mids)
+                    // and 40% squared tracking (for sharp, punchy bass and drum hits)
+                    double melodySignal = normalizedPeak;
+                    double bassSignal = Math.Pow(normalizedPeak, 2.0);
+                    double mixedPeak = (melodySignal * 0.6) + (bassSignal * 0.4);
+
+                    if (mixedPeak > _smoothPeak)
+                    {
+                        _smoothPeak = mixedPeak; // Fast attack
+                    }
+                    else
+                    {
+                        _smoothPeak = _smoothPeak * 0.76 + mixedPeak * 0.24; // Faster decay for responsive melody tracking
+                    }
+                }
+                catch
+                {
+                    _smoothPeak = 0.0;
+                }
+            }
+
+            // Exaggerated multipliers for strong visual beats
+            GlowRingScale = 1.0 + (_smoothPeak * 0.28);
+            GlowRingOpacity = 0.35 + (_smoothPeak * 0.65);
+            VinylDiskScale = 1.0 + (_smoothPeak * 0.08);
+        }
     }
 
-    public class MediaSessionInfo
+    public partial class MediaSessionInfo : ObservableObject
     {
         public string AppId { get; set; } = "";
         public string Name { get; set; } = "";
         public string Title { get; set; } = "";
         public string Artist { get; set; } = "";
         public bool IsPlaying { get; set; }
+
+        [ObservableProperty]
+        private bool _isSelected;
+
         public IAsyncRelayCommand TogglePlayCommand { get; set; } = null!;
         public IAsyncRelayCommand NextCommand { get; set; } = null!;
         public IAsyncRelayCommand PrevCommand { get; set; } = null!;

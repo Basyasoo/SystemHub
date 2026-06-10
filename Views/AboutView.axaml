@@ -46,11 +46,17 @@
 
                 <!-- Check Updates Section -->
                 <StackPanel Spacing="10" HorizontalAlignment="Center" Margin="0,15,0,0">
-                    <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center" IsVisible="{Binding !IsDownloading}">
                         <Button Classes="SystemButton" Content="{Binding AboutCheckUpdates, Source={x:Static services:LocalizationService.Instance}}" Command="{Binding CheckForUpdatesCommand}"/>
                         <Button Classes="AccentButton" Content="{Binding AboutDownload, Source={x:Static services:LocalizationService.Instance}}" Command="{Binding DownloadUpdateCommand}" IsVisible="{Binding UpdateAvailable}"/>
                     </StackPanel>
-                    <TextBlock Text="{Binding UpdateStatus}" FontSize="12" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center"/>
+                    <TextBlock Text="{Binding UpdateStatus}" FontSize="12" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center" IsVisible="{Binding !IsDownloading}"/>
+                    
+                    <!-- In-App Download Progress -->
+                    <StackPanel Spacing="8" Width="300" IsVisible="{Binding IsDownloading}">
+                        <TextBlock Text="{Binding DownloadStatus}" FontSize="12" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center"/>
+                        <ProgressBar Value="{Binding DownloadProgress}" Minimum="0" Maximum="100" Height="6" CornerRadius="3" Background="{DynamicResource BorderGray}" Foreground="{StaticResource AccentBlue}"/>
+                    </StackPanel>
                 </StackPanel>
             </StackPanel>
 

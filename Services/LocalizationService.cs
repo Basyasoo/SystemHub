@@ -970,9 +970,9 @@ namespace MacStyleHub.Services
         }
         public string WeatherSearchWatermark => CurrentLanguage switch
         {
-            "EN" => "Search city / region...",
-            "ZH" => "搜索城市/地区...",
-            _ => "Поиск города / области..."
+            "EN" => "If the city is not yours, write its name here...",
+            "ZH" => "如果这不是您的城市，请在此输入它的名称...",
+            _ => "Если город не ваш, напишите его название сюда..."
         };
 
         public string WeatherSearchBtn => CurrentLanguage switch

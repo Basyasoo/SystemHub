@@ -50,6 +50,15 @@
             <Setter Property="RenderTransform" Value="scale(1.0) translate(0, 0)"/>
         </Style>
 
+        <Style Selector="ItemsControl Border.SystemCard">
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+
+        <Style Selector="Border.SystemCard.selected">
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBlue}"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+        </Style>
+
         <Style Selector="Button.SpotifyLaunch">
             <Setter Property="Background" Value="#1DB954"/>
             <Setter Property="Foreground" Value="White"/>
@@ -95,6 +104,107 @@
         <Style Selector="Button.YandexLaunch:pressed">
             <Setter Property="RenderTransform" Value="scale(0.97)"/>
         </Style>
+
+        <!-- Custom macOS-style Volume Slider -->
+        <Style Selector="Slider.VolumeSlider">
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="MinHeight" Value="24"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="ClipToBounds" Value="False"/>
+        </Style>
+        <Style Selector="Slider.VolumeSlider /template/ Border#SliderContainer">
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+        </Style>
+        <Style Selector="Slider.VolumeSlider /template/ Track#PART_Track">
+            <Setter Property="Grid.Row" Value="0"/>
+            <Setter Property="Grid.RowSpan" Value="3"/>
+            <Setter Property="ClipToBounds" Value="False"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="Slider.VolumeSlider /template/ Grid">
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="ClipToBounds" Value="False"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="Slider.VolumeSlider /template/ ContentPresenter">
+            <Setter Property="IsVisible" Value="False"/>
+        </Style>
+        <Style Selector="Slider.VolumeSlider /template/ TickBar">
+            <Setter Property="IsVisible" Value="False"/>
+        </Style>
+        <Style Selector="TextBlock.VolumeText">
+            <Setter Property="Opacity" Value="0"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <DoubleTransition Property="Opacity" Duration="0:0:0.2" Easing="CubicEaseOut"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Grid.VolumeContainer:pointerover TextBlock.VolumeText">
+            <Setter Property="Opacity" Value="1"/>
+        </Style>
+        <Style Selector="Slider.VolumeSlider /template/ RepeatButton#PART_DecreaseButton">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Name="TrackBorder" Background="{TemplateBinding Background}" Height="3" CornerRadius="1.5 0 0 1.5" VerticalAlignment="Center"/>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+        <Style Selector="Slider.VolumeSlider /template/ RepeatButton#PART_IncreaseButton">
+            <Setter Property="Background" Value="#3A3A3C"/>
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Name="TrackBorder" Background="{TemplateBinding Background}" Height="3" CornerRadius="0 1.5 1.5 0" VerticalAlignment="Center"/>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+        <Style Selector="Slider.VolumeSlider /template/ Thumb">
+            <Setter Property="Width" Value="0"/>
+            <Setter Property="Height" Value="14"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Opacity" Value="0"/>
+            <Setter Property="ClipToBounds" Value="False"/>
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Background="White" Width="14" Height="14" CornerRadius="7" VerticalAlignment="Center"/>
+                </ControlTemplate>
+            </Setter>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <DoubleTransition Property="Opacity" Duration="0:0:0.15" Easing="CubicEaseOut"/>
+                    <DoubleTransition Property="Width" Duration="0:0:0.15" Easing="CubicEaseOut"/>
+                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.15" Easing="CubicEaseOut"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Grid.VolumeContainer:pointerover Slider.VolumeSlider /template/ Thumb">
+            <Setter Property="Opacity" Value="1"/>
+            <Setter Property="Width" Value="14"/>
+        </Style>
+        <Style Selector="Slider.VolumeSlider /template/ Thumb:pointerover">
+            <Setter Property="RenderTransform" Value="scale(1.15)"/>
+        </Style>
+
+        <!-- Vinyl Record Visualizer Animations -->
+        <Style Selector="Grid.VinylRecord.playing Grid.VinylDisk">
+            <Style.Animations>
+                <Animation Duration="0:0:8" IterationCount="Infinite">
+                    <KeyFrame Cue="0%">
+                        <Setter Property="RotateTransform.Angle" Value="0"/>
+                    </KeyFrame>
+                    <KeyFrame Cue="100%">
+                        <Setter Property="RotateTransform.Angle" Value="360"/>
+                    </KeyFrame>
+                </Animation>
+            </Style.Animations>
+        </Style>
+
     </UserControl.Styles>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -161,17 +271,30 @@
                     <Grid RowDefinitions="*, Auto, Auto, Auto">
                         
                         <!-- Vinyl Disk/Waveform Visualizer -->
-                        <Grid Grid.Row="0" Width="180" Height="180" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,20">
-                            <!-- Background shadow glow -->
-                            <Ellipse Width="170" Height="170" Fill="#10ffffff" Stroke="{StaticResource AccentBlue}" StrokeThickness="1" Opacity="0.5"/>
-                            <!-- Outer Vinyl Disk -->
-                            <Ellipse Width="160" Height="160" Fill="#111112" Stroke="#2C2C2E" StrokeThickness="4"/>
-                            <!-- Inner Grooves -->
-                            <Ellipse Width="120" Height="120" Stroke="#1C1C1E" StrokeThickness="1" Fill="Transparent"/>
-                            <Ellipse Width="90" Height="90" Stroke="#1C1C1E" StrokeThickness="1" Fill="Transparent"/>
-                            <!-- Center Label -->
-                            <Ellipse Width="50" Height="50" Fill="{StaticResource AccentBlue}"/>
-                            <PathIcon Data="{StaticResource PhMusic}" Width="18" Height="18" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Grid Grid.Row="0" Classes="VinylRecord" Classes.playing="{Binding IsPlaying}" Width="180" Height="180" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,20">
+                            <!-- Background shadow glow (dynamically scaled and faded by audio output peaks) -->
+                            <Ellipse Classes="GlowRing" Width="170" Height="170" Fill="#10ffffff" Stroke="{StaticResource AccentBlue}" StrokeThickness="1" Opacity="{Binding GlowRingOpacity}" RenderTransformOrigin="50%,50%">
+                                <Ellipse.RenderTransform>
+                                    <ScaleTransform ScaleX="{Binding GlowRingScale}" ScaleY="{Binding GlowRingScale}"/>
+                                </Ellipse.RenderTransform>
+                            </Ellipse>
+                            <!-- Rotating Disk Assembly -->
+                            <Grid Classes="VinylDisk" Width="160" Height="160" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransformOrigin="50%,50%">
+                                <!-- We apply the continuous rotation animation to VinylDisk, and scale the inner Grid dynamically -->
+                                <Grid Width="160" Height="160" RenderTransformOrigin="50%,50%">
+                                    <Grid.RenderTransform>
+                                        <ScaleTransform ScaleX="{Binding VinylDiskScale}" ScaleY="{Binding VinylDiskScale}"/>
+                                    </Grid.RenderTransform>
+                                    <!-- Outer Vinyl Disk -->
+                                    <Ellipse Width="160" Height="160" Fill="#111112" Stroke="#2C2C2E" StrokeThickness="4"/>
+                                    <!-- Inner Grooves -->
+                                    <Ellipse Width="120" Height="120" Stroke="#1C1C1E" StrokeThickness="1" Fill="Transparent"/>
+                                    <Ellipse Width="90" Height="90" Stroke="#1C1C1E" StrokeThickness="1" Fill="Transparent"/>
+                                    <!-- Center Label -->
+                                    <Ellipse Width="50" Height="50" Fill="{StaticResource AccentBlue}"/>
+                                    <PathIcon Data="{StaticResource PhMusic}" Width="18" Height="18" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Grid>
+                            </Grid>
                         </Grid>
  
                         <!-- Track Info -->
@@ -214,28 +337,53 @@
                         </StackPanel>
  
                         <!-- Volume Controls -->
-                        <Grid Grid.Row="3" ColumnDefinitions="Auto, *, Auto" Margin="20,10,20,0" VerticalAlignment="Center">
+                        <Grid Grid.Row="3" Classes="VolumeContainer" ColumnDefinitions="Auto, *, Auto" Margin="20,10,20,10" VerticalAlignment="Center" Background="Transparent" ClipToBounds="False">
                             <!-- Mute Toggle Button -->
                             <Button Command="{Binding ToggleMuteCommand}" Width="32" Height="32" Padding="0" Background="Transparent" BorderThickness="0" CornerRadius="16" ToolTip.Tip="Громкость" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
                                 <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
                                     <!-- Mute Icon -->
-                                    <PathIcon Data="M3,7 H6 L9,4 V16 L6,13 H3 Z M11,6 L15,10 M15,6 L11,10" Width="16" Height="16" Foreground="{DynamicResource TextPrimary}" IsVisible="{Binding IsMuted}"/>
-                                    <!-- Low Volume Icon -->
-                                    <PathIcon Data="M3,7 H6 L9,4 V16 L6,13 H3 Z M11,6 A3,3 0 0,1 11,10" Width="16" Height="16" Foreground="{DynamicResource TextPrimary}" IsVisible="{Binding !IsMuted}"/>
+                                    <Path Data="M3,7 H6 L9,4 V16 L6,13 H3 Z M 12.5,8.5 L 15.5,11.5 M 15.5,8.5 L 12.5,11.5" 
+                                          Stroke="{DynamicResource TextPrimary}" 
+                                          StrokeThickness="2.0" 
+                                          StrokeJoin="Round" 
+                                          StrokeLineCap="Round" 
+                                          Fill="Transparent" 
+                                          Width="16" 
+                                          Height="16" 
+                                          Stretch="Uniform" 
+                                          IsVisible="{Binding IsMuted}"/>
+                                    <!-- Unmuted Icon -->
+                                    <Path Data="M3,7 H6 L9,4 V16 L6,13 H3 Z M 12,7 A 3.5,3.5 0 0,1 12,13" 
+                                          Stroke="{DynamicResource TextPrimary}" 
+                                          StrokeThickness="2.0" 
+                                          StrokeJoin="Round" 
+                                          StrokeLineCap="Round" 
+                                          Fill="Transparent" 
+                                          Width="16" 
+                                          Height="16" 
+                                          Stretch="Uniform" 
+                                          IsVisible="{Binding !IsMuted}"/>
                                 </Grid>
                             </Button>
                             
                             <!-- Volume Slider -->
-                            <Slider Grid.Column="1" Value="{Binding Volume, Mode=TwoWay}" Minimum="0" Maximum="100" Margin="10,-3,10,3" Foreground="{DynamicResource AccentBlue}" VerticalAlignment="Center"/>
+                            <Slider Grid.Column="1" 
+                                    Classes="VolumeSlider" 
+                                    Classes.Muted="{Binding IsMuted}"
+                                    Value="{Binding DisplayVolume, Mode=TwoWay}" 
+                                    Minimum="0" 
+                                    Maximum="100" 
+                                    Margin="10,0,10,0" 
+                                    VerticalAlignment="Center"/>
                             
                             <!-- Volume Percent Text -->
-                            <TextBlock Grid.Column="2" Text="{Binding Volume, StringFormat={}{0:0}%}" Width="40" TextAlignment="Right" FontSize="12" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="2" Classes="VolumeText" Text="{Binding Volume, StringFormat={}{0:0}%}" Width="40" TextAlignment="Right" FontSize="12" Foreground="{DynamicResource TextPrimary}" VerticalAlignment="Center"/>
                         <!-- Volume Controls closing Grid -->
                         </Grid>
                     </Grid>
                 </Border>
 
-                <!-- Right Column: List of All Active Media Sessions -->
+                <!-- Right Column: List of All Active Media Sessions & Volume Mixer -->
                 <Border Grid.Column="1" Classes="GlassCard SessionsCard" Margin="12,0,0,0" Padding="25" MinHeight="420" VerticalAlignment="Stretch" IsVisible="{Binding IsSessionsExpanded}">
                     <StackPanel Spacing="15">
                         <!-- Header with Collapse Button -->
@@ -246,11 +394,11 @@
                             </Button>
                         </Grid>
                         
-                        <!-- List of items -->
+                        <!-- List of active sessions -->
                         <ItemsControl ItemsSource="{Binding ActiveSessions}">
                             <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Border Classes="SystemCard" Margin="0,0,0,10" Padding="14">
+                                <DataTemplate x:DataType="vm:MediaSessionInfo">
+                                    <Border Classes="SystemCard" Classes.selected="{Binding IsSelected}" Margin="0,0,0,10" Padding="14" PointerPressed="OnSessionCardPointerPressed">
                                         <Grid ColumnDefinitions="*, Auto">
                                             <!-- Info -->
                                             <StackPanel Grid.Column="0" Spacing="4" VerticalAlignment="Center" Margin="0,0,15,0">

@@ -35,7 +35,11 @@
                                  Text="{Binding SearchQuery, Mode=TwoWay}" 
                                  Watermark="{Binding WeatherSearchWatermark, Source={x:Static services:LocalizationService.Instance}}" 
                                  VerticalAlignment="Center" 
-                                 Margin="0,0,10,0"/>
+                                 Margin="0,0,10,0">
+                            <TextBox.KeyBindings>
+                                <KeyBinding Gesture="Enter" Command="{Binding SearchCityCommand}"/>
+                            </TextBox.KeyBindings>
+                        </TextBox>
                         <Button Grid.Column="1" 
                                 Classes="SystemButton" 
                                 Command="{Binding SearchCityCommand}" 
@@ -47,24 +51,6 @@
                                 Command="{Binding ResetLocationCommand}" 
                                 Content="{Binding WeatherResetLocation, Source={x:Static services:LocalizationService.Instance}}"/>
                     </Grid>
-
-                    <!-- Coordinates Row -->
-                    <Grid ColumnDefinitions="*, Auto" RowDefinitions="Auto">
-                        <TextBox Grid.Column="0" 
-                                 Text="{Binding CoordinatesInput, Mode=TwoWay}" 
-                                 Watermark="{Binding WeatherCoordinatesWatermark, Source={x:Static services:LocalizationService.Instance}}" 
-                                 VerticalAlignment="Center" 
-                                 Margin="0,0,10,0"/>
-                        <Button Grid.Column="1" 
-                                Classes="SystemButton" 
-                                Command="{Binding SetCoordinatesCommand}" 
-                                Content="{Binding WeatherCoordinatesBtn, Source={x:Static services:LocalizationService.Instance}}"/>
-                    </Grid>
-                    
-                    <TextBlock Text="{Binding WeatherCoordinatesError, Source={x:Static services:LocalizationService.Instance}}" 
-                               Foreground="#FF453A" 
-                               FontSize="12" 
-                               IsVisible="{Binding IsInvalidInputError}"/>
 
                     <!-- Search Results -->
                     <StackPanel Spacing="8" IsVisible="{Binding HasSearchResults}">
