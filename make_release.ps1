@@ -54,7 +54,6 @@ git tag -f "v$newVersion"
 git tag -f "latest"
 
 Write-Host "Pushing to remote repository..."
-git push origin main
 git push origin -f "v$newVersion"
 git push origin -f "latest"
 
