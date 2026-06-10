@@ -61,7 +61,7 @@ git commit -m "Release v$newVersion"
 git tag "v$newVersion"
 
 Write-Host "Pushing to remote repository..."
-git push origin main --force
-git push origin "v$newVersion" --force
+git push origin main
+git push origin "v$newVersion"
 
 Write-Host "Successfully released v$newVersion!"
