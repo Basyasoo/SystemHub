@@ -116,6 +116,15 @@ namespace MacStyleHub.Services
                 Description = "Модифицированная версия Яндекс Музыки без рекламы и ограничений.",
                 IconKey = "IconMusic"
             });
+            _programs.Add(new InstallerProgram
+            {
+                Id = "zapret",
+                Name = "Zapret (YouTube/Discord)",
+                Category = "Утилиты",
+                WingetId = "",
+                Description = "Обход ограничений и замедления YouTube и Discord в России.",
+                IconKey = "IconFlash"
+            });
 
             foreach (var prog in _programs)
             {
@@ -152,6 +161,12 @@ namespace MacStyleHub.Services
                     prog.Name = LocalizationService.Instance.YandexMusicModName;
                     prog.Description = LocalizationService.Instance.YandexMusicModDesc;
                     prog.Category = LocalizationService.Instance.SidebarPlayer;
+                }
+                if (p.Id == "zapret")
+                {
+                    prog.Name = LocalizationService.Instance.ZapretName;
+                    prog.Description = LocalizationService.Instance.ZapretDesc;
+                    prog.Category = "Утилиты";
                 }
 
                 list.Add(prog);
@@ -239,6 +254,10 @@ namespace MacStyleHub.Services
                         return CheckRegistryForDisplayName("YandexMusicMod") ||
                                CheckRegistryForDisplayName("Yandex Music Mod") ||
                                CheckRegistryForDisplayName("Yandex.Music");
+
+                    case "zapret":
+                        string desktop = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                        return Directory.Exists(Path.Combine(desktop, "zapret-discord-youtube-1.9.9a"));
                 }
             }
             return false;
@@ -329,6 +348,12 @@ namespace MacStyleHub.Services
             if (id == "yandexmusicmod")
             {
                 InstallYandexMusicMod(id);
+                return;
+            }
+
+            if (id == "zapret")
+            {
+                InstallZapret(id);
                 return;
             }
 
@@ -550,6 +575,155 @@ namespace MacStyleHub.Services
                         string targetDesktopExe = Path.Combine(desktopPath, "Яндекс Музыка Setup 5.86.0.exe");
                         if (File.Exists(targetDesktopExe))
                             File.Delete(targetDesktopExe);
+                    }
+                    catch { }
+
+                    _states[id] = InstallState.Failed;
+                    _progress[id] = 0;
+                    _statusMessages[id] = $"Ошибка: {ex.Message}";
+                    ProgramStateChanged?.Invoke(id, InstallState.Failed, 0, _statusMessages[id]);
+                }
+            });
+        }
+
+        private void InstallZapret(string id)
+        {
+            _states[id] = InstallState.Installing;
+            _progress[id] = 10;
+            _statusMessages[id] = "Скачивание Zapret...";
+            ProgramStateChanged?.Invoke(id, InstallState.Installing, 10, _statusMessages[id]);
+
+            Task.Run(async () =>
+            {
+                string tempZip = Path.Combine(Path.GetTempPath(), "zapret.zip");
+                string tempExtractPath = Path.Combine(Path.GetTempPath(), "zapret_extract");
+                string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                string finalInstallPath = Path.Combine(desktopPath, "zapret-discord-youtube-1.9.9a");
+
+                try
+                {
+                    // 1. Download ZIP
+                    using (var client = new HttpClient())
+                    {
+                        client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
+                        using (var response = await client.GetAsync("https://github.com/Flowseal/zapret-discord-youtube/releases/download/1.9.9a/zapret-discord-youtube-1.9.9a.zip", HttpCompletionOption.ResponseHeadersRead))
+                        {
+                            response.EnsureSuccessStatusCode();
+                            var totalBytes = response.Content.Headers.ContentLength ?? -1L;
+
+                            using (var contentStream = await response.Content.ReadAsStreamAsync())
+                            using (var fileStream = new FileStream(tempZip, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
+                            {
+                                var buffer = new byte[8192];
+                                var totalRead = 0L;
+                                int read;
+
+                                while ((read = await contentStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                                {
+                                    await fileStream.WriteAsync(buffer, 0, read);
+                                    totalRead += read;
+
+                                    if (totalBytes > 0)
+                                    {
+                                        int progressPct = 10 + (int)((double)totalRead / totalBytes * 50);
+                                        if (progressPct != _progress[id])
+                                        {
+                                            _progress[id] = progressPct;
+                                            _statusMessages[id] = $"Скачивание: {progressPct - 10}%";
+                                            ProgramStateChanged?.Invoke(id, InstallState.Installing, progressPct, _statusMessages[id]);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // 2. Extract ZIP
+                    _progress[id] = 70;
+                    _statusMessages[id] = "Распаковка архива...";
+                    ProgramStateChanged?.Invoke(id, InstallState.Installing, 70, _statusMessages[id]);
+
+                    if (Directory.Exists(tempExtractPath))
+                    {
+                        Directory.Delete(tempExtractPath, true);
+                    }
+                    Directory.CreateDirectory(tempExtractPath);
+
+                    ZipFile.ExtractToDirectory(tempZip, tempExtractPath);
+
+                    // Move to Desktop
+                    _progress[id] = 85;
+                    _statusMessages[id] = "Копирование на рабочий стол...";
+                    ProgramStateChanged?.Invoke(id, InstallState.Installing, 85, _statusMessages[id]);
+
+                    string sourceFolder = tempExtractPath;
+                    var subdirs = Directory.GetDirectories(tempExtractPath);
+                    var files = Directory.GetFiles(tempExtractPath);
+                    if (subdirs.Length == 1 && files.Length == 0)
+                    {
+                        sourceFolder = subdirs[0];
+                    }
+
+                    if (Directory.Exists(finalInstallPath))
+                    {
+                        Directory.Delete(finalInstallPath, true);
+                    }
+                    Directory.Move(sourceFolder, finalInstallPath);
+
+                    // Clean up temp files
+                    try
+                    {
+                        if (File.Exists(tempZip))
+                            File.Delete(tempZip);
+                        if (Directory.Exists(tempExtractPath))
+                            Directory.Delete(tempExtractPath, true);
+                    }
+                    catch { }
+
+                    // 3. Find service.bat and run as Administrator
+                    string serviceBat = Path.Combine(finalInstallPath, "service.bat");
+                    if (!File.Exists(serviceBat))
+                    {
+                        var filesFound = Directory.GetFiles(finalInstallPath, "service.bat", SearchOption.AllDirectories);
+                        if (filesFound.Length > 0)
+                        {
+                            serviceBat = filesFound[0];
+                        }
+                    }
+
+                    if (!File.Exists(serviceBat))
+                    {
+                        throw new FileNotFoundException("Файл service.bat не найден в архиве.");
+                    }
+
+                    _progress[id] = 95;
+                    _statusMessages[id] = "Запуск установщика...";
+                    ProgramStateChanged?.Invoke(id, InstallState.Installing, 95, _statusMessages[id]);
+
+                    var psi = new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = "cmd.exe",
+                        Arguments = $"/c \"{serviceBat}\"",
+                        WorkingDirectory = Path.GetDirectoryName(serviceBat),
+                        UseShellExecute = true,
+                        Verb = "runas" // Run as Administrator
+                    };
+
+                    System.Diagnostics.Process.Start(psi);
+
+                    _states[id] = InstallState.Installed;
+                    _progress[id] = 100;
+                    _statusMessages[id] = "Успешно распаковано!";
+                    ProgramStateChanged?.Invoke(id, InstallState.Installed, 100, _statusMessages[id]);
+                }
+                catch (Exception ex)
+                {
+                    try
+                    {
+                        if (File.Exists(tempZip))
+                            File.Delete(tempZip);
+                        if (Directory.Exists(tempExtractPath))
+                            Directory.Delete(tempExtractPath, true);
                     }
                     catch { }
 

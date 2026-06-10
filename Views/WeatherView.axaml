@@ -24,17 +24,74 @@
 
             <!-- Location Settings Card -->
             <Border Classes="GlassCard" HorizontalAlignment="Stretch" Padding="18">
-                <Grid ColumnDefinitions="*, Auto">
-                    <StackPanel Grid.Column="0" Spacing="4" VerticalAlignment="Center">
-                        <TextBlock Text="{Binding WeatherLocationSettingsHeader, Source={x:Static services:LocalizationService.Instance}}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
-                        <TextBlock Text="{Binding WeatherLocationSettingsDesc, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap"/>
-                    </StackPanel>
-                    <Button Grid.Column="1" 
-                            Classes="SystemButton" 
-                            Command="{Binding MyLocationCommand}" 
-                            Content="{Binding WeatherResetLocation, Source={x:Static services:LocalizationService.Instance}}"
-                            VerticalAlignment="Center"/>
-                </Grid>
+                <StackPanel Spacing="15">
+                    <Grid ColumnDefinitions="*, Auto">
+                        <StackPanel Grid.Column="0" Spacing="4" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding WeatherLocationSettingsHeader, Source={x:Static services:LocalizationService.Instance}}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                            <TextBlock Text="{Binding WeatherLocationSettingsDesc, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap"/>
+                        </StackPanel>
+                        <Button Grid.Column="1" 
+                                Classes="SystemButton" 
+                                Command="{Binding MyLocationCommand}" 
+                                Content="{Binding WeatherResetLocation, Source={x:Static services:LocalizationService.Instance}}"
+                                VerticalAlignment="Center"/>
+                    </Grid>
+
+                    <!-- City Search Bar -->
+                    <Grid ColumnDefinitions="*, Auto">
+                        <TextBox Grid.Column="0"
+                                 Text="{Binding SearchQuery, Mode=TwoWay}"
+                                 PlaceholderText="{Binding WeatherSearchWatermark, Source={x:Static services:LocalizationService.Instance}}"
+                                 Background="#222C2C2E"
+                                 BorderBrush="{DynamicResource BorderGray}"
+                                 CornerRadius="6"
+                                 VerticalAlignment="Center"/>
+                        <Button Grid.Column="1"
+                                Classes="AccentButton"
+                                Command="{Binding SearchCityCommand}"
+                                Content="{Binding WeatherSearchBtn, Source={x:Static services:LocalizationService.Instance}}"
+                                Margin="10,0,0,0"
+                                VerticalAlignment="Center"/>
+                    </Grid>
+
+                    <!-- Search Results -->
+                    <Border IsVisible="{Binding IsSearchResultsVisible}"
+                            Background="{DynamicResource CardBg}"
+                            BorderBrush="{DynamicResource BorderGray}"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="5">
+                        <StackPanel Spacing="5">
+                            <TextBlock Text="{Binding WeatherSearchResultsTitle, Source={x:Static services:LocalizationService.Instance}}"
+                                       FontSize="11"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource TextSecondary}"
+                                       Margin="8,4,8,2"/>
+                            <ListBox ItemsSource="{Binding SearchResults}"
+                                     Background="Transparent"
+                                     BorderThickness="0"
+                                     MaxHeight="200">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid ColumnDefinitions="*, Auto" Margin="5,2">
+                                            <TextBlock Text="{Binding DisplayName}"
+                                                       VerticalAlignment="Center"
+                                                       Foreground="{DynamicResource TextPrimary}"
+                                                       FontSize="13"/>
+                                            <Button Grid.Column="1"
+                                                    Classes="SystemButton"
+                                                    Content="{Binding WeatherCoordinatesBtn, Source={x:Static services:LocalizationService.Instance}}"
+                                                    Command="{Binding $parent[UserControl].((vm:WeatherViewModel)DataContext).SelectCityCommand}"
+                                                    CommandParameter="{Binding}"
+                                                    Padding="10,4"
+                                                    FontSize="11"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
             </Border>
 
             <!-- Main Weather Card -->

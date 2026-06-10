@@ -1207,6 +1207,34 @@ namespace MacStyleHub.Services
             _ => "Модифицированная версия Яндекс Музыки без рекламы и ограничений."
         };
 
+        public string ZapretName => CurrentLanguage switch
+        {
+            "EN" => "Zapret (YouTube/Discord)",
+            "ZH" => "Zapret (YouTube/Discord 绕过)",
+            _ => "Zapret (YouTube/Discord)"
+        };
+
+        public string ZapretDesc => CurrentLanguage switch
+        {
+            "EN" => "Bypass YouTube and Discord restrictions/blocking in Russia.",
+            "ZH" => "绕过俄罗斯对 YouTube 和 Discord 的封锁与限制。",
+            _ => "Обход ограничений и замедления YouTube и Discord в России."
+        };
+
+        public string ZapretModalTitle => CurrentLanguage switch
+        {
+            "EN" => "Zapret Installation Guide",
+            "ZH" => "Zapret 安装向导",
+            _ => "Инструкция по установке Zapret"
+        };
+
+        public string ZapretModalDesc => CurrentLanguage switch
+        {
+            "EN" => "To bypass YouTube and Discord blocking, we will now start the installation of the zapret service.\n\nAfter unpacking, a black Administrator command line window titled «ZAPRET SERVICE MANAGER v1.9.9a» will open.\n\nIn that open console window:\n1. Type 1 and press Enter (to install the service)\n2. Type 12 and press Enter (to exit the menu)\n\nClick 'Install' to start downloading and running the installation script.",
+            "ZH" => "为了绕过对 YouTube 和 Discord 的封锁，我们将开始安装 zapret 服务。\n\n解压完成后，会打开一个名为“ZAPRET SERVICE MANAGER v1.9.9a”的管理员命令行窗口。\n\n在打开的控制台窗口中：\n1. 输入 1 并按 Enter（以安装服务）\n2. 输入 12 并按 Enter（以退出菜单）\n\n点击“安装”以开始下载并运行安装脚本。",
+            _ => "Для обхода блокировок YouTube и Discord сейчас начнется установка службы zapret.\n\nПосле распаковки откроется черное окно командной строки администратора «ZAPRET SERVICE MANAGER v1.9.9a».\n\nВ открывшемся консольном окне вам нужно:\n1. Написать цифру 1 и нажать Enter (для установки службы)\n2. Написать цифру 12 и нажать Enter (для выхода)\n\nНажмите «Установить» для скачивания и запуска скрипта установки."
+        };
+
         // Media player launcher localizations
         public string PlayerOpenSpotify => CurrentLanguage switch
         {

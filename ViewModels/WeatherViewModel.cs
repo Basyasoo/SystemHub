@@ -45,6 +45,15 @@ namespace MacStyleHub.ViewModels
         [ObservableProperty]
         private bool _isClipboardDataValid;
 
+        [ObservableProperty]
+        private string _searchQuery = "";
+
+        [ObservableProperty]
+        private ObservableCollection<SearchResult> _searchResults = new();
+
+        [ObservableProperty]
+        private bool _isSearchResultsVisible;
+
         private double? _customLat;
         private double? _customLon;
         private bool _useAutoLocation = true;
@@ -215,6 +224,51 @@ namespace MacStyleHub.ViewModels
             }
             var parsed = WeatherService.ParseCoordinates(value);
             IsClipboardDataValid = parsed.HasValue;
+        }
+
+        [RelayCommand]
+        public async Task SearchCityAsync()
+        {
+            if (string.IsNullOrWhiteSpace(SearchQuery)) return;
+            IsLoading = true;
+            try
+            {
+                var lang = LocalizationService.Instance.CurrentLanguage;
+                var list = await _weatherService.SearchCityAsync(SearchQuery, lang);
+                SearchResults.Clear();
+                foreach (var item in list)
+                {
+                    SearchResults.Add(item);
+                }
+                IsSearchResultsVisible = SearchResults.Count > 0;
+            }
+            finally
+            {
+                IsLoading = false;
+            }
+        }
+
+        [RelayCommand]
+        public async Task SelectCityAsync(SearchResult result)
+        {
+            if (result == null) return;
+            _customLat = result.Lat;
+            _customLon = result.Lon;
+            _useAutoLocation = false;
+            IsSearchResultsVisible = false;
+            SearchQuery = "";
+            SearchResults.Clear();
+
+            await LoadWeatherAsync();
+
+            // Save to settings
+            WeatherService.SaveSettings(new WeatherSettings
+            {
+                Latitude = _customLat,
+                Longitude = _customLon,
+                UseAutoLocation = false,
+                CustomCityName = City
+            });
         }
     }
 }

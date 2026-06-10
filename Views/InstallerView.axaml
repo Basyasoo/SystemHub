@@ -8,64 +8,121 @@
              x:Class="MacStyleHub.Views.InstallerView"
              x:DataType="vm:InstallerViewModel">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel Margin="30" Spacing="25">
-            <!-- Header -->
-            <Grid ColumnDefinitions="*, Auto">
-                <StackPanel Grid.Column="0" Spacing="5" Margin="0,0,20,0">
-                    <TextBlock Text="{Binding InstallerHeader}" FontSize="28" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" LetterSpacing="-0.5"/>
-                    <TextBlock Text="{Binding InstallerDesc}" FontSize="14" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap"/>
-                </StackPanel>
-                
-                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                    <Button Classes="SystemButton" Command="{Binding RescanInstalledCommand}" Content="{Binding InstallerBtnScan}"/>
-                    <Button Classes="AccentButton" Command="{Binding InstallSelectedCommand}" Content="{Binding InstallerBtnInstallSelected, Source={x:Static services:LocalizationService.Instance}}"/>
-                </StackPanel>
-            </Grid>
-
-            <!-- Software Packages List -->
-            <ItemsControl ItemsSource="{Binding Programs}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Border Classes="GlassCard" Margin="0,0,0,12" Padding="18" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderGray}">
-                            <Grid ColumnDefinitions="Auto, Auto, *, Auto, Auto" RowDefinitions="Auto, Auto">
-                                <!-- Checkbox to select -->
-                                <CheckBox Grid.Column="0" Grid.RowSpan="2" IsChecked="{Binding IsSelected}" IsEnabled="{Binding IsNotInstalled}" Margin="0,0,15,0" VerticalAlignment="Center"/>
-
-                                <!-- Icon -->
-                                <Border Grid.Column="1" Grid.RowSpan="2" Background="{DynamicResource BorderGray}" Width="40" Height="40" CornerRadius="20" Margin="0,0,15,0" VerticalAlignment="Center">
-                                    <PathIcon Data="{StaticResource IconFlash}" Width="16" Height="16" Foreground="{DynamicResource AccentBlue}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                </Border>
-
-                                <!-- Text Details -->
-                                <StackPanel Grid.Column="2" Grid.Row="0" Spacing="2" VerticalAlignment="Center">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
-                                        <Border Background="{DynamicResource BorderGray}" CornerRadius="4" Padding="5,1" VerticalAlignment="Center">
-                                            <TextBlock Text="{Binding Category}" FontSize="9" Foreground="{DynamicResource TextSecondary}" FontWeight="Bold"/>
-                                        </Border>
+    <Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="30" Spacing="25">
+                <!-- Header -->
+                <Grid ColumnDefinitions="*, Auto">
+                    <StackPanel Grid.Column="0" Spacing="5" Margin="0,0,20,0">
+                        <TextBlock Text="{Binding InstallerHeader}" FontSize="28" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" LetterSpacing="-0.5"/>
+                        <TextBlock Text="{Binding InstallerDesc}" FontSize="14" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap"/>
+                    </StackPanel>
+                    
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                        <Button Classes="SystemButton" Command="{Binding RescanInstalledCommand}" Content="{Binding InstallerBtnScan}"/>
+                        <Button Classes="AccentButton" Command="{Binding InstallSelectedCommand}" Content="{Binding InstallerBtnInstallSelected, Source={x:Static services:LocalizationService.Instance}}"/>
+                    </StackPanel>
+                </Grid>
+    
+                <!-- Software Packages List -->
+                <ItemsControl ItemsSource="{Binding Programs}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Classes="GlassCard" Margin="0,0,0,12" Padding="18" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderGray}">
+                                <Grid ColumnDefinitions="Auto, Auto, *, Auto, Auto" RowDefinitions="Auto, Auto">
+                                    <!-- Checkbox to select -->
+                                    <CheckBox Grid.Column="0" Grid.RowSpan="2" IsChecked="{Binding IsSelected}" IsEnabled="{Binding IsNotInstalled}" Margin="0,0,15,0" VerticalAlignment="Center"/>
+    
+                                    <!-- Icon -->
+                                    <Border Grid.Column="1" Grid.RowSpan="2" Background="{DynamicResource BorderGray}" Width="40" Height="40" CornerRadius="20" Margin="0,0,15,0" VerticalAlignment="Center">
+                                        <PathIcon Data="{StaticResource IconFlash}" Width="16" Height="16" Foreground="{DynamicResource AccentBlue}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+    
+                                    <!-- Text Details -->
+                                    <StackPanel Grid.Column="2" Grid.Row="0" Spacing="2" VerticalAlignment="Center">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                                            <Border Background="{DynamicResource BorderGray}" CornerRadius="4" Padding="5,1" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Category}" FontSize="9" Foreground="{DynamicResource TextSecondary}" FontWeight="Bold"/>
+                                            </Border>
+                                        </StackPanel>
+                                        <TextBlock Text="{Binding Description}" FontSize="12" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap"/>
                                     </StackPanel>
-                                    <TextBlock Text="{Binding Description}" FontSize="12" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap"/>
-                                </StackPanel>
+    
+                                    <!-- Progress Bar and Status -->
+                                    <StackPanel Grid.Column="2" Grid.Row="1" Orientation="Horizontal" Spacing="10" Margin="0,6,0,0" IsVisible="{Binding IsInstalling}">
+                                        <ProgressBar Value="{Binding Progress}" Minimum="0" Maximum="100" Width="180" Height="6" Foreground="{DynamicResource AccentBlue}" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding StatusMessage}" FontSize="11" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center"/>
+                                    </StackPanel>
+    
+                                    <!-- Status Label -->
+                                    <TextBlock Grid.Column="3" Grid.RowSpan="2" Text="{Binding StateText}" FontSize="13" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center" Margin="0,0,20,0" FontWeight="Medium"/>
+    
+                                    <!-- Action Button -->
+                                    <Button Grid.Column="4" Grid.RowSpan="2" Classes="SystemButton" Command="{Binding $parent[UserControl].((vm:InstallerViewModel)DataContext).InstallProgramCommand}" CommandParameter="{Binding Id}" IsEnabled="{Binding IsNotInstalled}" VerticalAlignment="Center" Width="120" HorizontalContentAlignment="Center">
+                                        <TextBlock Text="{Binding ActionText}"/>
+                                    </Button>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </ScrollViewer>
 
-                                <!-- Progress Bar and Status -->
-                                <StackPanel Grid.Column="2" Grid.Row="1" Orientation="Horizontal" Spacing="10" Margin="0,6,0,0" IsVisible="{Binding IsInstalling}">
-                                    <ProgressBar Value="{Binding Progress}" Minimum="0" Maximum="100" Width="180" Height="6" Foreground="{DynamicResource AccentBlue}" VerticalAlignment="Center"/>
-                                    <TextBlock Text="{Binding StatusMessage}" FontSize="11" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center"/>
-                                </StackPanel>
+        <!-- Glassmorphic Modal Overlay for Zapret Instructions -->
+        <Grid Background="#A0000000" 
+              IsVisible="{Binding IsZapretInstructionsVisible}"
+              HorizontalAlignment="Stretch" 
+              VerticalAlignment="Stretch">
+            
+            <Border Classes="GlassCard" 
+                    Width="480" 
+                    VerticalAlignment="Center" 
+                    HorizontalAlignment="Center" 
+                    Padding="25" 
+                    Background="#CC1C1C1E" 
+                    BorderBrush="#33FFFFFF" 
+                    BorderThickness="1" 
+                    CornerRadius="12"
+                    BoxShadow="0 8 24 0 #80000000">
+                <StackPanel Spacing="18">
+                    <!-- Title -->
+                    <TextBlock Text="{Binding ZapretModalTitle}" 
+                               FontSize="18" 
+                               FontWeight="SemiBold" 
+                               Foreground="White"
+                               HorizontalAlignment="Center"/>
+                    
+                    <!-- Description / Guide -->
+                    <TextBlock Text="{Binding ZapretModalDesc}" 
+                               FontSize="13" 
+                               Foreground="#FFD1D1D6" 
+                               TextWrapping="Wrap"
+                               LineHeight="20"/>
 
-                                <!-- Status Label -->
-                                <TextBlock Grid.Column="3" Grid.RowSpan="2" Text="{Binding StateText}" FontSize="13" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center" Margin="0,0,20,0" FontWeight="Medium"/>
-
-                                <!-- Action Button -->
-                                <Button Grid.Column="4" Grid.RowSpan="2" Classes="SystemButton" Command="{Binding $parent[UserControl].((vm:InstallerViewModel)DataContext).InstallProgramCommand}" CommandParameter="{Binding Id}" IsEnabled="{Binding IsNotInstalled}" VerticalAlignment="Center" Width="120" HorizontalContentAlignment="Center">
-                                    <TextBlock Text="{Binding ActionText}"/>
-                                </Button>
-                            </Grid>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </StackPanel>
-    </ScrollViewer>
+                    <!-- Buttons -->
+                    <Grid ColumnDefinitions="*, *" RowDefinitions="Auto" Margin="0,10,0,0">
+                        <Button Grid.Column="0" 
+                                Classes="SystemButton" 
+                                Content="{Binding ZapretModalCancel}" 
+                                Command="{Binding CancelZapretInstallCommand}"
+                                Margin="0,0,8,0"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Center"/>
+                        
+                        <Button Grid.Column="1" 
+                                Classes="SystemButton" 
+                                Content="{Binding ZapretModalInstall}" 
+                                Command="{Binding ConfirmZapretInstallCommand}"
+                                Background="{StaticResource AccentBlue}"
+                                Foreground="White"
+                                Margin="8,0,0,0"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Center"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
 </UserControl>

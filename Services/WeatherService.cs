@@ -91,39 +91,42 @@ namespace MacStyleHub.Services
             try
             {
                 string encodedQuery = Uri.EscapeDataString(query);
-                string url = $"https://nominatim.openstreetmap.org/search?q={encodedQuery}&format=json&addressdetails=1&limit=6&accept-language={lang.ToLower()}";
+                string url = $"https://geocoding-api.open-meteo.com/v1/search?name={encodedQuery}&count=8&language={lang.ToLower()}";
                 
-                var request = new HttpRequestMessage(HttpMethod.Get, url);
-                request.Headers.Add("User-Agent", "SystemHub/1.0 (contact@example.com)");
-                using var response = await HttpClient.SendAsync(request);
+                using var response = await HttpClient.GetAsync(url);
                 if (response.IsSuccessStatusCode)
                 {
                     var json = await response.Content.ReadAsStringAsync();
                     using var doc = JsonDocument.Parse(json);
-                    foreach (var item in doc.RootElement.EnumerateArray())
+                    var root = doc.RootElement;
+                    if (root.TryGetProperty("results", out var resultsArr))
                     {
-                        string displayName = "";
-                        string settlement = "";
-                        string state = "";
-
-                        if (item.TryGetProperty("address", out var address))
+                        foreach (var item in resultsArr.EnumerateArray())
                         {
-                            displayName = FormatCityName(address, lang.ToLower(), item.GetProperty("display_name").GetString() ?? "");
+                            string name = item.GetProperty("name").GetString() ?? "";
+                            string country = item.TryGetProperty("country", out var cProp) ? cProp.GetString() ?? "" : "";
+                            string admin1 = item.TryGetProperty("admin1", out var aProp) ? aProp.GetString() ?? "" : "";
+                            
+                            string displayName = name;
+                            if (!string.IsNullOrEmpty(admin1) && admin1 != name)
+                            {
+                                displayName += $", {admin1}";
+                            }
+                            if (!string.IsNullOrEmpty(country))
+                            {
+                                displayName += $", {country}";
+                            }
+
+                            double resLat = item.GetProperty("latitude").GetDouble();
+                            double resLon = item.GetProperty("longitude").GetDouble();
+
+                            results.Add(new SearchResult
+                            {
+                                DisplayName = displayName,
+                                Lat = resLat,
+                                Lon = resLon
+                            });
                         }
-                        else
-                        {
-                            displayName = item.GetProperty("display_name").GetString() ?? "";
-                        }
-
-                        double resLat = double.Parse(item.GetProperty("lat").GetString() ?? "0", System.Globalization.CultureInfo.InvariantCulture);
-                        double resLon = double.Parse(item.GetProperty("lon").GetString() ?? "0", System.Globalization.CultureInfo.InvariantCulture);
-
-                        results.Add(new SearchResult
-                        {
-                            DisplayName = displayName,
-                            Lat = resLat,
-                            Lon = resLon
-                        });
                     }
                 }
             }
@@ -274,6 +277,33 @@ namespace MacStyleHub.Services
                                 lon = root.GetProperty("longitude").GetDouble();
                                 city = root.GetProperty("cityName").GetString() ?? city;
                                 gotCoords = true;
+                            }
+                        }
+                        catch { }
+                    }
+
+                    // Try Provider 4: ipinfo.io
+                    if (!gotCoords)
+                    {
+                        try
+                        {
+                            using var response = await HttpClient.GetAsync("https://ipinfo.io/json");
+                            if (response.IsSuccessStatusCode)
+                            {
+                                var json = await response.Content.ReadAsStringAsync();
+                                using var doc = JsonDocument.Parse(json);
+                                var root = doc.RootElement;
+                                if (root.TryGetProperty("loc", out var locProp))
+                                {
+                                    var locParts = locProp.GetString()?.Split(',');
+                                    if (locParts != null && locParts.Length == 2)
+                                    {
+                                        lat = double.Parse(locParts[0], System.Globalization.CultureInfo.InvariantCulture);
+                                        lon = double.Parse(locParts[1], System.Globalization.CultureInfo.InvariantCulture);
+                                        city = root.TryGetProperty("city", out var cityProp) ? cityProp.GetString() ?? city : city;
+                                        gotCoords = true;
+                                    }
+                                }
                             }
                         }
                         catch { }

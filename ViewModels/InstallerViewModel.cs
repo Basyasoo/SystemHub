@@ -78,6 +78,9 @@ namespace MacStyleHub.ViewModels
         [ObservableProperty]
         private ObservableCollection<ProgramInstallItemViewModel> _programs = new();
 
+        [ObservableProperty]
+        private bool _isZapretInstructionsVisible;
+
         public InstallerViewModel()
         {
             var serviceProgs = InstallerService.Instance.GetPrograms();
@@ -108,6 +111,10 @@ namespace MacStyleHub.ViewModels
                 OnPropertyChanged(nameof(InstallerHeader));
                 OnPropertyChanged(nameof(InstallerDesc));
                 OnPropertyChanged(nameof(InstallerBtnScan));
+                OnPropertyChanged(nameof(ZapretModalTitle));
+                OnPropertyChanged(nameof(ZapretModalDesc));
+                OnPropertyChanged(nameof(ZapretModalCancel));
+                OnPropertyChanged(nameof(ZapretModalInstall));
             };
         }
 
@@ -136,12 +143,24 @@ namespace MacStyleHub.ViewModels
         [RelayCommand]
         public void InstallProgram(string id)
         {
+            if (id == "zapret")
+            {
+                IsZapretInstructionsVisible = true;
+                return;
+            }
             InstallerService.Instance.InstallProgram(id);
         }
 
         [RelayCommand]
         public void InstallSelected()
         {
+            var zapretProg = Programs.FirstOrDefault(p => p.Id == "zapret");
+            if (zapretProg != null && zapretProg.IsSelected && zapretProg.IsNotInstalled)
+            {
+                IsZapretInstructionsVisible = true;
+                return;
+            }
+
             foreach (var prog in Programs)
             {
                 if (prog.IsSelected && prog.IsNotInstalled)
@@ -150,5 +169,32 @@ namespace MacStyleHub.ViewModels
                 }
             }
         }
+
+        [RelayCommand]
+        public void ConfirmZapretInstall()
+        {
+            IsZapretInstructionsVisible = false;
+            InstallerService.Instance.InstallProgram("zapret");
+
+            // Also install other selected programs
+            foreach (var prog in Programs)
+            {
+                if (prog.Id != "zapret" && prog.IsSelected && prog.IsNotInstalled)
+                {
+                    InstallerService.Instance.InstallProgram(prog.Id);
+                }
+            }
+        }
+
+        [RelayCommand]
+        public void CancelZapretInstall()
+        {
+            IsZapretInstructionsVisible = false;
+        }
+
+        public string ZapretModalTitle => LocalizationService.Instance.ZapretModalTitle;
+        public string ZapretModalDesc => LocalizationService.Instance.ZapretModalDesc;
+        public string ZapretModalCancel => LocalizationService.Instance.WeatherLocationDialogCancel;
+        public string ZapretModalInstall => LocalizationService.Instance.InstallerBtnInstall;
     }
 }
