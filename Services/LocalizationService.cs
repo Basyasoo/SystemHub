@@ -566,18 +566,18 @@ namespace MacStyleHub.Services
             _ => "Управление всеми активными музыкальными и видеосессиями в одном месте."
         };
 
-        public string AboutFeatureLangTitle => CurrentLanguage switch
+        public string AboutFeatureInstallerTitle => CurrentLanguage switch
         {
-            "EN" => "Personalization",
-            "ZH" => "个性化",
-            _ => "Персонализация"
+            "EN" => "App Installer",
+            "ZH" => "软件安装",
+            _ => "Установка программ"
         };
 
-        public string AboutFeatureLangDesc => CurrentLanguage switch
+        public string AboutFeatureInstallerDesc => CurrentLanguage switch
         {
-            "EN" => "Theme switching (Light/Dark) and multi-language support (RU, EN, ZH).",
-            "ZH" => "深浅色主题切换和多语言支持 (RU, EN, ZH)。",
-            _ => "Смена тем оформления (Светлая/Темная) и поддержка 3 языков (RU, EN, ZH)."
+            "EN" => "Quick and secure installation of popular software using package manager.",
+            "ZH" => "使用包管理器快速且安全地安装常用必备软件。",
+            _ => "Быстрая и безопасная установка популярных программ с помощью пакетного менеджера."
         };
 
         public string AboutTechTitle => CurrentLanguage switch
@@ -1019,9 +1019,9 @@ namespace MacStyleHub.Services
 
         public string WeatherLocationSettingsDesc => CurrentLanguage switch
         {
-            "EN" => "Click the button to open Yandex Maps and set your location",
-            "ZH" => "点击按钮打开 Yandex 地图并设置您的位置",
-            _ => "Нажмите кнопку, чтобы открыть Яндекс.Карты и настроить ваше местоположение"
+            "EN" => "Search for any city or town to view its weather forecast",
+            "ZH" => "搜索任何城市或城镇以查看天气预报",
+            _ => "Введите название города или поселка для поиска погоды"
         };
 
         public string WeatherLocationDialogTitle => CurrentLanguage switch

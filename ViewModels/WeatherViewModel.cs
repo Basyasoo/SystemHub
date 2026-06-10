@@ -107,7 +107,7 @@ namespace MacStyleHub.ViewModels
             IsLoading = true;
             try
             {
-                var info = await _weatherService.GetWeatherAsync(_customLat, _customLon);
+                var info = await _weatherService.GetWeatherAsync(_customLat, _customLon, _useAutoLocation ? null : City);
                 City = info.City;
                 Temperature = info.Temperature;
                 Condition = info.Condition;
@@ -258,6 +258,8 @@ namespace MacStyleHub.ViewModels
             IsSearchResultsVisible = false;
             SearchQuery = "";
             SearchResults.Clear();
+
+            City = result.DisplayName;
 
             await LoadWeatherAsync();
 

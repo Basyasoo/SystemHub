@@ -78,7 +78,7 @@
                     
                     <!-- Feature 2: System Specs -->
                     <Grid Grid.Row="0" Grid.Column="1" ColumnDefinitions="Auto, *" Margin="20,0,0,20" Width="260" HorizontalAlignment="Left">
-                        <PathIcon Grid.Column="0" Data="{StaticResource IconCpu}" Width="20" Height="20" Foreground="{StaticResource AccentBlue}" Margin="0,0,12,0" VerticalAlignment="Top"/>
+                        <PathIcon Grid.Column="0" Data="{StaticResource IconSystem}" Width="20" Height="20" Foreground="{StaticResource AccentBlue}" Margin="0,0,12,0" VerticalAlignment="Top"/>
                         <StackPanel Grid.Column="1" Spacing="2">
                             <TextBlock Text="{Binding AboutFeatureSystemTitle, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
                             <TextBlock Text="{Binding AboutFeatureSystemDesc, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap"/>
@@ -112,12 +112,12 @@
                         </StackPanel>
                     </Grid>
                     
-                    <!-- Feature 6: Personalization -->
+                    <!-- Feature 6: App Installer -->
                     <Grid Grid.Row="2" Grid.Column="1" ColumnDefinitions="Auto, *" Margin="20,0,0,0" Width="260" HorizontalAlignment="Left">
-                        <PathIcon Grid.Column="0" Data="{StaticResource IconTip}" Width="20" Height="20" Foreground="{StaticResource AccentBlue}" Margin="0,0,12,0" VerticalAlignment="Top"/>
+                        <PathIcon Grid.Column="0" Data="{StaticResource IconFlash}" Width="20" Height="20" Foreground="{StaticResource AccentBlue}" Margin="0,0,12,0" VerticalAlignment="Top"/>
                         <StackPanel Grid.Column="1" Spacing="2">
-                            <TextBlock Text="{Binding AboutFeatureLangTitle, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
-                            <TextBlock Text="{Binding AboutFeatureLangDesc, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap"/>
+                            <TextBlock Text="{Binding AboutFeatureInstallerTitle, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                            <TextBlock Text="{Binding AboutFeatureInstallerDesc, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap"/>
                         </StackPanel>
                     </Grid>
                 </Grid>
