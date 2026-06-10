@@ -1,5 +1,5 @@
 #define AppName "SystemHub"
-#define AppVersion "1.0.3"
+#define AppVersion "1.0.4"
 #define AppPublisher "Basyasoo"
 #define AppExeName "SystemHub.exe"
 
