@@ -34,8 +34,32 @@ namespace MacStyleHub.ViewModels
         [ObservableProperty]
         private ObservableCollection<ForecastDay> _forecast = new();
 
+        [ObservableProperty]
+        private string _searchQuery = "";
+
+        [ObservableProperty]
+        private string _coordinatesInput = "";
+
+        [ObservableProperty]
+        private bool _isInvalidInputError;
+
+        [ObservableProperty]
+        private ObservableCollection<SearchResult> _searchResults = new();
+
+        [ObservableProperty]
+        private bool _hasSearchResults;
+
+        private double? _customLat;
+        private double? _customLon;
+        private bool _useAutoLocation = true;
+
         public WeatherViewModel()
         {
+            // Force auto-location (search is disabled, app auto-detects coordinates)
+            _useAutoLocation = true;
+            _customLat = null;
+            _customLon = null;
+
             LoadWeatherCommand = new AsyncRelayCommand(LoadWeatherAsync);
             _ = LoadWeatherAsync();
 
@@ -46,6 +70,9 @@ namespace MacStyleHub.ViewModels
                 OnPropertyChanged(nameof(ConditionLocalized));
                 OnPropertyChanged(nameof(WindSpeedLocalized));
                 OnPropertyChanged(nameof(Forecast)); // Forces ItemsControl to re-bind ForecastDay elements
+                
+                // If language changes, reload weather to get localized city name from OSM Nominatim!
+                _ = LoadWeatherAsync();
             };
         }
 
@@ -69,7 +96,7 @@ namespace MacStyleHub.ViewModels
             IsLoading = true;
             try
             {
-                var info = await _weatherService.GetWeatherAsync();
+                var info = await _weatherService.GetWeatherAsync(_customLat, _customLon);
                 City = info.City;
                 Temperature = info.Temperature;
                 Condition = info.Condition;
@@ -91,5 +118,100 @@ namespace MacStyleHub.ViewModels
                 OnPropertyChanged(nameof(WindSpeedLocalized));
             }
         }
+
+        [RelayCommand]
+        public async Task SearchCityAsync()
+        {
+            if (string.IsNullOrWhiteSpace(SearchQuery)) return;
+            var lang = LocalizationService.Instance.CurrentLanguage;
+            var list = await _weatherService.SearchCityAsync(SearchQuery, lang);
+            SearchResults.Clear();
+            foreach (var item in list)
+            {
+                SearchResults.Add(item);
+            }
+            HasSearchResults = SearchResults.Count > 0;
+        }
+
+        [RelayCommand]
+        public async Task SelectCityAsync(SearchResult result)
+        {
+            if (result == null) return;
+            _customLat = result.Lat;
+            _customLon = result.Lon;
+            _useAutoLocation = false;
+
+            // Save to settings
+            WeatherService.SaveSettings(new WeatherSettings
+            {
+                Latitude = _customLat,
+                Longitude = _customLon,
+                UseAutoLocation = false,
+                CustomCityName = result.DisplayName
+            });
+
+            // Clear search UI
+            SearchQuery = "";
+            SearchResults.Clear();
+            HasSearchResults = false;
+
+            await LoadWeatherAsync();
+        }
+
+
+        [RelayCommand]
+        public async Task SetCoordinatesAsync()
+        {
+            IsInvalidInputError = false;
+            if (string.IsNullOrWhiteSpace(CoordinatesInput)) return;
+
+            var coords = WeatherService.ParseCoordinates(CoordinatesInput);
+            if (coords == null)
+            {
+                IsInvalidInputError = true;
+                return;
+            }
+
+            _customLat = coords.Value.Lat;
+            _customLon = coords.Value.Lon;
+            _useAutoLocation = false;
+
+            await LoadWeatherAsync();
+
+            // Save to settings
+            WeatherService.SaveSettings(new WeatherSettings
+            {
+                Latitude = _customLat,
+                Longitude = _customLon,
+                UseAutoLocation = false,
+                CustomCityName = City
+            });
+
+            CoordinatesInput = "";
+        }
+
+        [RelayCommand]
+        public async Task ResetLocationAsync()
+        {
+            _customLat = null;
+            _customLon = null;
+            _useAutoLocation = true;
+
+            // Save settings
+            WeatherService.SaveSettings(new WeatherSettings
+            {
+                UseAutoLocation = true
+            });
+
+            // Clear search UI
+            SearchQuery = "";
+            SearchResults.Clear();
+            HasSearchResults = false;
+            CoordinatesInput = "";
+            IsInvalidInputError = false;
+
+            await LoadWeatherAsync();
+        }
     }
 }
+

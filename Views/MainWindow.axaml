@@ -134,6 +134,13 @@
 
                     <ListBoxItem>
                         <StackPanel Orientation="Horizontal" Spacing="12">
+                            <PathIcon Data="{StaticResource IconFlash}" Width="16" Height="16" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding SidebarInstaller, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="Medium" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </ListBoxItem>
+                    
+                    <ListBoxItem>
+                        <StackPanel Orientation="Horizontal" Spacing="12">
                             <PathIcon Data="{StaticResource IconTip}" Width="16" Height="16" VerticalAlignment="Center"/>
                             <TextBlock Text="{Binding SidebarAbout, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="Medium" VerticalAlignment="Center"/>
                         </StackPanel>

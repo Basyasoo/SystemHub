@@ -11,20 +11,6 @@ sealed class Program
     [STAThread]
     public static void Main(string[] args)
     {
-        Console.WriteLine("=== DIAGNOSTICS: Testing VolumeService ===");
-        try
-        {
-            float vol = Services.VolumeService.GetVolume();
-            bool mute = Services.VolumeService.GetMute();
-            Console.WriteLine($"VolumeService.GetVolume(): {vol}");
-            Console.WriteLine($"VolumeService.GetMute(): {mute}");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"VolumeService DIAGNOSTICS FAILED: {ex}");
-        }
-        Console.WriteLine("=== DIAGNOSTICS END ===");
-
         BuildAvaloniaApp()
             .StartWithClassicDesktopLifetime(args);
     }

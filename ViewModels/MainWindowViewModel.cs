@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using MacStyleHub.Services;
 
 namespace MacStyleHub.ViewModels
@@ -16,6 +17,7 @@ namespace MacStyleHub.ViewModels
         public SystemInfoViewModel SystemInfoVM { get; } = new();
         public CleanerViewModel CleanerVM { get; } = new();
         public StartupViewModel StartupVM { get; } = new();
+        public InstallerViewModel InstallerVM { get; } = new();
         public AboutViewModel AboutVM { get; } = new();
         
         // Windows current music playback VM
@@ -52,8 +54,20 @@ namespace MacStyleHub.ViewModels
                     CurrentPageViewModel = PlaybackVM;
                     break;
                 case 6:
+                    CurrentPageViewModel = InstallerVM;
+                    break;
+                case 7:
                     CurrentPageViewModel = AboutVM;
                     break;
+            }
+        }
+
+        [RelayCommand]
+        public void NavigateTo(string indexStr)
+        {
+            if (int.TryParse(indexStr, out int index))
+            {
+                SelectedMenuIndex = index;
             }
         }
     }

@@ -176,6 +176,13 @@ namespace MacStyleHub.Services
             _ => "Управлять"
         };
 
+        public string YandexMusicLabel => CurrentLanguage switch
+        {
+            "EN" => "Yandex Music",
+            "ZH" => "Yandex Music",
+            _ => "Яндекс Музыка"
+        };
+
         public string PlayerAppLabel => CurrentLanguage switch
         {
             "EN" => "Source/App",
@@ -961,5 +968,152 @@ namespace MacStyleHub.Services
 
             return dayName;
         }
+        public string WeatherSearchWatermark => CurrentLanguage switch
+        {
+            "EN" => "Search city / region...",
+            "ZH" => "搜索城市/地区...",
+            _ => "Поиск города / области..."
+        };
+
+        public string WeatherSearchBtn => CurrentLanguage switch
+        {
+            "EN" => "Find",
+            "ZH" => "搜索",
+            _ => "Найти"
+        };
+
+        public string WeatherResetLocation => CurrentLanguage switch
+        {
+            "EN" => "My Location",
+            "ZH" => "我的位置",
+            _ => "Моя локация"
+        };
+
+        public string WeatherSearchResultsTitle => CurrentLanguage switch
+        {
+            "EN" => "Search Results",
+            "ZH" => "搜索结果",
+            _ => "Результаты поиска"
+        };
+
+        public string WeatherCoordinatesWatermark => CurrentLanguage switch
+        {
+            "EN" => "Paste coordinates (54.92, 43.34) or Google/Yandex/2GIS link...",
+            "ZH" => "粘贴坐标 (54.92, 43.34) 或 Google/Yandex/2GIS 链接...",
+            _ => "Вставьте координаты (54.92, 43.34) или ссылку Google/Яндекс/2ГИС..."
+        };
+
+        public string WeatherCoordinatesBtn => CurrentLanguage switch
+        {
+            "EN" => "Apply",
+            "ZH" => "应用",
+            _ => "Применить"
+        };
+
+        public string WeatherCoordinatesError => CurrentLanguage switch
+        {
+            "EN" => "Could not parse coordinates or map link",
+            "ZH" => "无法解析坐标或地图链接",
+            _ => "Не удалось распознать координаты или ссылку"
+        };
+
+        public string VolumeMixerHeader => CurrentLanguage switch
+        {
+            "EN" => "App Volume Mixer",
+            "ZH" => "应用音量 mixer",
+            _ => "Микшер громкости программ"
+        };
+
+        public string VolumeMixerNoApps => CurrentLanguage switch
+        {
+            "EN" => "No active applications with audio",
+            "ZH" => "未检测到活动音频应用",
+            _ => "Нет активных приложений со звуком"
+        };
+
+        public string SidebarInstaller => CurrentLanguage switch
+        {
+            "EN" => "App Installer",
+            "ZH" => "软件安装",
+            _ => "Установка программ"
+        };
+
+        public string InstallerHeader => CurrentLanguage switch
+        {
+            "EN" => "Software Installer",
+            "ZH" => "必备软件安装器",
+            _ => "Установка программ"
+        };
+
+        public string InstallerDesc => CurrentLanguage switch
+        {
+            "EN" => "Quick and secure installation of popular software using Windows Package Manager (winget).",
+            "ZH" => "通过 Windows 官方包管理器 (winget) 安全且极速地安装常用装机必备软件。",
+            _ => "Быстрая и безопасная установка популярных программ через официальный пакетный менеджер Windows (winget)."
+        };
+
+        public string InstallerStatusNotInstalled => CurrentLanguage switch
+        {
+            "EN" => "Not Installed",
+            "ZH" => "未安装",
+            _ => "Не установлено"
+        };
+
+        public string InstallerStatusQueued => CurrentLanguage switch
+        {
+            "EN" => "In Queue",
+            "ZH" => "队列中",
+            _ => "В очереди"
+        };
+
+        public string InstallerStatusInstalling => CurrentLanguage switch
+        {
+            "EN" => "Installing...",
+            "ZH" => "正在安装...",
+            _ => "Установка..."
+        };
+
+        public string InstallerStatusInstalled => CurrentLanguage switch
+        {
+            "EN" => "Installed",
+            "ZH" => "已安装",
+            _ => "Установлено"
+        };
+
+        public string InstallerStatusFailed => CurrentLanguage switch
+        {
+            "EN" => "Failed",
+            "ZH" => "安装失败",
+            _ => "Ошибка"
+        };
+
+        public string InstallerBtnInstall => CurrentLanguage switch
+        {
+            "EN" => "Install",
+            "ZH" => "安装",
+            _ => "Установить"
+        };
+
+        public string InstallerBtnInstallSelected => CurrentLanguage switch
+        {
+            "EN" => "Install Selected",
+            "ZH" => "安装所选",
+            _ => "Установить выбранные"
+        };
+
+        public string InstallerWidgetTitle => CurrentLanguage switch
+        {
+            "EN" => "Quick Installer",
+            "ZH" => "快捷装机",
+            _ => "Быстрая установка"
+        };
+
+        public string InstallerWidgetOpenLink => CurrentLanguage switch
+        {
+            "EN" => "Open full list",
+            "ZH" => "查看完整列表",
+            _ => "Открыть полный список"
+        };
     }
 }
+

@@ -114,7 +114,7 @@ namespace MacStyleHub.Services
 
         private const byte VK_MEDIA_NEXT_TRACK = 0xB0;
         private const byte VK_MEDIA_PREV_TRACK = 0xB1;
-        private const byte VK_MEDIA_PLAY_PAUSE = 0xFA;
+        private const byte VK_MEDIA_PLAY_PAUSE = 0xB3;
         private const uint KEYEVENTF_KEYUP = 0x0002;
 
         private static void SendMediaKey(byte vk)

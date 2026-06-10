@@ -21,6 +21,7 @@
                 <Button Grid.Column="1" Classes="SystemButton" Command="{Binding LoadWeatherCommand}" Content="{Binding WeatherRefresh, Source={x:Static services:LocalizationService.Instance}}" VerticalAlignment="Center"/>
             </Grid>
 
+
             <!-- Main Weather Card -->
             <Border Classes="GlassCard" HorizontalAlignment="Stretch" Padding="25" MinHeight="230" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderGray}">
                 <Grid RowDefinitions="Auto, *, Auto" ColumnDefinitions="*, Auto">

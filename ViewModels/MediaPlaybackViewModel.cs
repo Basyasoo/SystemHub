@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -8,6 +10,54 @@ using MacStyleHub.Services;
 
 namespace MacStyleHub.ViewModels
 {
+    public partial class AppVolumeSessionViewModel : ObservableObject
+    {
+        public string SessionInstanceId { get; set; } = "";
+        public string DisplayName { get; set; } = "";
+        public string ProcessName { get; set; } = "";
+        public bool IsSystemSounds { get; set; }
+
+        [ObservableProperty]
+        private double _volume;
+
+        [ObservableProperty]
+        private bool _isMuted;
+
+        private bool _isUpdatingInternally;
+
+        public AppVolumeSessionViewModel()
+        {
+            ToggleMuteCommand = new RelayCommand(ToggleMute);
+        }
+
+        public IRelayCommand ToggleMuteCommand { get; }
+
+        private void ToggleMute()
+        {
+            IsMuted = !IsMuted;
+        }
+
+        partial void OnVolumeChanged(double value)
+        {
+            if (_isUpdatingInternally) return;
+            VolumeService.SetAppSessionVolume(SessionInstanceId, (float)value);
+        }
+
+        partial void OnIsMutedChanged(bool value)
+        {
+            if (_isUpdatingInternally) return;
+            VolumeService.SetAppSessionMute(SessionInstanceId, value);
+        }
+
+        public void UpdateFromModel(AppAudioSession model)
+        {
+            _isUpdatingInternally = true;
+            Volume = model.Volume;
+            IsMuted = model.IsMuted;
+            _isUpdatingInternally = false;
+        }
+    }
+
     public partial class MediaPlaybackViewModel : ViewModelBase
     {
         private readonly MediaPlaybackService _playbackService = new();
@@ -33,6 +83,9 @@ namespace MacStyleHub.ViewModels
 
         [ObservableProperty]
         private ObservableCollection<MediaSessionInfo> _activeSessions = new();
+
+        [ObservableProperty]
+        private ObservableCollection<AppVolumeSessionViewModel> _appVolumeSessions = new();
 
         [ObservableProperty]
         private double _volume;
@@ -71,31 +124,147 @@ namespace MacStyleHub.ViewModels
                 UpdateMediaText();
             };
 
+            // Initial refresh of volume sessions
+            RefreshVolumeSessions();
+
             // DispatcherTimer to periodically refresh the list of all active audio sources
             _sessionRefreshTimer = new DispatcherTimer
             {
-                Interval = TimeSpan.FromSeconds(1.5)
+                Interval = TimeSpan.FromSeconds(1.2)
             };
-            _sessionRefreshTimer.Tick += (s, e) => RefreshActiveSessions();
+            _sessionRefreshTimer.Tick += (s, e) =>
+            {
+                RefreshActiveSessions();
+                RefreshVolumeSessions();
+            };
             _sessionRefreshTimer.Start();
+        }
+
+        private AppVolumeSessionViewModel? GetActivePlayerSession()
+        {
+            if (!HasMedia || string.IsNullOrEmpty(PlayerName)) return null;
+
+            string name = PlayerName.ToLower();
+
+            // Explicit check for Yandex Music
+            if (name.Contains("яндекс.музыка") || name.Contains("yandexmusic"))
+            {
+                var yandexSession = AppVolumeSessions.FirstOrDefault(s => s.ProcessName.ToLower().Contains("yandex"));
+                if (yandexSession != null) return yandexSession;
+            }
+
+            return AppVolumeSessions.FirstOrDefault(s => 
+                s.ProcessName.ToLower().Contains(name) || 
+                s.DisplayName.ToLower().Contains(name) ||
+                name.Contains(s.ProcessName.ToLower()) ||
+                name.Contains(s.DisplayName.ToLower())
+            );
+        }
+
+        private bool _isUpdatingVolumeFromSystem;
+
+        private void UpdateVolumeFromSystem()
+        {
+            try
+            {
+                var activeSession = GetActivePlayerSession();
+                if (activeSession != null)
+                {
+                    var activeVol = activeSession.Volume;
+                    var activeMute = activeSession.IsMuted;
+                    
+                    if (Math.Abs(activeVol - Volume) > 1.0 || activeMute != IsMuted)
+                    {
+                        _isUpdatingVolumeFromSystem = true;
+                        Volume = activeVol;
+                        IsMuted = activeMute;
+                        _isUpdatingVolumeFromSystem = false;
+                    }
+                }
+                else if (!HasMedia)
+                {
+                    var sysVol = VolumeService.GetVolume();
+                    var sysMute = VolumeService.GetMute();
+                    
+                    if (Math.Abs(sysVol - Volume) > 1.0 || sysMute != IsMuted)
+                    {
+                        _isUpdatingVolumeFromSystem = true;
+                        Volume = sysVol;
+                        IsMuted = sysMute;
+                        _isUpdatingVolumeFromSystem = false;
+                    }
+                }
+            }
+            catch {}
         }
 
         partial void OnVolumeChanged(double value)
         {
+            if (_isUpdatingVolumeFromSystem) return;
             try
             {
-                VolumeService.SetVolume((float)value);
+                var activeSession = GetActivePlayerSession();
+                if (activeSession != null)
+                {
+                    activeSession.Volume = value;
+                }
+                else if (!HasMedia)
+                {
+                    VolumeService.SetVolume((float)value);
+                }
             }
             catch { }
         }
 
         partial void OnIsMutedChanged(bool value)
         {
+            if (_isUpdatingVolumeFromSystem) return;
             try
             {
-                VolumeService.SetMute(value);
+                var activeSession = GetActivePlayerSession();
+                if (activeSession != null)
+                {
+                    activeSession.IsMuted = value;
+                }
+                else if (!HasMedia)
+                {
+                    VolumeService.SetMute(value);
+                }
             }
             catch { }
+        }
+
+        [RelayCommand]
+        public void LaunchSpotify()
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("spotify:") { UseShellExecute = true });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Launch Spotify failed: " + ex.Message);
+            }
+        }
+
+        [RelayCommand]
+        public void LaunchYandexMusic()
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("yandexmusic:") { UseShellExecute = true });
+            }
+            catch
+            {
+                try
+                {
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("https://music.yandex.ru") { UseShellExecute = true });
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine("Launch Yandex Music failed: " + ex.Message);
+                }
+            }
         }
 
         [RelayCommand]
@@ -184,6 +353,54 @@ namespace MacStyleHub.ViewModels
             {
                 ActiveSessions = newList;
             });
+        }
+
+        private void RefreshVolumeSessions()
+        {
+            try
+            {
+                // Synchronize Master Volume first
+                UpdateVolumeFromSystem();
+
+                var currentSessions = VolumeService.GetAppAudioSessions();
+                
+                // Use UI thread to modify ObservableCollection
+                Dispatcher.UIThread.Post(() =>
+                {
+                    // Remove sessions that no longer exist
+                    for (int i = AppVolumeSessions.Count - 1; i >= 0; i--)
+                    {
+                        var vm = AppVolumeSessions[i];
+                        if (!currentSessions.Any(s => s.SessionInstanceId == vm.SessionInstanceId))
+                        {
+                            AppVolumeSessions.RemoveAt(i);
+                        }
+                    }
+
+                    // Add or update sessions
+                    foreach (var session in currentSessions)
+                    {
+                        var existing = AppVolumeSessions.FirstOrDefault(s => s.SessionInstanceId == session.SessionInstanceId);
+                        if (existing != null)
+                        {
+                            existing.UpdateFromModel(session);
+                        }
+                        else
+                        {
+                            var newVm = new AppVolumeSessionViewModel
+                            {
+                                SessionInstanceId = session.SessionInstanceId,
+                                DisplayName = session.DisplayName,
+                                ProcessName = session.ProcessName,
+                                IsSystemSounds = session.IsSystemSounds
+                            };
+                            newVm.UpdateFromModel(session);
+                            AppVolumeSessions.Add(newVm);
+                        }
+                    }
+                });
+            }
+            catch { }
         }
     }
 
