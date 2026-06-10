@@ -22,6 +22,15 @@ namespace MacStyleHub.ViewModels
         [ObservableProperty]
         private bool _updateAvailable;
 
+        public string AppVersion
+        {
+            get
+            {
+                var assemblyVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+                return assemblyVersion != null ? $"{assemblyVersion.Major}.{assemblyVersion.Minor}.{assemblyVersion.Build}" : "0.0.1";
+            }
+        }
+
         public string Hwid => SystemInfoService.GetHWID();
 
         public AboutViewModel()
@@ -68,7 +77,7 @@ namespace MacStyleHub.ViewModels
                 using (var client = new HttpClient())
                 {
                     client.DefaultRequestHeaders.Add("User-Agent", "MacStyleHub-App");
-                    var response = await client.GetAsync("https://api.github.com/repos/Basyasoo/MacStyleHub/releases/latest");
+                    var response = await client.GetAsync("https://api.github.com/repos/Basyasoo/SystemHub/releases/latest");
                     if (response.IsSuccessStatusCode)
                     {
                         var json = await response.Content.ReadAsStringAsync();
@@ -78,7 +87,7 @@ namespace MacStyleHub.ViewModels
                             if (root.TryGetProperty("tag_name", out var tagProp))
                             {
                                 var latestVersion = tagProp.GetString()?.Trim().ToLower() ?? "";
-                                var currentVersion = "v1.0.0";
+                                var currentVersion = $"v{AppVersion}";
 
                                 if (latestVersion != currentVersion && !string.IsNullOrEmpty(latestVersion))
                                 {
@@ -99,9 +108,9 @@ namespace MacStyleHub.ViewModels
                                 {
                                     UpdateStatus = LocalizationService.Instance.CurrentLanguage switch
                                     {
-                                        "EN" => "You are running the latest version (v1.0.0).",
-                                        "ZH" => "您已安装最新版本 (v1.0.0)。",
-                                        _ => "У вас установлена последняя версия (v1.0.0)."
+                                        "EN" => $"You are running the latest version (v{AppVersion}).",
+                                        "ZH" => $"您已安装最新版本 (v{AppVersion})。",
+                                        _ => $"У вас установлена последняя версия (v{AppVersion})."
                                     };
                                 }
                             }

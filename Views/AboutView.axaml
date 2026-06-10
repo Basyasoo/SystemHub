@@ -21,7 +21,7 @@
                 <!-- Title and Version -->
                 <StackPanel Spacing="5" HorizontalAlignment="Center">
                     <TextBlock Text="{Binding AboutTitle, Source={x:Static services:LocalizationService.Instance}}" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" HorizontalAlignment="Center"/>
-                    <TextBlock Text="v1.0.0" FontSize="15" Foreground="{StaticResource AccentBlue}" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                    <TextBlock Text="{Binding AppVersion, StringFormat='v{0}'}" FontSize="15" Foreground="{StaticResource AccentBlue}" FontWeight="SemiBold" HorizontalAlignment="Center"/>
                 </StackPanel>
 
                 <!-- Description (Centered) -->
@@ -33,7 +33,7 @@
                 <Grid RowDefinitions="Auto, Auto, Auto" ColumnDefinitions="Auto, Auto" HorizontalAlignment="Center">
                     <!-- Version -->
                     <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding AboutVersion, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" Foreground="{StaticResource TextSecondary}" FontWeight="Medium" Margin="0,0,20,10" HorizontalAlignment="Right"/>
-                    <TextBlock Grid.Row="0" Grid.Column="1" Text="1.0.0" FontSize="13" Foreground="{DynamicResource TextPrimary}" FontWeight="SemiBold" Margin="0,0,0,10" HorizontalAlignment="Left"/>
+                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding AppVersion}" FontSize="13" Foreground="{DynamicResource TextPrimary}" FontWeight="SemiBold" Margin="0,0,0,10" HorizontalAlignment="Left"/>
 
                     <!-- Developer -->
                     <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding AboutDev, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" Foreground="{StaticResource TextSecondary}" FontWeight="Medium" Margin="0,0,20,10" HorizontalAlignment="Right"/>
