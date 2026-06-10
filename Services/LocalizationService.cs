@@ -989,12 +989,55 @@ namespace MacStyleHub.Services
             _ => "Моя локация"
         };
 
+        public string WeatherLocationSettingsHeader => CurrentLanguage switch
+        {
+            "EN" => "Location Settings",
+            "ZH" => "位置设置",
+            _ => "Настройка местоположения"
+        };
+
+        public string WeatherLocationSettingsDesc => CurrentLanguage switch
+        {
+            "EN" => "Click the button to open Yandex Maps and set your location",
+            "ZH" => "点击按钮打开 Yandex 地图并设置您的位置",
+            _ => "Нажмите кнопку, чтобы открыть Яндекс.Карты и настроить ваше местоположение"
+        };
+
+        public string WeatherLocationDialogTitle => CurrentLanguage switch
+        {
+            "EN" => "Geolocation Setup",
+            "ZH" => "地理位置设置",
+            _ => "Настройка геопозиции"
+        };
+
+        public string WeatherLocationDialogDesc => CurrentLanguage switch
+        {
+            "EN" => "1. Choose your location in the opened Yandex Maps.\n2. Copy the URL from address bar (or right-click the map and copy coordinates).\n3. Paste the copied link/coordinates below:",
+            "ZH" => "1. 在打开的 Yandex 地图上选择您所在的位置。\n2. 从地址栏复制网址 (或右键点击地图并复制坐标)。\n3. 在下方粘贴所复制의链接/坐标：",
+            _ => "1. В открывшихся Яндекс.Картах выберите ваше местоположение.\n2. Скопируйте ссылку из адресной строки (или нажмите правой кнопкой на карту и скопируйте координаты).\n3. Вставьте скопированную ссылку или координаты ниже:"
+        };
+
+        public string WeatherLocationDialogSuccess => CurrentLanguage switch
+        {
+            "EN" => "Link/coordinates recognized!",
+            "ZH" => "链接/坐标已识别！",
+            _ => "Ссылка/координаты распознаны!"
+        };
+
+        public string WeatherLocationDialogCancel => CurrentLanguage switch
+        {
+            "EN" => "Cancel",
+            "ZH" => "Отмена",
+            _ => "Отмена"
+        };
+
         public string WeatherSearchResultsTitle => CurrentLanguage switch
         {
             "EN" => "Search Results",
             "ZH" => "搜索结果",
             _ => "Результаты поиска"
         };
+
 
         public string WeatherCoordinatesWatermark => CurrentLanguage switch
         {
@@ -1113,6 +1156,34 @@ namespace MacStyleHub.Services
             "EN" => "Open full list",
             "ZH" => "查看完整列表",
             _ => "Открыть полный список"
+        };
+
+        public string InstallerBtnScan => CurrentLanguage switch
+        {
+            "EN" => "Scan Installed",
+            "ZH" => "扫描已安装",
+            _ => "Сканировать"
+        };
+
+        public string InstallerStatusScanning => CurrentLanguage switch
+        {
+            "EN" => "Scanning...",
+            "ZH" => "正在扫描...",
+            _ => "Сканирование..."
+        };
+
+        public string YandexMusicModName => CurrentLanguage switch
+        {
+            "EN" => "Yandex Music Mod (Beta)",
+            "ZH" => "Yandex Music 修改版",
+            _ => "Яндекс Музыка (Mod)"
+        };
+
+        public string YandexMusicModDesc => CurrentLanguage switch
+        {
+            "EN" => "Modified version of Yandex Music without ads and limitations.",
+            "ZH" => "去广告且无限制的 Yandex 音乐修改版。",
+            _ => "Модифицированная версия Яндекс Музыки без рекламы и ограничений."
         };
 
         // Media player launcher localizations

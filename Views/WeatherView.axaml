@@ -9,7 +9,8 @@
              x:Class="MacStyleHub.Views.WeatherView"
              x:DataType="vm:WeatherViewModel">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="30" Spacing="25">
             <!-- Header -->
             <Grid ColumnDefinitions="*, Auto">
@@ -21,60 +22,20 @@
                 <Button Grid.Column="1" Classes="SystemButton" Command="{Binding LoadWeatherCommand}" Content="{Binding WeatherRefresh, Source={x:Static services:LocalizationService.Instance}}" VerticalAlignment="Center"/>
             </Grid>
 
-            <!-- Location Settings / Search Expander -->
-            <Expander Header="Настройка местоположения / Location Settings" 
-                      HorizontalAlignment="Stretch"
-                      Background="{DynamicResource CardBg}"
-                      BorderBrush="{DynamicResource BorderGray}"
-                      BorderThickness="1"
-                      CornerRadius="8">
-                <StackPanel Spacing="15" Margin="5,10,5,5">
-                    <!-- Search City Row -->
-                    <Grid ColumnDefinitions="*, Auto, Auto" RowDefinitions="Auto">
-                        <TextBox Grid.Column="0" 
-                                 Text="{Binding SearchQuery, Mode=TwoWay}" 
-                                 Watermark="{Binding WeatherSearchWatermark, Source={x:Static services:LocalizationService.Instance}}" 
-                                 VerticalAlignment="Center" 
-                                 Margin="0,0,10,0">
-                            <TextBox.KeyBindings>
-                                <KeyBinding Gesture="Enter" Command="{Binding SearchCityCommand}"/>
-                            </TextBox.KeyBindings>
-                        </TextBox>
-                        <Button Grid.Column="1" 
-                                Classes="SystemButton" 
-                                Command="{Binding SearchCityCommand}" 
-                                Content="{Binding WeatherSearchBtn, Source={x:Static services:LocalizationService.Instance}}" 
-                                Margin="0,0,10,0" 
-                                IsDefault="True"/>
-                        <Button Grid.Column="2" 
-                                Classes="SystemButton" 
-                                Command="{Binding ResetLocationCommand}" 
-                                Content="{Binding WeatherResetLocation, Source={x:Static services:LocalizationService.Instance}}"/>
-                    </Grid>
-
-                    <!-- Search Results -->
-                    <StackPanel Spacing="8" IsVisible="{Binding HasSearchResults}">
-                        <TextBlock Text="{Binding WeatherSearchResultsTitle, Source={x:Static services:LocalizationService.Instance}}" 
-                                   FontWeight="SemiBold" 
-                                   Foreground="{DynamicResource TextPrimary}"/>
-                        <ScrollViewer MaxHeight="150">
-                            <ItemsControl ItemsSource="{Binding SearchResults}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Button Classes="SystemButton" 
-                                                HorizontalAlignment="Stretch" 
-                                                HorizontalContentAlignment="Left" 
-                                                Command="{Binding $parent[UserControl].((vm:WeatherViewModel)DataContext).SelectCityCommand}" 
-                                                CommandParameter="{Binding}" 
-                                                Content="{Binding DisplayName}" 
-                                                Margin="0,2"/>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </ScrollViewer>
+            <!-- Location Settings Card -->
+            <Border Classes="GlassCard" HorizontalAlignment="Stretch" Padding="18">
+                <Grid ColumnDefinitions="*, Auto">
+                    <StackPanel Grid.Column="0" Spacing="4" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding WeatherLocationSettingsHeader, Source={x:Static services:LocalizationService.Instance}}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                        <TextBlock Text="{Binding WeatherLocationSettingsDesc, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap"/>
                     </StackPanel>
-                </StackPanel>
-            </Expander>
+                    <Button Grid.Column="1" 
+                            Classes="SystemButton" 
+                            Command="{Binding MyLocationCommand}" 
+                            Content="{Binding WeatherResetLocation, Source={x:Static services:LocalizationService.Instance}}"
+                            VerticalAlignment="Center"/>
+                </Grid>
+            </Border>
 
             <!-- Main Weather Card -->
             <Border Classes="GlassCard" HorizontalAlignment="Stretch" Padding="25" MinHeight="230" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderGray}">
@@ -154,4 +115,87 @@
             </StackPanel>
         </StackPanel>
     </ScrollViewer>
+
+        <!-- Glassmorphic Modal Overlay -->
+        <Grid Background="#A0000000" 
+              IsVisible="{Binding IsClipboardDialogVisible}"
+              HorizontalAlignment="Stretch" 
+              VerticalAlignment="Stretch">
+            
+            <Border Classes="GlassCard" 
+                    Width="480" 
+                    VerticalAlignment="Center" 
+                    HorizontalAlignment="Center" 
+                    Padding="25" 
+                    Background="#CC1C1C1E" 
+                    BorderBrush="#33FFFFFF" 
+                    BorderThickness="1" 
+                    CornerRadius="12"
+                    BoxShadow="0 8 24 0 #80000000">
+                <StackPanel Spacing="18">
+                    <!-- Title -->
+                    <TextBlock Text="{Binding WeatherLocationDialogTitle, Source={x:Static services:LocalizationService.Instance}}" 
+                               FontSize="18" 
+                               FontWeight="SemiBold" 
+                               Foreground="White"
+                               HorizontalAlignment="Center"/>
+                    
+                    <!-- Description / Guide -->
+                    <TextBlock Text="{Binding WeatherLocationDialogDesc, Source={x:Static services:LocalizationService.Instance}}" 
+                               FontSize="12" 
+                               Foreground="#FFD1D1D6" 
+                               TextWrapping="Wrap"
+                               LineHeight="18"/>
+
+                    <!-- Input TextBox -->
+                     <TextBox Text="{Binding ClipboardText, Mode=TwoWay}"
+                              PlaceholderText="{Binding WeatherCoordinatesWatermark, Source={x:Static services:LocalizationService.Instance}}"
+                              Background="#442C2C2E"
+                              Foreground="White"
+                              BorderBrush="#44FFFFFF"
+                              CornerRadius="6"
+                              Padding="10,8"
+                              Height="60"
+                              AcceptsReturn="True"
+                              TextWrapping="Wrap"/>
+                    
+                    <!-- Message / Status -->
+                    <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                        <TextBlock Text="{Binding WeatherLocationDialogSuccess, Source={x:Static services:LocalizationService.Instance}}" 
+                                   Foreground="#FF30D158" 
+                                   FontSize="12" 
+                                   IsVisible="{Binding IsClipboardDataValid}"
+                                   FontWeight="Medium"/>
+                        <TextBlock Text="{Binding WeatherCoordinatesError, Source={x:Static services:LocalizationService.Instance}}" 
+                                   Foreground="#FFFF453A" 
+                                   FontSize="12" 
+                                   IsVisible="{Binding !IsClipboardDataValid}"
+                                   FontWeight="Medium"/>
+                    </StackPanel>
+
+                    <!-- Buttons -->
+                    <Grid ColumnDefinitions="*, *" RowDefinitions="Auto">
+                        <Button Grid.Column="0" 
+                                Classes="SystemButton" 
+                                Content="{Binding WeatherLocationDialogCancel, Source={x:Static services:LocalizationService.Instance}}" 
+                                Command="{Binding CloseClipboardDialogCommand}"
+                                Margin="0,0,8,0"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Center"/>
+                        
+                        <Button Grid.Column="1" 
+                                Classes="SystemButton" 
+                                Content="{Binding WeatherCoordinatesBtn, Source={x:Static services:LocalizationService.Instance}}" 
+                                Command="{Binding ApplyClipboardLocationCommand}"
+                                IsEnabled="{Binding IsClipboardDataValid}"
+                                Background="{StaticResource AccentBlue}"
+                                Foreground="White"
+                                Margin="8,0,0,0"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Center"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
 </UserControl>

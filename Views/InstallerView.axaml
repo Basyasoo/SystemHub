@@ -17,7 +17,10 @@
                     <TextBlock Text="{Binding InstallerDesc}" FontSize="14" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap"/>
                 </StackPanel>
                 
-                <Button Grid.Column="1" Classes="AccentButton" Command="{Binding InstallSelectedCommand}" Content="{Binding InstallerBtnInstallSelected, Source={x:Static services:LocalizationService.Instance}}" VerticalAlignment="Center"/>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                    <Button Classes="SystemButton" Command="{Binding RescanInstalledCommand}" Content="{Binding InstallerBtnScan}"/>
+                    <Button Classes="AccentButton" Command="{Binding InstallSelectedCommand}" Content="{Binding InstallerBtnInstallSelected, Source={x:Static services:LocalizationService.Instance}}"/>
+                </StackPanel>
             </Grid>
 
             <!-- Software Packages List -->

@@ -11,10 +11,18 @@ namespace MacStyleHub.ViewModels
     public partial class ProgramInstallItemViewModel : ObservableObject
     {
         public string Id { get; set; } = "";
-        public string Name { get; set; } = "";
-        public string Category { get; set; } = "";
+
+        [ObservableProperty]
+        private string _name = "";
+
+        [ObservableProperty]
+        private string _category = "";
+
         public string WingetId { get; set; } = "";
-        public string Description { get; set; } = "";
+
+        [ObservableProperty]
+        private string _description = "";
+
         public string IconKey { get; set; } = "";
 
         [ObservableProperty]
@@ -49,6 +57,13 @@ namespace MacStyleHub.ViewModels
             State = state;
             Progress = progress;
             StatusMessage = message;
+
+            if (Id == "yandexmusicmod")
+            {
+                Name = LocalizationService.Instance.YandexMusicModName;
+                Description = LocalizationService.Instance.YandexMusicModDesc;
+                Category = LocalizationService.Instance.SidebarPlayer;
+            }
             
             OnPropertyChanged(nameof(IsNotInstalled));
             OnPropertyChanged(nameof(IsInstalling));
@@ -92,11 +107,13 @@ namespace MacStyleHub.ViewModels
                 }
                 OnPropertyChanged(nameof(InstallerHeader));
                 OnPropertyChanged(nameof(InstallerDesc));
+                OnPropertyChanged(nameof(InstallerBtnScan));
             };
         }
 
         public string InstallerHeader => LocalizationService.Instance.InstallerHeader;
         public string InstallerDesc => LocalizationService.Instance.InstallerDesc;
+        public string InstallerBtnScan => LocalizationService.Instance.InstallerBtnScan;
 
         private void OnProgramStateChanged(string id, InstallState state, int progress, string message)
         {
@@ -108,6 +125,12 @@ namespace MacStyleHub.ViewModels
                     prog.Update(state, progress, message);
                 }
             });
+        }
+
+        [RelayCommand]
+        public void RescanInstalled()
+        {
+            InstallerService.Instance.ScanInstalledApps();
         }
 
         [RelayCommand]

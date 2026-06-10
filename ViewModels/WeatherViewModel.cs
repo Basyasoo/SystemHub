@@ -1,5 +1,7 @@
+using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
+using Avalonia.Input.Platform;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MacStyleHub.Services;
@@ -35,19 +37,13 @@ namespace MacStyleHub.ViewModels
         private ObservableCollection<ForecastDay> _forecast = new();
 
         [ObservableProperty]
-        private string _searchQuery = "";
+        private string _clipboardText = "";
 
         [ObservableProperty]
-        private string _coordinatesInput = "";
+        private bool _isClipboardDialogVisible;
 
         [ObservableProperty]
-        private bool _isInvalidInputError;
-
-        [ObservableProperty]
-        private ObservableCollection<SearchResult> _searchResults = new();
-
-        [ObservableProperty]
-        private bool _hasSearchResults;
+        private bool _isClipboardDataValid;
 
         private double? _customLat;
         private double? _customLon;
@@ -79,6 +75,7 @@ namespace MacStyleHub.ViewModels
                 // If language changes, reload weather to get localized city name from OSM Nominatim!
                 _ = LoadWeatherAsync();
             };
+
         }
 
         public IAsyncRelayCommand LoadWeatherCommand { get; }
@@ -125,61 +122,68 @@ namespace MacStyleHub.ViewModels
         }
 
         [RelayCommand]
-        public async Task SearchCityAsync()
+        public async Task MyLocationAsync()
         {
-            if (string.IsNullOrWhiteSpace(SearchQuery)) return;
-            var lang = LocalizationService.Instance.CurrentLanguage;
-            var list = await _weatherService.SearchCityAsync(SearchQuery, lang);
-            SearchResults.Clear();
-            foreach (var item in list)
+            // Open Yandex Maps in browser
+            try
             {
-                SearchResults.Add(item);
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = "https://yandex.ru/maps/",
+                    UseShellExecute = true
+                });
             }
-            HasSearchResults = SearchResults.Count > 0;
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Error opening Yandex Maps: " + ex.Message);
+            }
+
+            IsClipboardDialogVisible = true;
+
+            // Try to auto-populate from clipboard
+            try
+            {
+                if (Avalonia.Application.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)
+                {
+                    var clipboard = desktop.MainWindow?.Clipboard;
+                    if (clipboard != null)
+                    {
+                        var dataTransfer = await clipboard.TryGetDataAsync();
+                        if (dataTransfer != null)
+                        {
+                            foreach (var item in dataTransfer.Items)
+                            {
+                                var textObj = await item.TryGetRawAsync(Avalonia.Input.DataFormat.Text);
+                                string? text = textObj as string;
+                                if (!string.IsNullOrEmpty(text))
+                                {
+                                    var parsed = WeatherService.ParseCoordinates(text);
+                                    if (parsed != null)
+                                    {
+                                        ClipboardText = text;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch { }
         }
 
         [RelayCommand]
-        public async Task SelectCityAsync(SearchResult result)
+        public async Task ApplyClipboardLocationAsync()
         {
-            if (result == null) return;
-            _customLat = result.Lat;
-            _customLon = result.Lon;
-            _useAutoLocation = false;
-
-            // Save to settings
-            WeatherService.SaveSettings(new WeatherSettings
-            {
-                Latitude = _customLat,
-                Longitude = _customLon,
-                UseAutoLocation = false,
-                CustomCityName = result.DisplayName
-            });
-
-            // Clear search UI
-            SearchQuery = "";
-            SearchResults.Clear();
-            HasSearchResults = false;
-
-            await LoadWeatherAsync();
-        }
-
-
-        [RelayCommand]
-        public async Task SetCoordinatesAsync()
-        {
-            IsInvalidInputError = false;
-            if (string.IsNullOrWhiteSpace(CoordinatesInput)) return;
-
-            var coords = WeatherService.ParseCoordinates(CoordinatesInput);
-            if (coords == null)
-            {
-                IsInvalidInputError = true;
-                return;
-            }
+            if (string.IsNullOrWhiteSpace(ClipboardText)) return;
+            var coords = WeatherService.ParseCoordinates(ClipboardText);
+            if (coords == null) return;
 
             _customLat = coords.Value.Lat;
             _customLon = coords.Value.Lon;
             _useAutoLocation = false;
+
+            IsClipboardDialogVisible = false;
 
             await LoadWeatherAsync();
 
@@ -192,30 +196,25 @@ namespace MacStyleHub.ViewModels
                 CustomCityName = City
             });
 
-            CoordinatesInput = "";
+            ClipboardText = "";
         }
 
         [RelayCommand]
-        public async Task ResetLocationAsync()
+        public void CloseClipboardDialog()
         {
-            _customLat = null;
-            _customLon = null;
-            _useAutoLocation = true;
+            IsClipboardDialogVisible = false;
+            ClipboardText = "";
+        }
 
-            // Save settings
-            WeatherService.SaveSettings(new WeatherSettings
+        partial void OnClipboardTextChanged(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
             {
-                UseAutoLocation = true
-            });
-
-            // Clear search UI
-            SearchQuery = "";
-            SearchResults.Clear();
-            HasSearchResults = false;
-            CoordinatesInput = "";
-            IsInvalidInputError = false;
-
-            await LoadWeatherAsync();
+                IsClipboardDataValid = false;
+                return;
+            }
+            var parsed = WeatherService.ParseCoordinates(value);
+            IsClipboardDataValid = parsed.HasValue;
         }
     }
 }
