@@ -58,10 +58,12 @@ if ($LASTEXITCODE -ne 0) {
 Write-Host "Committing changes to Git..."
 git add -f MacStyleHub.csproj setup.iss SystemHubSetup.exe
 git commit -m "Release v$newVersion"
-git tag "v$newVersion"
+git tag -f "v$newVersion"
+git tag -f "latest"
 
 Write-Host "Pushing to remote repository..."
 git push origin main
-git push origin "v$newVersion"
+git push origin -f "v$newVersion"
+git push origin -f "latest"
 
 Write-Host "Successfully released v$newVersion!"
