@@ -174,7 +174,7 @@
               HorizontalAlignment="Stretch" 
               VerticalAlignment="Stretch">
             
-            <Border Classes="GlassCard" 
+            <Border Classes="GlassCard Static" 
                     Width="480" 
                     VerticalAlignment="Center" 
                     HorizontalAlignment="Center" 

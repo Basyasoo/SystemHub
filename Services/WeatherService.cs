@@ -819,6 +819,8 @@ namespace MacStyleHub.Services
 
             info.City = city;
 
+            bool openMeteoSuccess = false;
+
             // 4. Query Open-Meteo weather
             try
             {
@@ -883,11 +885,106 @@ namespace MacStyleHub.Services
                             });
                         }
                     }
+                    openMeteoSuccess = true;
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // Fallback dummy weather
+                System.Diagnostics.Debug.WriteLine("Open-Meteo weather fetch error: " + ex.Message);
+            }
+
+            // Fallback to wttr.in if Open-Meteo fails
+            if (!openMeteoSuccess)
+            {
+                try
+                {
+                    string latStr = lat.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                    string lonStr = lon.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                    string wttrUrl = $"https://wttr.in/{latStr},{lonStr}?format=j1&lang={langCode}";
+                    using var response = await HttpClient.GetAsync(wttrUrl);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var json = await response.Content.ReadAsStringAsync();
+                        using var doc = JsonDocument.Parse(json);
+                        var root = doc.RootElement;
+
+                        if (root.TryGetProperty("current_condition", out var currentArr) && currentArr.GetArrayLength() > 0)
+                        {
+                            var current = currentArr[0];
+
+                            string tempStr = current.GetProperty("temp_C").GetString() ?? "0";
+                            info.Temperature = double.Parse(tempStr, System.Globalization.CultureInfo.InvariantCulture);
+
+                            string windStr = current.GetProperty("windspeedKmph").GetString() ?? "0";
+                            info.WindSpeed = double.Parse(windStr, System.Globalization.CultureInfo.InvariantCulture);
+
+                            string humStr = current.GetProperty("humidity").GetString() ?? "0";
+                            info.Humidity = int.Parse(humStr);
+
+                            string codeStr = current.GetProperty("weatherCode").GetString() ?? "113";
+                            int code = int.Parse(codeStr);
+                            (info.Condition, info.Icon) = GetConditionByWwoCode(code);
+                        }
+
+                        if (root.TryGetProperty("weather", out var weatherArr))
+                        {
+                            int count = weatherArr.GetArrayLength();
+                            info.Forecast.Clear();
+                            for (int i = 0; i < count; i++)
+                            {
+                                var weatherDay = weatherArr[i];
+                                var dateStr = weatherDay.GetProperty("date").GetString() ?? "";
+                                var date = DateTime.TryParse(dateStr, out var d) ? d : DateTime.Now.AddDays(i);
+
+                                var culture = LocalizationService.Instance.CurrentLanguage switch
+                                {
+                                    "EN" => System.Globalization.CultureInfo.GetCultureInfo("en-US"),
+                                    "ZH" => System.Globalization.CultureInfo.GetCultureInfo("zh-CN"),
+                                    _ => System.Globalization.CultureInfo.GetCultureInfo("ru-RU")
+                                };
+                                var dayName = i == 0 ? "Сегодня" : date.ToString("ddd", culture);
+
+                                string maxTempStr = weatherDay.GetProperty("maxtempC").GetString() ?? "0";
+                                double maxTemp = double.Parse(maxTempStr, System.Globalization.CultureInfo.InvariantCulture);
+
+                                string minTempStr = weatherDay.GetProperty("mintempC").GetString() ?? "0";
+                                double minTemp = double.Parse(minTempStr, System.Globalization.CultureInfo.InvariantCulture);
+
+                                int code = 113;
+                                if (weatherDay.TryGetProperty("hourly", out var hourlyArr) && hourlyArr.GetArrayLength() > 0)
+                                {
+                                    int midIdx = Math.Min(4, hourlyArr.GetArrayLength() - 1);
+                                    if (midIdx >= 0)
+                                    {
+                                        string hCodeStr = hourlyArr[midIdx].GetProperty("weatherCode").GetString() ?? "113";
+                                        code = int.Parse(hCodeStr);
+                                    }
+                                }
+
+                                var (cond, icon) = GetConditionByWwoCode(code);
+
+                                info.Forecast.Add(new ForecastDay
+                                {
+                                    Day = dayName,
+                                    MaxTemp = maxTemp,
+                                    MinTemp = minTemp,
+                                    Condition = cond,
+                                    Icon = icon
+                                });
+                            }
+                        }
+                        openMeteoSuccess = true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine("wttr.in weather fetch error: " + ex.Message);
+                }
+            }
+
+            // Fallback dummy weather if both fail
+            if (!openMeteoSuccess)
+            {
                 info.Temperature = 21.5;
                 info.Condition = "Ясно";
                 info.Icon = "sun";
@@ -941,6 +1038,22 @@ namespace MacStyleHub.Services
                 85 or 86 => ("Снегопад", "snow"),
                 95 => ("Гроза", "thunderstorm"),
                 96 or 99 => ("Гроза", "thunderstorm"),
+                _ => ("Ясно", "sun")
+            };
+        }
+
+        private (string text, string icon) GetConditionByWwoCode(int code)
+        {
+            return code switch
+            {
+                113 => ("Ясно", "sun"),
+                116 => ("Переменная облачность", "cloud-sun"),
+                119 or 122 => ("Пасмурно", "cloud"),
+                143 or 248 or 260 => ("Туман", "fog"),
+                263 or 266 or 271 or 273 or 293 or 296 or 311 or 314 or 353 => ("Дождь", "rain"), // Light/drizzle/freezing rain
+                176 or 299 or 302 or 305 or 308 or 356 or 359 => ("Дождь", "rain"), // Rain / heavy rain / showers
+                179 or 182 or 227 or 230 or 317 or 320 or 323 or 326 or 329 or 332 or 335 or 338 or 350 or 362 or 365 or 368 or 371 or 374 or 377 => ("Снегопад", "snow"),
+                200 or 386 or 389 or 392 or 395 => ("Гроза", "thunderstorm"),
                 _ => ("Ясно", "sun")
             };
         }

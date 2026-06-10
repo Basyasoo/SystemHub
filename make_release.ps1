@@ -7,18 +7,9 @@ Stop-Process -Name "SystemHub" -ErrorAction SilentlyContinue
 $currentVersion = $csproj.Project.PropertyGroup.Version
 Write-Host "Current version: $currentVersion"
 
-# Split version and increment the patch number
-$parts = $currentVersion.Split('.')
-$major = [int]$parts[0]
-$minor = [int]$parts[1]
-$patch = [int]$parts[2]
-$patch++
-$newVersion = "$major.$minor.$patch"
-Write-Host "Bumping to version: $newVersion"
-
-# Update version in csproj
-$csproj.Project.PropertyGroup.Version = $newVersion
-$csproj.Save((Resolve-Path MacStyleHub.csproj))
+# Use the version defined in csproj directly
+$newVersion = $currentVersion
+Write-Host "Releasing version: $newVersion"
 
 # Update version in setup.iss
 $setupContent = Get-Content setup.iss
@@ -56,7 +47,8 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Write-Host "Committing changes to Git..."
-git add -f MacStyleHub.csproj setup.iss SystemHubSetup.exe
+git add -u
+git add -f SystemHubSetup.exe
 git commit -m "Release v$newVersion"
 git tag -f "v$newVersion"
 git tag -f "latest"

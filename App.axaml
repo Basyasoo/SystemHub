@@ -80,7 +80,7 @@
                 </Transitions>
             </Setter>
         </Style>
-        <Style Selector="Border.SystemCard:pointerover">
+        <Style Selector="Border.SystemCard:not(.Static):pointerover">
             <Setter Property="RenderTransform" Value="scale(1.018)"/>
             <Setter Property="BorderBrush" Value="{DynamicResource AccentBlue}"/>
         </Style>
@@ -100,7 +100,7 @@
                 </Transitions>
             </Setter>
         </Style>
-        <Style Selector="Border.GlassCard:pointerover">
+        <Style Selector="Border.GlassCard:not(.Static):pointerover">
             <Setter Property="RenderTransform" Value="scale(1.018)"/>
             <Setter Property="BorderBrush" Value="{DynamicResource AccentBlue}"/>
         </Style>
@@ -200,6 +200,20 @@
                     </KeyFrame>
                 </Animation>
             </Style.Animations>
+        </Style>
+
+        <!-- Prevent clipping of scaled card borders inside list views -->
+        <Style Selector="ItemsControl">
+            <Setter Property="ClipToBounds" Value="False"/>
+        </Style>
+        <Style Selector="ItemsPresenter">
+            <Setter Property="ClipToBounds" Value="False"/>
+        </Style>
+        <Style Selector="ItemsControl > ItemsPresenter > StackPanel">
+            <Setter Property="ClipToBounds" Value="False"/>
+        </Style>
+        <Style Selector="ItemsControl > ItemsPresenter > VirtualizingStackPanel">
+            <Setter Property="ClipToBounds" Value="False"/>
         </Style>
     </Application.Styles>
 

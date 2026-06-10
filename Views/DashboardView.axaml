@@ -66,10 +66,10 @@
                 <!-- Left: Weather Widget (Minimal Glass card) -->
                 <Border Grid.Column="0" Classes="GlassCard" Margin="0,0,10,0" MinHeight="210" VerticalAlignment="Stretch">
                     <Grid RowDefinitions="Auto, *, Auto">
-                        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8">
-                            <PathIcon Data="{StaticResource IconLocation}" Width="14" Height="14" Foreground="{DynamicResource TextSecondary}"/>
-                            <TextBlock Text="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).WeatherVM.City}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
-                        </StackPanel>
+                        <Grid Grid.Row="0" ColumnDefinitions="Auto, *">
+                            <PathIcon Grid.Column="0" Data="{StaticResource IconLocation}" Width="14" Height="14" Foreground="{DynamicResource TextSecondary}" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="1" Text="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).WeatherVM.City}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                        </Grid>
                         
                         <Grid Grid.Row="1" ColumnDefinitions="Auto, *" VerticalAlignment="Center" Margin="0,5">
                             <views:WeatherIcon Grid.Column="0" Icon="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).WeatherVM.Icon}" Width="64" Height="64" StrokeThickness="2.8" VerticalAlignment="Center" Margin="0,0,20,0"/>
