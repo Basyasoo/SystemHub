@@ -32,6 +32,28 @@ namespace MacStyleHub.ViewModels
 
         public IRelayCommand ToggleMuteCommand { get; }
 
+        public string LocalizedDisplayName
+        {
+            get
+            {
+                if (IsSystemSounds || DisplayName == "System Sounds" || DisplayName == "Системные звуки" || DisplayName == "系统声音")
+                {
+                    return LocalizationService.Instance.CurrentLanguage switch
+                    {
+                        "EN" => "System Sounds",
+                        "ZH" => "系统声音",
+                        _ => "Системные звуки"
+                    };
+                }
+                return DisplayName;
+            }
+        }
+
+        public void NotifyLocalizationChanged()
+        {
+            OnPropertyChanged(nameof(LocalizedDisplayName));
+        }
+
         private void ToggleMute()
         {
             IsMuted = !IsMuted;
@@ -137,6 +159,10 @@ namespace MacStyleHub.ViewModels
             LocalizationService.Instance.PropertyChanged += (sender, args) =>
             {
                 UpdateMediaText();
+                foreach (var s in AppVolumeSessions)
+                {
+                    s.NotifyLocalizationChanged();
+                }
             };
 
             // Initial refresh of volume sessions
@@ -568,7 +594,16 @@ namespace MacStyleHub.ViewModels
             {
                 try
                 {
-                    double rawPeak = VolumeService.GetAudioPeak();
+                    double rawPeak = 0.0;
+                    var activeSession = GetActivePlayerSession();
+                    if (activeSession != null && !string.IsNullOrEmpty(activeSession.ProcessName))
+                    {
+                        rawPeak = VolumeService.GetAudioPeakForProcess(activeSession.ProcessName);
+                    }
+                    else
+                    {
+                        rawPeak = VolumeService.GetAudioPeak();
+                    }
 
                     // Maintain a history of the last 2 seconds of peaks (80 ticks at 25ms interval)
                     _peakHistory.Enqueue(rawPeak);

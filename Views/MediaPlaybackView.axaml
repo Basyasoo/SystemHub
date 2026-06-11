@@ -52,9 +52,10 @@
 
         <Style Selector="ItemsControl Border.SystemCard">
             <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="1"/>
         </Style>
 
-        <Style Selector="Border.SystemCard.selected">
+        <Style Selector="ItemsControl Border.SystemCard.selected">
             <Setter Property="BorderBrush" Value="{DynamicResource AccentBlue}"/>
             <Setter Property="BorderThickness" Value="1.5"/>
         </Style>
@@ -205,6 +206,17 @@
             </Style.Animations>
         </Style>
 
+        <!-- Custom macOS-style Flyout presenter to remove default native padding/borders -->
+        <Style Selector="FlyoutPresenter">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="MinWidth" Value="0"/>
+            <Setter Property="MinHeight" Value="0"/>
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+            <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled"/>
+        </Style>
+
     </UserControl.Styles>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -218,9 +230,9 @@
                     <Button Classes="SpotifyLaunch" Height="36" ToolTip.Tip="Spotify">
                         <Button.Flyout>
                             <Flyout Placement="Bottom" ShowMode="Transient">
-                                <Border Padding="12" Background="{DynamicResource CardBg}" CornerRadius="8" BorderBrush="{DynamicResource BorderGray}" BorderThickness="1">
-                                    <StackPanel Spacing="8" Width="180">
-                                        <TextBlock Text="{Binding PlayerOpenSpotify, Source={x:Static services:LocalizationService.Instance}}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" HorizontalAlignment="Center" Margin="0,0,0,4"/>
+                                <Border Padding="16" Background="#E51C1C1E" CornerRadius="12" BorderBrush="#33FFFFFF" BorderThickness="1" BoxShadow="0 8 24 0 #60000000">
+                                    <StackPanel Spacing="10" Width="180">
+                                        <TextBlock Text="{Binding PlayerOpenSpotify, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,4"/>
                                         <Button Classes="SystemButton" Content="{Binding PlayerOpenApp, Source={x:Static services:LocalizationService.Instance}}" Command="{Binding LaunchSpotifyAppCommand}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
                                         <Button Classes="SystemButton" Content="{Binding PlayerOpenWeb, Source={x:Static services:LocalizationService.Instance}}" Command="{Binding LaunchSpotifyWebCommand}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
                                     </StackPanel>
@@ -233,12 +245,12 @@
                         </StackPanel>
                     </Button>
                     
-                    <Button Classes="YandexLaunch" Height="36" ToolTip.Tip="Яндекс.Музыка">
+                    <Button Classes="YandexLaunch" Height="36" ToolTip.Tip="{Binding YandexMusicLabel, Source={x:Static services:LocalizationService.Instance}}">
                         <Button.Flyout>
                             <Flyout Placement="Bottom" ShowMode="Transient">
-                                <Border Padding="12" Background="{DynamicResource CardBg}" CornerRadius="8" BorderBrush="{DynamicResource BorderGray}" BorderThickness="1">
-                                    <StackPanel Spacing="8" Width="180">
-                                        <TextBlock Text="{Binding PlayerOpenYandex, Source={x:Static services:LocalizationService.Instance}}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" HorizontalAlignment="Center" Margin="0,0,0,4"/>
+                                <Border Padding="16" Background="#E51C1C1E" CornerRadius="12" BorderBrush="#33FFFFFF" BorderThickness="1" BoxShadow="0 8 24 0 #60000000">
+                                    <StackPanel Spacing="10" Width="180">
+                                        <TextBlock Text="{Binding PlayerOpenYandex, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" Margin="0,0,0,4"/>
                                         <Button Classes="SystemButton" Content="{Binding PlayerOpenApp, Source={x:Static services:LocalizationService.Instance}}" Command="{Binding LaunchYandexMusicAppCommand}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
                                         <Button Classes="SystemButton" Content="{Binding PlayerOpenWeb, Source={x:Static services:LocalizationService.Instance}}" Command="{Binding LaunchYandexMusicWebCommand}" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
                                     </StackPanel>
@@ -316,13 +328,13 @@
                         <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="25" HorizontalAlignment="Center" Margin="0,0,0,10">
                             <!-- Prev Button -->
                             <Button Width="40" Height="40" Padding="0" CornerRadius="20" Background="Transparent" BorderThickness="0"
-                                    Command="{Binding PrevCommand}" ToolTip.Tip="Назад">
+                                    Command="{Binding PrevCommand}" ToolTip.Tip="{Binding ToolTipPrev, Source={x:Static services:LocalizationService.Instance}}">
                                 <PathIcon Data="{StaticResource PhPrev}" Width="16" Height="16" Foreground="{DynamicResource TextPrimary}"/>
                             </Button>
                             
                             <!-- Play/Pause Button -->
                             <Button Width="56" Height="56" Padding="0" CornerRadius="28" Classes="SystemButton"
-                                    Command="{Binding TogglePlayCommand}">
+                                    Command="{Binding TogglePlayCommand}" ToolTip.Tip="{Binding ToolTipPlayPause, Source={x:Static services:LocalizationService.Instance}}">
                                 <Grid>
                                     <PathIcon Data="{StaticResource PhPause}" Width="20" Height="20" Foreground="{StaticResource AccentBlue}" IsVisible="{Binding IsPlaying}"/>
                                     <PathIcon Data="{StaticResource PhPlay}" Width="20" Height="20" Foreground="{DynamicResource TextPrimary}" Margin="2,0,0,0" IsVisible="{Binding !IsPlaying}"/>
@@ -331,7 +343,7 @@
                             
                             <!-- Next Button -->
                             <Button Width="40" Height="40" Padding="0" CornerRadius="20" Background="Transparent" BorderThickness="0"
-                                    Command="{Binding NextCommand}" ToolTip.Tip="Вперед">
+                                    Command="{Binding NextCommand}" ToolTip.Tip="{Binding ToolTipNext, Source={x:Static services:LocalizationService.Instance}}">
                                 <PathIcon Data="{StaticResource PhNext}" Width="16" Height="16" Foreground="{DynamicResource TextPrimary}"/>
                             </Button>
                         </StackPanel>
@@ -339,7 +351,7 @@
                         <!-- Volume Controls -->
                         <Grid Grid.Row="3" Classes="VolumeContainer" ColumnDefinitions="Auto, *, Auto" Margin="20,10,20,10" VerticalAlignment="Center" Background="Transparent" ClipToBounds="False">
                             <!-- Mute Toggle Button -->
-                            <Button Command="{Binding ToggleMuteCommand}" Width="32" Height="32" Padding="0" Background="Transparent" BorderThickness="0" CornerRadius="16" ToolTip.Tip="Громкость" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+                            <Button Command="{Binding ToggleMuteCommand}" Width="32" Height="32" Padding="0" Background="Transparent" BorderThickness="0" CornerRadius="16" ToolTip.Tip="{Binding ToolTipVolume, Source={x:Static services:LocalizationService.Instance}}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
                                 <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
                                     <!-- Mute Icon -->
                                     <Path Data="M3,7 H6 L9,4 V16 L6,13 H3 Z M 12.5,8.5 L 15.5,11.5 M 15.5,8.5 L 12.5,11.5" 
@@ -389,7 +401,7 @@
                         <!-- Header with Collapse Button -->
                         <Grid ColumnDefinitions="*, Auto" Margin="0,0,0,5">
                             <TextBlock Grid.Column="0" Text="{Binding PlayerActiveSessions, Source={x:Static services:LocalizationService.Instance}}" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" VerticalAlignment="Center"/>
-                            <Button Grid.Column="1" Classes="SystemButton" Padding="8,6" Command="{Binding ToggleSessionsCommand}" ToolTip.Tip="Свернуть">
+                            <Button Grid.Column="1" Classes="SystemButton" Padding="8,6" Command="{Binding ToggleSessionsCommand}" ToolTip.Tip="{Binding ToolTipCollapse, Source={x:Static services:LocalizationService.Instance}}">
                                 <PathIcon Data="{StaticResource IconClose}" Width="10" Height="10"/>
                             </Button>
                         </Grid>

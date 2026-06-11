@@ -65,6 +65,7 @@ namespace MacStyleHub.ViewModels
                     break;
                 case 6:
                     CurrentPageViewModel = InstallerVM;
+                    InstallerVM.RescanInstalled();
                     break;
                 case 7:
                     CurrentPageViewModel = AboutVM;

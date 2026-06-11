@@ -89,15 +89,27 @@ namespace MacStyleHub.Services
                 }
                 catch { }
 
-                // 4. Recycle Bin
+                // 4. Recycle Bin (Manual user-specific scan for precise size reporting)
                 try
                 {
-                    var rbInfo = new SHQUERYRBINFO();
-                    rbInfo.cbSize = Marshal.SizeOf(typeof(SHQUERYRBINFO));
-                    int hr = SHQueryRecycleBin(null, ref rbInfo);
-                    if (hr == 0) // S_OK
+                    string? userSid = System.Security.Principal.WindowsIdentity.GetCurrent().User?.Value;
+                    if (!string.IsNullOrEmpty(userSid))
                     {
-                        result.RecycleBinSize = rbInfo.i64Size;
+                        long rbSize = 0;
+                        foreach (var drive in DriveInfo.GetDrives())
+                        {
+                            if (!drive.IsReady) continue;
+                            try
+                            {
+                                string rbPath = Path.Combine(drive.Name, "$Recycle.Bin", userSid);
+                                if (Directory.Exists(rbPath))
+                                {
+                                    rbSize += GetDirectorySize(rbPath);
+                                }
+                            }
+                            catch { }
+                        }
+                        result.RecycleBinSize = rbSize;
                     }
                 }
                 catch { }

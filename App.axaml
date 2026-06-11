@@ -82,7 +82,6 @@
         </Style>
         <Style Selector="Border.SystemCard:not(.Static):pointerover">
             <Setter Property="RenderTransform" Value="scale(1.018)"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource AccentBlue}"/>
         </Style>
 
         <!-- Sleek Monochromatic Glassmorphism Card -->
@@ -102,7 +101,6 @@
         </Style>
         <Style Selector="Border.GlassCard:not(.Static):pointerover">
             <Setter Property="RenderTransform" Value="scale(1.018)"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource AccentBlue}"/>
         </Style>
 
         <!-- Minimalist Fluent Flat Buttons -->

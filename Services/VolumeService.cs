@@ -202,47 +202,207 @@ namespace MacStyleHub.Services
 
     public static class VolumeService
     {
+        private static IAudioMeterInformation? _cachedMeter;
+        private static IntPtr _cachedMeterPtr;
+
         public static float GetAudioPeak()
         {
             try
             {
-                var enumerator = new MMDeviceEnumerator();
-                IntPtr pEnumerator = Marshal.GetIUnknownForObject(enumerator);
-                if (pEnumerator == IntPtr.Zero) return 0f;
-
-                IntPtr vtable = Marshal.ReadIntPtr(pEnumerator);
-                IntPtr pGetDefaultAudioEndpoint = Marshal.ReadIntPtr(vtable, 4 * IntPtr.Size);
-                var getDefaultAudioEndpoint = Marshal.GetDelegateForFunctionPointer<GetDefaultAudioEndpointDelegate>(pGetDefaultAudioEndpoint);
-
-                int hr = getDefaultAudioEndpoint(pEnumerator, 0, 0, out IntPtr pDevice);
-                Marshal.Release(pEnumerator);
-
-                if (hr != 0 || pDevice == IntPtr.Zero) return 0f;
-
-                IntPtr deviceVtable = Marshal.ReadIntPtr(pDevice);
-                IntPtr pActivate = Marshal.ReadIntPtr(deviceVtable, 3 * IntPtr.Size);
-                var activate = Marshal.GetDelegateForFunctionPointer<ActivateDelegate>(pActivate);
-
-                var iid = new Guid("C02216F6-8C67-4B5B-9D00-D008E73E0064"); // IID_IAudioMeterInformation
-                hr = activate(pDevice, ref iid, 1, IntPtr.Zero, out IntPtr pMeter);
-                Marshal.Release(pDevice);
-
-                if (hr != 0 || pMeter == IntPtr.Zero) return 0f;
-
-                var meterObj = Marshal.GetObjectForIUnknown(pMeter) as IAudioMeterInformation;
-                float peak = 0f;
-                if (meterObj != null)
+                if (_cachedMeter == null)
                 {
-                    meterObj.GetPeakValue(out peak);
+                    var enumerator = new MMDeviceEnumerator();
+                    IntPtr pEnumerator = Marshal.GetIUnknownForObject(enumerator);
+                    if (pEnumerator == IntPtr.Zero) return 0f;
+
+                    IntPtr vtable = Marshal.ReadIntPtr(pEnumerator);
+                    IntPtr pGetDefaultAudioEndpoint = Marshal.ReadIntPtr(vtable, 4 * IntPtr.Size);
+                    var getDefaultAudioEndpoint = Marshal.GetDelegateForFunctionPointer<GetDefaultAudioEndpointDelegate>(pGetDefaultAudioEndpoint);
+
+                    int hr = getDefaultAudioEndpoint(pEnumerator, 0, 0, out IntPtr pDevice);
+                    Marshal.Release(pEnumerator);
+                    Marshal.ReleaseComObject(enumerator);
+
+                    if (hr != 0 || pDevice == IntPtr.Zero) return 0f;
+
+                    IntPtr deviceVtable = Marshal.ReadIntPtr(pDevice);
+                    IntPtr pActivate = Marshal.ReadIntPtr(deviceVtable, 3 * IntPtr.Size);
+                    var activate = Marshal.GetDelegateForFunctionPointer<ActivateDelegate>(pActivate);
+
+                    var iid = new Guid("C02216F6-8C67-4B5B-9D00-D008E73E0064"); // IID_IAudioMeterInformation
+                    hr = activate(pDevice, ref iid, 1, IntPtr.Zero, out IntPtr pMeter);
+                    Marshal.Release(pDevice);
+
+                    if (hr != 0 || pMeter == IntPtr.Zero) return 0f;
+
+                    var meterObj = Marshal.GetObjectForIUnknown(pMeter) as IAudioMeterInformation;
+                    if (meterObj == null)
+                    {
+                        Marshal.Release(pMeter);
+                        return 0f;
+                    }
+
+                    _cachedMeter = meterObj;
+                    _cachedMeterPtr = pMeter;
                 }
 
-                Marshal.Release(pMeter);
+                float peak = 0f;
+                int hrPeak = _cachedMeter.GetPeakValue(out peak);
+                if (hrPeak != 0) // Call failed (device disconnected or changed)
+                {
+                    // Reset cache
+                    if (_cachedMeter != null)
+                    {
+                        Marshal.ReleaseComObject(_cachedMeter);
+                        _cachedMeter = null;
+                    }
+                    if (_cachedMeterPtr != IntPtr.Zero)
+                    {
+                        Marshal.Release(_cachedMeterPtr);
+                        _cachedMeterPtr = IntPtr.Zero;
+                    }
+                    return 0f;
+                }
+
                 return peak;
             }
             catch
             {
+                // Reset cache on exception
+                if (_cachedMeter != null)
+                {
+                    try { Marshal.ReleaseComObject(_cachedMeter); } catch {}
+                    _cachedMeter = null;
+                }
+                if (_cachedMeterPtr != IntPtr.Zero)
+                {
+                    try { Marshal.Release(_cachedMeterPtr); } catch {}
+                    _cachedMeterPtr = IntPtr.Zero;
+                }
                 return 0f;
             }
+        }
+
+        private static readonly Dictionary<uint, (string Name, DateTime CachedTime)> _processNameCache = new();
+        private static readonly object _cacheLock = new();
+
+        private static string GetProcessNameCached(uint pid)
+        {
+            if (pid == 0) return "Unknown Application";
+            lock (_cacheLock)
+            {
+                if (_processNameCache.TryGetValue(pid, out var cached) && (DateTime.UtcNow - cached.CachedTime).TotalSeconds < 5)
+                {
+                    return cached.Name;
+                }
+
+                string name = "Unknown Application";
+                try
+                {
+                    using var proc = System.Diagnostics.Process.GetProcessById((int)pid);
+                    name = proc.ProcessName;
+                }
+                catch
+                {
+                    if (cached.Name != null) name = cached.Name;
+                }
+
+                _processNameCache[pid] = (name, DateTime.UtcNow);
+                return name;
+            }
+        }
+
+        public static float GetAudioPeakForProcess(string processName)
+        {
+            if (string.IsNullOrEmpty(processName)) return 0f;
+            float maxPeak = 0f;
+            var managers = GetSessionManagers();
+
+            foreach (IntPtr pSessionManager in managers)
+            {
+                IAudioSessionManager2 manager = null;
+                IAudioSessionEnumerator sessionEnumerator = null;
+                try
+                {
+                    var obj = Marshal.GetObjectForIUnknown(pSessionManager);
+                    manager = obj as IAudioSessionManager2;
+                    if (manager == null) continue;
+
+                    int hr = manager.GetSessionEnumerator(out sessionEnumerator);
+                    if (hr != 0 || sessionEnumerator == null) continue;
+
+                    sessionEnumerator.GetCount(out int count);
+                    for (int i = 0; i < count; i++)
+                    {
+                        IntPtr pSession = IntPtr.Zero;
+                        IAudioSessionControl2? sessionControl2 = null;
+                        try
+                        {
+                            hr = sessionEnumerator.GetSession(i, out pSession);
+                            if (hr != 0 || pSession == IntPtr.Zero) continue;
+
+                            sessionControl2 = GetSessionControl2(pSession);
+                            if (sessionControl2 == null) continue;
+
+                            sessionControl2.GetState(out AudioSessionState state);
+                            if (state == AudioSessionState.AudioSessionStateExpired) continue;
+
+                            bool isSystemSounds = sessionControl2.IsSystemSoundsSession() == 0;
+                            string name = "";
+                            if (isSystemSounds)
+                            {
+                                name = "System Sounds";
+                            }
+                            else
+                            {
+                                uint pid = 0;
+                                sessionControl2.GetProcessId(out pid);
+                                name = GetProcessNameCached(pid);
+                            }
+
+                            if (string.Equals(name, processName, StringComparison.OrdinalIgnoreCase))
+                            {
+                                Guid iidMeter = new Guid("C02216F6-8C67-4B5B-9D00-D008E73E0064");
+                                hr = Marshal.QueryInterface(pSession, ref iidMeter, out IntPtr pMeter);
+                                if (hr == 0 && pMeter != IntPtr.Zero)
+                                {
+                                    try
+                                    {
+                                        var meter = Marshal.GetObjectForIUnknown(pMeter) as IAudioMeterInformation;
+                                        if (meter != null)
+                                        {
+                                            meter.GetPeakValue(out float peak);
+                                            if (peak > maxPeak) maxPeak = peak;
+                                            Marshal.ReleaseComObject(meter);
+                                        }
+                                    }
+                                    finally
+                                    {
+                                        Marshal.Release(pMeter);
+                                    }
+                                }
+                            }
+                        }
+                        finally
+                        {
+                            if (sessionControl2 != null) Marshal.ReleaseComObject(sessionControl2);
+                            if (pSession != IntPtr.Zero) Marshal.Release(pSession);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"GetAudioPeakForProcess exception: {ex}");
+                }
+                finally
+                {
+                    if (sessionEnumerator != null) Marshal.ReleaseComObject(sessionEnumerator);
+                    if (manager != null) Marshal.ReleaseComObject(manager);
+                    Marshal.Release(pSessionManager);
+                }
+            }
+
+            return maxPeak;
         }
 
         private static IntPtr GetVolumeControl()
@@ -259,6 +419,7 @@ namespace MacStyleHub.Services
 
                 int hr = getDefaultAudioEndpoint(pEnumerator, 0, 0, out IntPtr pDevice);
                 Marshal.Release(pEnumerator);
+                Marshal.ReleaseComObject(enumerator);
 
                 if (hr != 0 || pDevice == IntPtr.Zero)
                 {
@@ -393,6 +554,7 @@ namespace MacStyleHub.Services
 
                 int hr = getDefaultAudioEndpoint(pEnumerator, 0, 0, out IntPtr pDevice);
                 Marshal.Release(pEnumerator);
+                Marshal.ReleaseComObject(enumerator);
 
                 if (hr != 0 || pDevice == IntPtr.Zero)
                 {
@@ -486,6 +648,7 @@ namespace MacStyleHub.Services
 
                 int hr = enumAudioEndpoints(pEnumerator, 0, 1, out IntPtr pCollection);
                 Marshal.Release(pEnumerator);
+                Marshal.ReleaseComObject(enumerator);
 
                 if (hr != 0 || pCollection == IntPtr.Zero) return managers;
 
@@ -560,12 +723,14 @@ namespace MacStyleHub.Services
                     for (int i = 0; i < count; i++)
                     {
                         IntPtr pSession = IntPtr.Zero;
+                        IAudioSessionControl2? sessionControl2 = null;
+                        ISimpleAudioVolume? volume = null;
                         try
                         {
                             hr = sessionEnumerator.GetSession(i, out pSession);
                             if (hr != 0 || pSession == IntPtr.Zero) continue;
 
-                            var sessionControl2 = GetSessionControl2(pSession);
+                            sessionControl2 = GetSessionControl2(pSession);
                             if (sessionControl2 == null) continue;
 
                             sessionControl2.GetState(out AudioSessionState state);
@@ -587,26 +752,11 @@ namespace MacStyleHub.Services
                             else
                             {
                                 sessionControl2.GetProcessId(out pid);
-                                if (pid > 0)
-                                {
-                                    try
-                                    {
-                                        using var proc = System.Diagnostics.Process.GetProcessById((int)pid);
-                                        name = proc.ProcessName;
-                                    }
-                                    catch
-                                    {
-                                        name = "Unknown Application";
-                                    }
-                                }
-                                else
-                                {
-                                    name = "Unknown Application";
-                                }
+                                name = GetProcessNameCached(pid);
                             }
 
                             // Get volume
-                            var volume = GetSimpleAudioVolume(pSession);
+                            volume = GetSimpleAudioVolume(pSession);
                             float volLevel = 0f;
                             bool isMuted = false;
                             if (volume != null)
@@ -637,6 +787,8 @@ namespace MacStyleHub.Services
                         }
                         finally
                         {
+                            if (sessionControl2 != null) Marshal.ReleaseComObject(sessionControl2);
+                            if (volume != null) Marshal.ReleaseComObject(volume);
                             if (pSession != IntPtr.Zero) Marshal.Release(pSession);
                         }
                     }
@@ -677,18 +829,20 @@ namespace MacStyleHub.Services
                     for (int i = 0; i < count; i++)
                     {
                         IntPtr pSession = IntPtr.Zero;
+                        IAudioSessionControl2? sessionControl2 = null;
+                        ISimpleAudioVolume? volume = null;
                         try
                         {
                             hr = sessionEnumerator.GetSession(i, out pSession);
                             if (hr != 0 || pSession == IntPtr.Zero) continue;
 
-                            var sessionControl2 = GetSessionControl2(pSession);
+                            sessionControl2 = GetSessionControl2(pSession);
                             if (sessionControl2 == null) continue;
 
                             sessionControl2.GetSessionInstanceIdentifier(out string id);
                             if (id == instanceId)
                             {
-                                var volume = GetSimpleAudioVolume(pSession);
+                                volume = GetSimpleAudioVolume(pSession);
                                 if (volume != null)
                                 {
                                     var guid = Guid.Empty;
@@ -700,6 +854,8 @@ namespace MacStyleHub.Services
                         }
                         finally
                         {
+                            if (sessionControl2 != null) Marshal.ReleaseComObject(sessionControl2);
+                            if (volume != null) Marshal.ReleaseComObject(volume);
                             if (pSession != IntPtr.Zero) Marshal.Release(pSession);
                         }
                     }
@@ -739,18 +895,20 @@ namespace MacStyleHub.Services
                     for (int i = 0; i < count; i++)
                     {
                         IntPtr pSession = IntPtr.Zero;
+                        IAudioSessionControl2? sessionControl2 = null;
+                        ISimpleAudioVolume? volume = null;
                         try
                         {
                             hr = sessionEnumerator.GetSession(i, out pSession);
                             if (hr != 0 || pSession == IntPtr.Zero) continue;
 
-                            var sessionControl2 = GetSessionControl2(pSession);
+                            sessionControl2 = GetSessionControl2(pSession);
                             if (sessionControl2 == null) continue;
 
                             sessionControl2.GetSessionInstanceIdentifier(out string id);
                             if (id == instanceId)
                             {
-                                var volume = GetSimpleAudioVolume(pSession);
+                                volume = GetSimpleAudioVolume(pSession);
                                 if (volume != null)
                                 {
                                     var guid = Guid.Empty;
@@ -762,6 +920,8 @@ namespace MacStyleHub.Services
                         }
                         finally
                         {
+                            if (sessionControl2 != null) Marshal.ReleaseComObject(sessionControl2);
+                            if (volume != null) Marshal.ReleaseComObject(volume);
                             if (pSession != IntPtr.Zero) Marshal.Release(pSession);
                         }
                     }

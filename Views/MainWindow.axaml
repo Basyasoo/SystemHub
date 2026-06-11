@@ -30,7 +30,7 @@
                 <Grid Grid.Row="0" Height="50" Background="Transparent" Name="TitleBar" PointerPressed="TitleBar_OnPointerPressed">
                     <StackPanel Orientation="Horizontal" Spacing="8" Margin="20,0,0,0" VerticalAlignment="Center">
                         <!-- Red Button (Close) -->
-                        <Button Width="12" Height="12" CornerRadius="6" Background="#FF5F56" BorderThickness="0" Padding="0" Click="Close_OnClick" ToolTip.Tip="Закрыть">
+                        <Button Width="12" Height="12" CornerRadius="6" Background="#FF5F56" BorderThickness="0" Padding="0" Click="Close_OnClick" ToolTip.Tip="{Binding ToolTipClose, Source={x:Static services:LocalizationService.Instance}}">
                             <Button.Styles>
                                 <Style Selector="Button:pointerover">
                                     <Setter Property="Background" Value="#E04C40"/>
@@ -38,7 +38,7 @@
                             </Button.Styles>
                         </Button>
                         <!-- Yellow Button (Minimize) -->
-                        <Button Width="12" Height="12" CornerRadius="6" Background="#FFBD2E" BorderThickness="0" Padding="0" Click="Minimize_OnClick" ToolTip.Tip="Свернуть">
+                        <Button Width="12" Height="12" CornerRadius="6" Background="#FFBD2E" BorderThickness="0" Padding="0" Click="Minimize_OnClick" ToolTip.Tip="{Binding ToolTipMinimize, Source={x:Static services:LocalizationService.Instance}}">
                             <Button.Styles>
                                 <Style Selector="Button:pointerover">
                                     <Setter Property="Background" Value="#DE9E1B"/>
@@ -46,7 +46,7 @@
                             </Button.Styles>
                         </Button>
                         <!-- Green Button (Maximize) -->
-                        <Button Width="12" Height="12" CornerRadius="6" Background="#27C93F" BorderThickness="0" Padding="0" Click="Maximize_OnClick" ToolTip.Tip="Развернуть">
+                        <Button Width="12" Height="12" CornerRadius="6" Background="#27C93F" BorderThickness="0" Padding="0" Click="Maximize_OnClick" ToolTip.Tip="{Binding ToolTipMaximize, Source={x:Static services:LocalizationService.Instance}}">
                             <Button.Styles>
                                 <Style Selector="Button:pointerover">
                                     <Setter Property="Background" Value="#1FA330"/>

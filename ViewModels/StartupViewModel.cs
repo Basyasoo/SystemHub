@@ -39,11 +39,25 @@ namespace MacStyleHub.ViewModels
 
         public void RefreshStartupItems()
         {
+            foreach (var item in StartupItems)
+            {
+                item.PropertyChanged -= Item_PropertyChanged;
+            }
+
             StartupItems.Clear();
             var items = _startupService.GetStartupItems();
             foreach (var item in items)
             {
+                item.PropertyChanged += Item_PropertyChanged;
                 StartupItems.Add(item);
+            }
+        }
+
+        private void Item_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(StartupItem.IsEnabled) && sender is StartupItem item)
+            {
+                _startupService.ToggleStartupItem(item.Name, item.Location, item.Command, item.IsEnabled);
             }
         }
 

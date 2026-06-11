@@ -122,22 +122,22 @@
                                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="15" VerticalAlignment="Center">
                                     <!-- Prev track -->
                                     <Button Width="28" Height="28" Padding="0" Background="Transparent" BorderThickness="0"
-                                            Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).PlaybackVM.PrevCommand}" ToolTip.Tip="Назад">
+                                            Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).PlaybackVM.PrevCommand}" ToolTip.Tip="{Binding ToolTipPrev, Source={x:Static services:LocalizationService.Instance}}">
                                         <PathIcon Data="{StaticResource IconPlay}" Width="10" Height="10" Foreground="{DynamicResource TextPrimary}" RenderTransform="rotate(180deg)"/>
                                     </Button>
                                     
                                     <!-- Play/Pause -->
                                     <Button Width="30" Height="30" Padding="0" CornerRadius="15" Classes="SystemButton"
-                                            Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).PlaybackVM.TogglePlayCommand}" ToolTip.Tip="Воспроизведение/Пауза">
+                                            Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).PlaybackVM.TogglePlayCommand}" ToolTip.Tip="{Binding ToolTipPlayPause, Source={x:Static services:LocalizationService.Instance}}">
                                         <Grid>
-                                            <PathIcon Data="{StaticResource IconPause}" Width="10" Height="10" Foreground="{StaticResource AccentBlue}" IsVisible="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).PlaybackVM.IsPlaying}"/>
+                                            <PathIcon Data="{StaticResource IconPause}" Width="10" Height="10" Foreground="{DynamicResource AccentBlue}" IsVisible="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).PlaybackVM.IsPlaying}"/>
                                             <PathIcon Data="{StaticResource IconPlay}" Width="10" Height="10" Foreground="{DynamicResource TextPrimary}" IsVisible="{Binding !$parent[Window].((vm:MainWindowViewModel)DataContext).PlaybackVM.IsPlaying}"/>
                                         </Grid>
                                     </Button>
                                     
                                     <!-- Next track -->
                                     <Button Width="28" Height="28" Padding="0" Background="Transparent" BorderThickness="0"
-                                            Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).PlaybackVM.NextCommand}" ToolTip.Tip="Вперед">
+                                            Command="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).PlaybackVM.NextCommand}" ToolTip.Tip="{Binding ToolTipNext, Source={x:Static services:LocalizationService.Instance}}">
                                         <PathIcon Data="{StaticResource IconPlay}" Width="10" Height="10" Foreground="{DynamicResource TextPrimary}"/>
                                     </Button>
                                 </StackPanel>

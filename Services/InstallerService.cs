@@ -133,8 +133,8 @@ namespace MacStyleHub.Services
                 _statusMessages[prog.Id] = "";
             }
 
-            // Run initial scan asynchronously
-            Task.Run(() => ScanInstalledApps());
+            // Run initial scan synchronously so states are immediately populated on startup
+            ScanInstalledApps();
         }
 
         public List<InstallerProgram> GetPrograms()
@@ -155,18 +155,42 @@ namespace MacStyleHub.Services
                     StatusMessage = _statusMessages[p.Id]
                 };
 
-                // Dynamic translation mapping for Yandex Music Mod
+                // Map category translations dynamically
+                prog.Category = p.Category switch
+                {
+                    "Браузеры" => LocalizationService.Instance.CategoryBrowsers,
+                    "Мессенджеры" => LocalizationService.Instance.CategoryMessengers,
+                    "Игры" => LocalizationService.Instance.CategoryGames,
+                    "Плееры" => LocalizationService.Instance.CategoryPlayers,
+                    "Утилиты" => LocalizationService.Instance.CategoryUtilities,
+                    _ => p.Category
+                };
+
+                // Map description translations dynamically
+                prog.Description = p.Id switch
+                {
+                    "chrome" => LocalizationService.Instance.DescChrome,
+                    "discord" => LocalizationService.Instance.DescDiscord,
+                    "steam" => LocalizationService.Instance.DescSteam,
+                    "vlc" => LocalizationService.Instance.DescVlc,
+                    "telegram" => LocalizationService.Instance.DescTelegram,
+                    "spotify" => LocalizationService.Instance.DescSpotify,
+                    "7zip" => LocalizationService.Instance.Desc7Zip,
+                    "yandexmusicmod" => LocalizationService.Instance.YandexMusicModDesc,
+                    "zapret" => LocalizationService.Instance.ZapretDesc,
+                    _ => p.Description
+                };
+
+                // Special overrides
                 if (p.Id == "yandexmusicmod")
                 {
                     prog.Name = LocalizationService.Instance.YandexMusicModName;
-                    prog.Description = LocalizationService.Instance.YandexMusicModDesc;
                     prog.Category = LocalizationService.Instance.SidebarPlayer;
                 }
-                if (p.Id == "zapret")
+                else if (p.Id == "zapret")
                 {
                     prog.Name = LocalizationService.Instance.ZapretName;
-                    prog.Description = LocalizationService.Instance.ZapretDesc;
-                    prog.Category = "Утилиты";
+                    prog.Category = LocalizationService.Instance.CategoryUtilities;
                 }
 
                 list.Add(prog);
@@ -195,6 +219,7 @@ namespace MacStyleHub.Services
                     case "chrome":
                         return File.Exists(@"C:\Program Files\Google\Chrome\Application\chrome.exe") ||
                                File.Exists(@"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe") ||
+                               File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Google\Chrome\Application\chrome.exe")) ||
                                CheckRegistryForDisplayName("Google Chrome");
 
                     case "discord":

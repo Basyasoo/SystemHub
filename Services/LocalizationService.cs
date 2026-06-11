@@ -158,8 +158,8 @@ namespace MacStyleHub.Services
         public string PlayerNoActive => CurrentLanguage switch
         {
             "EN" => "No Active Players",
-            "ZH" => "Плееры не запущены",
-            _ => "未检测到活动播放器"
+            "ZH" => "未检测到活动播放器",
+            _ => "Плееры не запущены"
         };
 
         public string PlayerLaunchRecommendation => CurrentLanguage switch
@@ -1260,7 +1260,7 @@ namespace MacStyleHub.Services
         public string PlayerOpenWeb => CurrentLanguage switch
         {
             "EN" => "Web Version",
-            "ZH" => "Веб-версия",
+            "ZH" => "网页版",
             _ => "Веб-версия"
         };
 
@@ -1270,6 +1270,67 @@ namespace MacStyleHub.Services
             "ZH" => "显示/隐藏活动会话",
             _ => "Свернуть/развернуть активные сессии"
         };
+
+        // Installer Category translations
+        public string CategoryBrowsers => CurrentLanguage switch { "EN" => "Browsers", "ZH" => "浏览器", _ => "Браузеры" };
+        public string CategoryMessengers => CurrentLanguage switch { "EN" => "Messengers", "ZH" => "即时通讯", _ => "Мессенджеры" };
+        public string CategoryGames => CurrentLanguage switch { "EN" => "Games", "ZH" => "游戏", _ => "Игры" };
+        public string CategoryPlayers => CurrentLanguage switch { "EN" => "Players", "ZH" => "播放器", _ => "Плееры" };
+        public string CategoryUtilities => CurrentLanguage switch { "EN" => "Utilities", "ZH" => "实用工具", _ => "Утилиты" };
+
+        // Program Descriptions
+        public string DescChrome => CurrentLanguage switch 
+        { 
+            "EN" => "Fast, secure, and popular web browser by Google.", 
+            "ZH" => "谷歌公司出品的快速、安全且流行的网页浏览器。", 
+            _ => "Быстрый, безопасный и популярный веб-браузер от компании Google." 
+        };
+        public string DescDiscord => CurrentLanguage switch 
+        { 
+            "EN" => "Voice, video, and text communication service for gamers and creators.", 
+            "ZH" => "面向玩家和创作者的语音、视频及文字聊天工具。", 
+            _ => "Голосовой, видео- и текстовый чат для геймеров и создателей контента." 
+        };
+        public string DescSteam => CurrentLanguage switch 
+        { 
+            "EN" => "Popular gaming platform to play, discuss, and create games.", 
+            "ZH" => "用于玩游戏、讨论和创作的流行游戏平台。", 
+            _ => "Популярная игровая платформа для запуска игр, общения и творчества." 
+        };
+        public string DescVlc => CurrentLanguage switch 
+        { 
+            "EN" => "Free and open-source cross-platform multimedia player that plays most files.", 
+            "ZH" => "支持播放大多数格式文件的免费开源跨平台多媒体播放器。", 
+            _ => "Бесплатный медиаплеер с открытым исходным кодом, воспроизводящий большинство форматов." 
+        };
+        public string DescTelegram => CurrentLanguage switch 
+        { 
+            "EN" => "Fast and secure desktop messaging app with cloud synchronization.", 
+            "ZH" => "具有云同步功能的高速、安全的桌面即时通讯软件。", 
+            _ => "Быстрый и безопасный мессенджер с облачной синхронизацией сообщений." 
+        };
+        public string DescSpotify => CurrentLanguage switch 
+        { 
+            "EN" => "Streaming service providing access to millions of music tracks.", 
+            "ZH" => "提供数百万首音乐曲目的流媒体服务。", 
+            _ => "Стриминговый сервис, предоставляющий доступ к миллионам музыкальных треков." 
+        };
+        public string Desc7Zip => CurrentLanguage switch 
+        { 
+            "EN" => "Popular file archiver with a high compression ratio and AES-256 encryption.", 
+            "ZH" => "具有高压缩比和 AES-256 加密功能的热门文件归档管理器。", 
+            _ => "Популярный архиватор с высокой степенью сжатия файлов и шифрованием AES-256." 
+        };
+
+        // Tooltips
+        public string ToolTipPrev => CurrentLanguage switch { "EN" => "Previous", "ZH" => "上一首", _ => "Назад" };
+        public string ToolTipNext => CurrentLanguage switch { "EN" => "Next", "ZH" => "下一首", _ => "Вперед" };
+        public string ToolTipVolume => CurrentLanguage switch { "EN" => "Volume", "ZH" => "音量", _ => "Громкость" };
+        public string ToolTipCollapse => CurrentLanguage switch { "EN" => "Collapse", "ZH" => "折叠", _ => "Свернуть" };
+        public string ToolTipClose => CurrentLanguage switch { "EN" => "Close", "ZH" => "关闭", _ => "Закрыть" };
+        public string ToolTipMinimize => CurrentLanguage switch { "EN" => "Minimize", "ZH" => "最小化", _ => "Свернуть" };
+        public string ToolTipMaximize => CurrentLanguage switch { "EN" => "Maximize", "ZH" => "最大化", _ => "Развернуть" };
+        public string ToolTipPlayPause => CurrentLanguage switch { "EN" => "Play/Pause", "ZH" => "播放/暂停", _ => "Воспроизведение/Пауза" };
     }
 }
 
