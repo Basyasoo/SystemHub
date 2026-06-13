@@ -699,6 +699,14 @@
                                 </ComboBox>
                             </StackPanel>
 
+                            <!-- Echo warning tip -->
+                            <Border Background="#150A84FF" BorderBrush="#300A84FF" BorderThickness="1" CornerRadius="6" Padding="10" Margin="0,-4,0,-4">
+                                <Grid ColumnDefinitions="Auto, *">
+                                    <PathIcon Grid.Column="0" Data="{StaticResource IconTip}" Width="14" Height="14" Foreground="{DynamicResource AccentBlue}" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="1" Text="Если слышно эхо/дублирование: в Windows откройте свойства записи 'CABLE Output' -> вкладка 'Прослушивать' -> снимите флажок 'Прослушивать с данного устройства'." Foreground="{DynamicResource TextSecondary}" FontSize="10.5" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                                </Grid>
+                            </Border>
+
                             <Separator Background="{DynamicResource BorderGray}"/>
 
                             <!-- Equalizer Sliders Row -->
