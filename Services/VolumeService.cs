@@ -211,7 +211,9 @@ namespace MacStyleHub.Services
             {
                 if (_cachedMeter == null)
                 {
-                    var enumerator = new MMDeviceEnumerator();
+                    Type? enumeratorType = Type.GetTypeFromCLSID(new Guid("BCDE0395-E52F-467C-8E3D-C4579291692E"));
+                    object? enumerator = enumeratorType != null ? Activator.CreateInstance(enumeratorType) : null;
+                    if (enumerator == null) return 0f;
                     IntPtr pEnumerator = Marshal.GetIUnknownForObject(enumerator);
                     if (pEnumerator == IntPtr.Zero) return 0f;
 
@@ -409,7 +411,9 @@ namespace MacStyleHub.Services
         {
             try
             {
-                var enumerator = new MMDeviceEnumerator();
+                Type? enumeratorType = Type.GetTypeFromCLSID(new Guid("BCDE0395-E52F-467C-8E3D-C4579291692E"));
+                object? enumerator = enumeratorType != null ? Activator.CreateInstance(enumeratorType) : null;
+                if (enumerator == null) return IntPtr.Zero;
                 IntPtr pEnumerator = Marshal.GetIUnknownForObject(enumerator);
                 if (pEnumerator == IntPtr.Zero) return IntPtr.Zero;
 
@@ -544,7 +548,9 @@ namespace MacStyleHub.Services
         {
             try
             {
-                var enumerator = new MMDeviceEnumerator();
+                Type? enumeratorType = Type.GetTypeFromCLSID(new Guid("BCDE0395-E52F-467C-8E3D-C4579291692E"));
+                object? enumerator = enumeratorType != null ? Activator.CreateInstance(enumeratorType) : null;
+                if (enumerator == null) return IntPtr.Zero;
                 IntPtr pEnumerator = Marshal.GetIUnknownForObject(enumerator);
                 if (pEnumerator == IntPtr.Zero) return IntPtr.Zero;
 
@@ -638,7 +644,9 @@ namespace MacStyleHub.Services
             var managers = new List<IntPtr>();
             try
             {
-                var enumerator = new MMDeviceEnumerator();
+                Type? enumeratorType = Type.GetTypeFromCLSID(new Guid("BCDE0395-E52F-467C-8E3D-C4579291692E"));
+                object? enumerator = enumeratorType != null ? Activator.CreateInstance(enumeratorType) : null;
+                if (enumerator == null) return managers;
                 IntPtr pEnumerator = Marshal.GetIUnknownForObject(enumerator);
                 if (pEnumerator == IntPtr.Zero) return managers;
 

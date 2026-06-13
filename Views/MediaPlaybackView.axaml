@@ -119,6 +119,7 @@
         <Style Selector="Slider.VolumeSlider /template/ Border#SliderContainer">
             <Setter Property="Margin" Value="0"/>
             <Setter Property="Padding" Value="0"/>
+            <Setter Property="ClipToBounds" Value="False"/>
         </Style>
         <Style Selector="Slider.VolumeSlider /template/ Track#PART_Track">
             <Setter Property="Grid.Row" Value="0"/>
@@ -217,6 +218,106 @@
             <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled"/>
         </Style>
 
+        <!-- Custom Equalizer Sliders Style -->
+        <Style Selector="Slider.EqSlider">
+            <Setter Property="Width" Value="24"/>
+            <Setter Property="MinWidth" Value="24"/>
+            <Setter Property="Height" Value="140"/>
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+        <Style Selector="Slider.EqSlider /template/ Border#TrackBackground">
+            <Setter Property="IsVisible" Value="False"/>
+        </Style>
+        <Style Selector="Slider.EqSlider /template/ RepeatButton#PART_DecreaseButton">
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Name="TrackBorder" Background="#555555" Width="2" HorizontalAlignment="Center"/>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+        <Style Selector="Slider.EqSlider /template/ RepeatButton#PART_IncreaseButton">
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Name="TrackBorder" Background="#555555" Width="2" HorizontalAlignment="Center"/>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+        <Style Selector="Slider.EqSlider Thumb">
+            <Setter Property="Width" Value="14"/>
+            <Setter Property="Height" Value="14"/>
+            <Setter Property="Background" Value="#222222"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBlue}"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="CornerRadius" Value="7"/>
+        </Style>
+        <Style Selector="Slider.EqSlider Thumb:pointerover">
+            <Setter Property="Background" Value="#2C2C2C"/>
+            <Setter Property="BorderBrush" Value="#359AFF"/>
+        </Style>
+        <Style Selector="Slider.EqSlider Thumb:pressed">
+            <Setter Property="Background" Value="#151515"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBlue}"/>
+        </Style>
+
+        <!-- Custom AccentBlue ToggleSwitch Style -->
+        <Style Selector="ToggleSwitch.EqToggle:checked /template/ Border#SwitchKnob">
+            <Setter Property="Background" Value="Black"/>
+        </Style>
+        <Style Selector="ToggleSwitch.EqToggle:checked /template/ Border#SwitchKnobBounds">
+            <Setter Property="Background" Value="{DynamicResource AccentBlue}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBlue}"/>
+        </Style>
+
+        <!-- Equalizer Animated Panel Styles -->
+        <Style Selector="Border.eq-card-left">
+            <Setter Property="Opacity" Value="1"/>
+            <Setter Property="Width" Value="370"/>
+            <Setter Property="Height" Value="420"/>
+            <Setter Property="MinHeight" Value="420"/>
+            <Setter Property="Margin" Value="0,0,16,0"/>
+            <Setter Property="RenderTransform" Value="scale(1) translate(0, 0)"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <DoubleTransition Property="Opacity" Duration="0:0:0.35" Easing="CubicEaseOut"/>
+                    <DoubleTransition Property="Width" Duration="0:0:0.35" Easing="CubicEaseOut"/>
+                    <DoubleTransition Property="Height" Duration="0:0:0.35" Easing="CubicEaseOut"/>
+                    <DoubleTransition Property="MinHeight" Duration="0:0:0.35" Easing="CubicEaseOut"/>
+                    <ThicknessTransition Property="Margin" Duration="0:0:0.35" Easing="CubicEaseOut"/>
+                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.35" Easing="CubicEaseOut"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Border.eq-card-left.hidden">
+            <Setter Property="Opacity" Value="0"/>
+            <Setter Property="Width" Value="0"/>
+            <Setter Property="Height" Value="0"/>
+            <Setter Property="MinHeight" Value="0"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="RenderTransform" Value="scale(0.9) translate(-20px, 0)"/>
+            <Setter Property="IsHitTestVisible" Value="False"/>
+        </Style>
+
+        <Style Selector="Border.eq-card-right">
+            <Setter Property="Width" Value="380"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
+        </Style>
+
+        <Style Selector="StackPanel.eq-controls-right">
+            <Setter Property="Opacity" Value="1"/>
+            <Setter Property="MaxHeight" Value="400"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <DoubleTransition Property="Opacity" Duration="0:0:0.3" Easing="CubicEaseOut"/>
+                    <DoubleTransition Property="MaxHeight" Duration="0:0:0.35" Easing="CubicEaseOut"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="StackPanel.eq-controls-right.hidden">
+            <Setter Property="Opacity" Value="0"/>
+            <Setter Property="MaxHeight" Value="0"/>
+            <Setter Property="IsHitTestVisible" Value="False"/>
+        </Style>
+
     </UserControl.Styles>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -273,6 +374,16 @@
                             <TextBlock Text="{Binding PlayerActiveSessions, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
+                    
+                    <Button Classes="SystemButton" 
+                            Command="{Binding ToggleEqualizerCommand}" 
+                            VerticalAlignment="Center"
+                            ToolTip.Tip="Открыть/закрыть эквалайзер">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <PathIcon Data="{StaticResource IconSettings}" Width="16" Height="16" Foreground="{DynamicResource AccentBlue}"/>
+                            <TextBlock Text="Эквалайзер" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
             </Grid>
 
@@ -304,7 +415,14 @@
                                     <Ellipse Width="90" Height="90" Stroke="#1C1C1E" StrokeThickness="1" Fill="Transparent"/>
                                     <!-- Center Label -->
                                     <Ellipse Width="50" Height="50" Fill="{StaticResource AccentBlue}"/>
-                                    <PathIcon Data="{StaticResource PhMusic}" Width="18" Height="18" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <!-- Fallback Music icon when no art -->
+                                    <PathIcon Data="{StaticResource PhMusic}" Width="18" Height="18" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding AlbumArt, Converter={x:Static ObjectConverters.IsNull}}"/>
+                                    <!-- Album Art Image -->
+                                    <Ellipse Width="50" Height="50" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding AlbumArt, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                        <Ellipse.Fill>
+                                            <ImageBrush Source="{Binding AlbumArt}" Stretch="UniformToFill"/>
+                                        </Ellipse.Fill>
+                                    </Ellipse>
                                 </Grid>
                             </Grid>
                         </Grid>
@@ -454,6 +572,220 @@
                     </StackPanel>
                 </Border>
             </Grid>
+
+            <!-- Equalizer block -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Top" IsVisible="{Binding $parent[UserControl].((vm:MediaPlaybackViewModel)DataContext).IsEqualizerExpanded}" DataContext="{Binding $parent[Window].((vm:MainWindowViewModel)DataContext).ToolsVM}" Margin="0,15,0,0">
+                <!-- Left Column: Visualizer & Presets -->
+                <Border Classes="GlassCard eq-card-left" Classes.hidden="{Binding !IsEqualizerEnabled}" ClipToBounds="True">
+                    <Grid RowDefinitions="Auto, *, Auto" Margin="16">
+                        <!-- Header -->
+                        <StackPanel Grid.Row="0" Spacing="4" Margin="0,0,0,15">
+                            <TextBlock Text="Визуализатор спектра" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                            <TextBlock Text="Анализ и отображение частот воспроизведения системного звука" FontSize="11" Foreground="{DynamicResource TextSecondary}"/>
+                        </StackPanel>
+
+                        <!-- Visualizer Area -->
+                        <Border Grid.Row="1" CornerRadius="12" Background="#0C000000" BorderBrush="{DynamicResource BorderGray}" BorderThickness="1.5" ClipToBounds="True" Height="220">
+                            <Canvas Name="VisualizerCanvas" Width="310" Height="200" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+
+                        <!-- Presets Area -->
+                        <StackPanel Grid.Row="2" Spacing="8" Margin="0,10,0,0">
+                            <TextBlock Text="Пресеты эквалайзера:" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondary}"/>
+                            <Grid ColumnDefinitions="*, Auto, Auto, Auto, Auto">
+                                <ComboBox Grid.Column="0"
+                                          ItemsSource="{Binding EqualizerPresets}" 
+                                          SelectedItem="{Binding SelectedEqualizerPreset}" 
+                                          HorizontalAlignment="Stretch" 
+                                          Height="32" 
+                                          CornerRadius="6">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate DataType="vm:EqualizerPreset">
+                                            <TextBlock Text="{Binding Name}" FontSize="12"/>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                                
+                                <Button Grid.Column="1" 
+                                        Command="{Binding UpdateEqualizerPresetCommand}" 
+                                        Height="32" 
+                                        Width="32" 
+                                        Margin="6,0,0,0" 
+                                        Classes="SystemButton"
+                                        ToolTip.Tip="Сохранить изменения в пресет"
+                                        IsVisible="{Binding IsCustomPresetSelected}">
+                                    <PathIcon Data="{StaticResource IconCheck}" Width="13" Height="13" Foreground="{DynamicResource AccentBlue}"/>
+                                </Button>
+
+                                <Button Grid.Column="2" 
+                                        Command="{Binding DeleteEqualizerPresetCommand}" 
+                                        Height="32" 
+                                        Width="32" 
+                                        Margin="6,0,0,0" 
+                                        Classes="SystemButton"
+                                        ToolTip.Tip="Удалить пресет"
+                                        IsVisible="{Binding IsCustomPresetSelected}">
+                                    <PathIcon Data="{StaticResource IconTrash}" Width="13" Height="13" Foreground="{DynamicResource TextSecondary}"/>
+                                </Button>
+
+                                <Button Grid.Column="3" 
+                                        Command="{Binding ImportEqualizerPresetCommand}" 
+                                        Height="32" 
+                                        Width="32" 
+                                        Margin="6,0,0,0" 
+                                        Classes="SystemButton"
+                                        ToolTip.Tip="Импортировать пресет (.json)">
+                                    <PathIcon Data="{StaticResource IconImport}" Width="13" Height="13" Foreground="{DynamicResource AccentBlue}"/>
+                                </Button>
+
+                                <Button Grid.Column="4" 
+                                        Command="{Binding ExportEqualizerPresetCommand}" 
+                                        Height="32" 
+                                        Width="32" 
+                                        Margin="6,0,0,0" 
+                                        Classes="SystemButton"
+                                        ToolTip.Tip="Экспортировать выбранный пресет (.json)">
+                                    <PathIcon Data="{StaticResource IconExport}" Width="13" Height="13" Foreground="{DynamicResource AccentBlue}"/>
+                                </Button>
+                            </Grid>
+                            
+                            <Grid ColumnDefinitions="*, Auto" Margin="0,4,0,0">
+                                <TextBox PlaceholderText="Имя нового пресета..." 
+                                         Text="{Binding NewPresetName}" 
+                                         Height="32" 
+                                         CornerRadius="6"
+                                         VerticalAlignment="Center"/>
+                                <Button Grid.Column="1" 
+                                        Command="{Binding SaveCurrentAsPresetCommand}" 
+                                        Content="Сохранить" 
+                                        Height="32" 
+                                        Margin="6,0,0,0" 
+                                        Classes="SystemButton"
+                                        VerticalAlignment="Center"/>
+                            </Grid>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Right Column: Settings & Equalizer Sliders -->
+                <Border Classes="GlassCard eq-card-right" Padding="16" ClipToBounds="True">
+                    <StackPanel Spacing="16">
+                        <!-- Header: Title on Left, Toggle on Right -->
+                        <Grid ColumnDefinitions="*, Auto">
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <PathIcon Data="{StaticResource IconSettings}" Width="15" Height="15" Foreground="{DynamicResource AccentBlue}"/>
+                                <TextBlock Text="Эквалайзер" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                            </StackPanel>
+                            <ToggleSwitch Grid.Column="1" Classes="EqToggle" IsChecked="{Binding IsEqualizerEnabled}" Foreground="{DynamicResource AccentBlue}" OnContent="" OffContent="" Padding="0" MinWidth="0" VerticalAlignment="Center"/>
+                        </Grid>
+                        
+                        <!-- Wrapper for collapsing right controls -->
+                        <StackPanel Classes="eq-controls-right" Classes.hidden="{Binding !IsEqualizerEnabled}" Spacing="16" ClipToBounds="True">
+                            <Separator Background="{DynamicResource BorderGray}" Margin="0,-8"/>
+
+                            <!-- Audio Device Selector -->
+                            <StackPanel Spacing="6" Margin="0,4,0,4">
+                                <TextBlock Text="Устройство вывода:" FontSize="12" Foreground="{DynamicResource TextSecondary}"/>
+                                <ComboBox ItemsSource="{Binding AudioDevices}" 
+                                          SelectedItem="{Binding SelectedAudioDevice}" 
+                                          HorizontalAlignment="Stretch" 
+                                          CornerRadius="6"
+                                          Height="32">
+                                    <ComboBox.ItemTemplate>
+                                        <DataTemplate DataType="vm:AudioDeviceItem">
+                                            <TextBlock Text="{Binding Name}" FontSize="12" TextTrimming="CharacterEllipsis"/>
+                                        </DataTemplate>
+                                    </ComboBox.ItemTemplate>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <Separator Background="{DynamicResource BorderGray}"/>
+
+                            <!-- Equalizer Sliders Row -->
+                            <Grid ColumnDefinitions="Auto, 12, *" Height="185">
+                                <!-- Left Column: Master Level Slider ("уровень") -->
+                                <StackPanel Grid.Column="0" Spacing="0" HorizontalAlignment="Center" Width="80">
+                                    <Grid ColumnDefinitions="*, Auto" Height="150" VerticalAlignment="Top">
+                                        <!-- Master level vertical slider -->
+                                        <Slider Grid.Column="0" 
+                                                Orientation="Vertical" 
+                                                Value="{Binding MasterEqGain}" 
+                                                Minimum="-12" 
+                                                Maximum="12" 
+                                                Height="140" 
+                                                Classes="EqSlider"
+                                                VerticalAlignment="Center"/>
+                                        <!-- dB Labels -->
+                                        <Grid Grid.Column="1" RowDefinitions="*, *, *" Height="140" Margin="4,0,0,0" VerticalAlignment="Center">
+                                            <TextBlock Grid.Row="0" Text="12dB" FontSize="8.5" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Top"/>
+                                            <TextBlock Grid.Row="1" Text="0dB" FontSize="8.5" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center"/>
+                                            <TextBlock Grid.Row="2" Text="-12dB" FontSize="8.5" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Bottom"/>
+                                        </Grid>
+                                    </Grid>
+                                    <TextBlock Text="уровень" FontSize="11" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center" Margin="0,6,0,0"/>
+                                </StackPanel>
+
+                                <!-- Vertical Divider -->
+                                <Border Grid.Column="1" Width="1.5" Background="#444444" Margin="4,5,4,20" VerticalAlignment="Stretch"/>
+
+                                <!-- Right Column: 10 frequency sliders -->
+                                <Grid Grid.Column="2" ColumnDefinitions="*, *, *, *, *, *, *, *, *, *">
+                                    <!-- 60 Hz -->
+                                    <StackPanel Grid.Column="0" Spacing="0" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                                        <Slider Orientation="Vertical" Value="{Binding Eq60Hz}" Minimum="-12" Maximum="12" Height="140" Classes="EqSlider"/>
+                                        <TextBlock Text="60" FontSize="10" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center" Margin="0,6,0,0"/>
+                                    </StackPanel>
+                                    <!-- 170 Hz -->
+                                    <StackPanel Grid.Column="1" Spacing="0" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                                        <Slider Orientation="Vertical" Value="{Binding Eq170Hz}" Minimum="-12" Maximum="12" Height="140" Classes="EqSlider"/>
+                                        <TextBlock Text="170" FontSize="10" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center" Margin="0,6,0,0"/>
+                                    </StackPanel>
+                                    <!-- 310 Hz -->
+                                    <StackPanel Grid.Column="2" Spacing="0" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                                        <Slider Orientation="Vertical" Value="{Binding Eq310Hz}" Minimum="-12" Maximum="12" Height="140" Classes="EqSlider"/>
+                                        <TextBlock Text="310" FontSize="10" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center" Margin="0,6,0,0"/>
+                                    </StackPanel>
+                                    <!-- 600 Hz -->
+                                    <StackPanel Grid.Column="3" Spacing="0" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                                        <Slider Orientation="Vertical" Value="{Binding Eq600Hz}" Minimum="-12" Maximum="12" Height="140" Classes="EqSlider"/>
+                                        <TextBlock Text="600" FontSize="10" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center" Margin="0,6,0,0"/>
+                                    </StackPanel>
+                                    <!-- 1 kHz -->
+                                    <StackPanel Grid.Column="4" Spacing="0" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                                        <Slider Orientation="Vertical" Value="{Binding Eq1kHz}" Minimum="-12" Maximum="12" Height="140" Classes="EqSlider"/>
+                                        <TextBlock Text="1k" FontSize="10" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center" Margin="0,6,0,0"/>
+                                    </StackPanel>
+                                    <!-- 3 kHz -->
+                                    <StackPanel Grid.Column="5" Spacing="0" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                                        <Slider Orientation="Vertical" Value="{Binding Eq3kHz}" Minimum="-12" Maximum="12" Height="140" Classes="EqSlider"/>
+                                        <TextBlock Text="3k" FontSize="10" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center" Margin="0,6,0,0"/>
+                                    </StackPanel>
+                                    <!-- 6 kHz -->
+                                    <StackPanel Grid.Column="6" Spacing="0" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                                        <Slider Orientation="Vertical" Value="{Binding Eq6kHz}" Minimum="-12" Maximum="12" Height="140" Classes="EqSlider"/>
+                                        <TextBlock Text="6k" FontSize="10" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center" Margin="0,6,0,0"/>
+                                    </StackPanel>
+                                    <!-- 12 kHz -->
+                                    <StackPanel Grid.Column="7" Spacing="0" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                                        <Slider Orientation="Vertical" Value="{Binding Eq12kHz}" Minimum="-12" Maximum="12" Height="140" Classes="EqSlider"/>
+                                        <TextBlock Text="12k" FontSize="10" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center" Margin="0,6,0,0"/>
+                                    </StackPanel>
+                                    <!-- 14 kHz -->
+                                    <StackPanel Grid.Column="8" Spacing="0" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                                        <Slider Orientation="Vertical" Value="{Binding Eq14kHz}" Minimum="-12" Maximum="12" Height="140" Classes="EqSlider"/>
+                                        <TextBlock Text="14k" FontSize="10" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center" Margin="0,6,0,0"/>
+                                    </StackPanel>
+                                    <!-- 16 kHz -->
+                                    <StackPanel Grid.Column="9" Spacing="0" HorizontalAlignment="Center" VerticalAlignment="Bottom">
+                                        <Slider Orientation="Vertical" Value="{Binding Eq16kHz}" Minimum="-12" Maximum="12" Height="140" Classes="EqSlider"/>
+                                        <TextBlock Text="16k" FontSize="10" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center" Margin="0,6,0,0"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Grid>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
         </StackPanel>
     </ScrollViewer>
 </UserControl>

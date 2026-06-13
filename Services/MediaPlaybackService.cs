@@ -9,7 +9,7 @@ namespace MacStyleHub.Services
     {
         private GlobalSystemMediaTransportControlsSessionManager? _manager;
 
-        public event Action<string, string, bool, string>? MediaChanged;
+        public event Action<string, string, bool, string, byte[]?>? MediaChanged;
         public event Action? SessionsListChanged;
 
         private string? _selectedAppId;
@@ -78,8 +78,50 @@ namespace MacStyleHub.Services
                 // If selected app not found or not set, fallback to default current session
                 if (session == null)
                 {
-                    session = _manager.GetCurrentSession();
-                    if (!string.IsNullOrEmpty(_selectedAppId))
+                    var sysCurrent = _manager.GetCurrentSession();
+                    if (_activeSubscribedSession != null)
+                    {
+                        // Check if our active session is still in the list of active sessions
+                        bool activeStillExists = false;
+                        foreach (var s in _manager.GetSessions())
+                        {
+                            if (s.SourceAppUserModelId == _activeSubscribedSession.SourceAppUserModelId)
+                            {
+                                activeStillExists = true;
+                                break;
+                            }
+                        }
+
+                        if (activeStillExists)
+                        {
+                            // If the system current session is different, check if it is actively playing.
+                            // If it is NOT playing, we stick with our current active session!
+                            if (sysCurrent != null && sysCurrent.SourceAppUserModelId != _activeSubscribedSession.SourceAppUserModelId)
+                            {
+                                var playbackInfo = sysCurrent.GetPlaybackInfo();
+                                bool sysIsPlaying = playbackInfo != null && playbackInfo.PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing;
+                                if (sysIsPlaying)
+                                {
+                                    session = sysCurrent; // Switch only because it's actively playing
+                                }
+                                else
+                                {
+                                    session = _activeSubscribedSession; // Keep current session
+                                }
+                            }
+                            else
+                            {
+                                session = _activeSubscribedSession;
+                            }
+                        }
+                    }
+
+                    if (session == null)
+                    {
+                        session = sysCurrent;
+                    }
+
+                    if (!string.IsNullOrEmpty(_selectedAppId) && (session == null || session.SourceAppUserModelId != _selectedAppId))
                     {
                         _selectedAppId = null;
                     }
@@ -113,13 +155,13 @@ namespace MacStyleHub.Services
                 }
                 else
                 {
-                    MediaChanged?.Invoke("", "", false, "");
+                    MediaChanged?.Invoke("", "", false, "", null);
                 }
             }
             catch
             {
                 _activeSubscribedSession = null;
-                MediaChanged?.Invoke("", "", false, "");
+                MediaChanged?.Invoke("", "", false, "", null);
             }
         }
 
@@ -157,11 +199,30 @@ namespace MacStyleHub.Services
                         player = player.Substring(0, player.Length - 4);
                 }
 
-                MediaChanged?.Invoke(props.Title ?? "", props.Artist ?? "", isPlaying, player);
+                // Retrieve album art thumbnail bytes
+                byte[]? thumbnailBytes = null;
+                if (props.Thumbnail != null)
+                {
+                    try
+                    {
+                        using (var stream = await props.Thumbnail.OpenReadAsync())
+                        {
+                            thumbnailBytes = new byte[stream.Size];
+                            using (var reader = new Windows.Storage.Streams.DataReader(stream.GetInputStreamAt(0)))
+                            {
+                                await reader.LoadAsync((uint)stream.Size);
+                                reader.ReadBytes(thumbnailBytes);
+                            }
+                        }
+                    }
+                    catch { }
+                }
+
+                MediaChanged?.Invoke(props.Title ?? "", props.Artist ?? "", isPlaying, player, thumbnailBytes);
             }
             catch
             {
-                MediaChanged?.Invoke("", "", false, "");
+                MediaChanged?.Invoke("", "", false, "", null);
             }
         }
 

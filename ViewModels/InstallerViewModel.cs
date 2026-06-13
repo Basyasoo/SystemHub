@@ -25,6 +25,33 @@ namespace MacStyleHub.ViewModels
 
         public string IconKey { get; set; } = "";
 
+        public Avalonia.Media.Imaging.Bitmap? AppIcon
+        {
+            get
+            {
+                try
+                {
+                    string suffix = IsModSelected ? "_mod" : "";
+                    var uri = new Uri($"avares://SystemHub/Assets/{Id}{suffix}.png");
+                    var assets = Avalonia.Platform.AssetLoader.Open(uri);
+                    return new Avalonia.Media.Imaging.Bitmap(assets);
+                }
+                catch
+                {
+                    try
+                    {
+                        var uri = new Uri($"avares://SystemHub/Assets/{Id}.png");
+                        var assets = Avalonia.Platform.AssetLoader.Open(uri);
+                        return new Avalonia.Media.Imaging.Bitmap(assets);
+                    }
+                    catch
+                    {
+                        return null;
+                    }
+                }
+            }
+        }
+
         [ObservableProperty]
         private InstallState _state;
 
@@ -37,9 +64,32 @@ namespace MacStyleHub.ViewModels
         [ObservableProperty]
         private bool _isSelected;
 
+        [ObservableProperty]
+        private bool _isModSelected;
+
         public bool IsNotInstalled => State == InstallState.NotInstalled || State == InstallState.Failed;
         public bool IsInstalling => State == InstallState.Installing || State == InstallState.Queued;
         public bool IsInstalled => State == InstallState.Installed;
+        public bool ShowStatusMessage => IsInstalling || State == InstallState.Failed;
+
+        public bool HasVersions => Id == "spotify" || Id == "yandexmusic" || Id == "telegram";
+        public string VersionLabelText => LocalizationService.Instance.VersionLabel;
+
+        public string RegularVersionText => Id switch
+        {
+            "telegram" => LocalizationService.Instance.VersionOfficial,
+            "spotify" => LocalizationService.Instance.VersionRegular,
+            "yandexmusic" => LocalizationService.Instance.VersionRegular,
+            _ => ""
+        };
+
+        public string ModVersionText => Id switch
+        {
+            "telegram" => LocalizationService.Instance.VersionAyuGram,
+            "spotify" => LocalizationService.Instance.VersionSpotX,
+            "yandexmusic" => LocalizationService.Instance.VersionMod,
+            _ => ""
+        };
 
         public string StateText => State switch
         {
@@ -115,9 +165,97 @@ namespace MacStyleHub.ViewModels
                     "Скачивание Zapret..." => LocalizationService.Instance.CurrentLanguage switch { "EN" => "Downloading Zapret...", "ZH" => "正在下载 Zapret...", _ => "Скачивание Zapret..." },
                     "Запуск установщика..." => LocalizationService.Instance.CurrentLanguage switch { "EN" => "Launching installer...", "ZH" => "启动安装程序...", _ => "Запуск установщика..." },
                     "Успешно распаковано!" => LocalizationService.Instance.CurrentLanguage switch { "EN" => "Extracted successfully!", "ZH" => "解压成功！", _ => "Успешно распаковано!" },
+                    "Запуск установщика SpotX..." => LocalizationService.Instance.CurrentLanguage switch { "EN" => "Launching SpotX installer...", "ZH" => "启动 SpotX 安装程序...", _ => "Запуск установщика SpotX..." },
+                    "Скачивание и запуск SpotX..." => LocalizationService.Instance.CurrentLanguage switch { "EN" => "Downloading & running SpotX...", "ZH" => "下载并运行 SpotX...", _ => "Скачивание и запуск SpotX..." },
+                    "Установка SpotX..." => LocalizationService.Instance.CurrentLanguage switch { "EN" => "Installing SpotX...", "ZH" => "正在安装 SpotX...", _ => "Установка SpotX..." },
                     _ => StatusMessage
                 };
             }
+        }
+
+        partial void OnIsModSelectedChanged(bool value)
+        {
+            UpdateInfoAndState();
+        }
+
+        [RelayCommand]
+        public void SelectRegular()
+        {
+            IsModSelected = false;
+        }
+
+        [RelayCommand]
+        public void SelectMod()
+        {
+            IsModSelected = true;
+        }
+
+        private void UpdateInfoAndState()
+        {
+            if (Id == "spotify")
+            {
+                if (IsModSelected)
+                {
+                    Name = LocalizationService.Instance.SpotifyModName;
+                    Description = LocalizationService.Instance.DescSpotifyMod;
+                    Category = LocalizationService.Instance.CategoryPlayers;
+                    WingetId = "";
+                }
+                else
+                {
+                    Name = "Spotify";
+                    Description = LocalizationService.Instance.DescSpotify;
+                    Category = LocalizationService.Instance.CategoryPlayers;
+                    WingetId = "Spotify.Spotify";
+                }
+            }
+            else if (Id == "yandexmusic")
+            {
+                if (IsModSelected)
+                {
+                    Name = LocalizationService.Instance.YandexMusicModName;
+                    Description = LocalizationService.Instance.YandexMusicModDesc;
+                    Category = LocalizationService.Instance.CategoryPlayers;
+                    WingetId = "";
+                }
+                else
+                {
+                    Name = LocalizationService.Instance.YandexMusicName;
+                    Description = LocalizationService.Instance.DescYandexMusic;
+                    Category = LocalizationService.Instance.CategoryPlayers;
+                    WingetId = "Yandex.Music";
+                }
+            }
+            else if (Id == "telegram")
+            {
+                if (IsModSelected)
+                {
+                    Name = LocalizationService.Instance.TelegramModName;
+                    Description = LocalizationService.Instance.DescTelegramMod;
+                    Category = LocalizationService.Instance.CategoryMessengers;
+                    WingetId = "RadolynLabs.AyuGramDesktop";
+                }
+                else
+                {
+                    Name = "Telegram Desktop";
+                    Description = LocalizationService.Instance.DescTelegram;
+                    Category = LocalizationService.Instance.CategoryMessengers;
+                    WingetId = "Telegram.TelegramDesktop";
+                }
+            }
+
+            State = InstallerService.Instance.GetState(Id, IsModSelected);
+            Progress = InstallerService.Instance.GetProgress(Id, IsModSelected);
+            StatusMessage = InstallerService.Instance.GetStatusMessage(Id, IsModSelected);
+
+            OnPropertyChanged(nameof(IsNotInstalled));
+            OnPropertyChanged(nameof(IsInstalling));
+            OnPropertyChanged(nameof(IsInstalled));
+            OnPropertyChanged(nameof(ShowStatusMessage));
+            OnPropertyChanged(nameof(StateText));
+            OnPropertyChanged(nameof(ActionText));
+            OnPropertyChanged(nameof(LocalizedStatusMessage));
+            OnPropertyChanged(nameof(AppIcon));
         }
 
         public void Update(InstallState state, int progress, string message)
@@ -126,19 +264,13 @@ namespace MacStyleHub.ViewModels
             Progress = progress;
             StatusMessage = message;
 
-            if (Id == "yandexmusicmod")
-            {
-                Name = LocalizationService.Instance.YandexMusicModName;
-                Description = LocalizationService.Instance.YandexMusicModDesc;
-                Category = LocalizationService.Instance.SidebarPlayer;
-            }
-            else if (Id == "zapret")
+            if (Id == "zapret")
             {
                 Name = LocalizationService.Instance.ZapretName;
                 Description = LocalizationService.Instance.ZapretDesc;
                 Category = LocalizationService.Instance.CategoryUtilities;
             }
-            else
+            else if (Id == "chrome" || Id == "discord" || Id == "steam" || Id == "vlc" || Id == "7zip")
             {
                 Category = Category switch
                 {
@@ -156,19 +288,16 @@ namespace MacStyleHub.ViewModels
                     "discord" => LocalizationService.Instance.DescDiscord,
                     "steam" => LocalizationService.Instance.DescSteam,
                     "vlc" => LocalizationService.Instance.DescVlc,
-                    "telegram" => LocalizationService.Instance.DescTelegram,
-                    "spotify" => LocalizationService.Instance.DescSpotify,
                     "7zip" => LocalizationService.Instance.Desc7Zip,
                     _ => Description
                 };
             }
 
-            OnPropertyChanged(nameof(IsNotInstalled));
-            OnPropertyChanged(nameof(IsInstalling));
-            OnPropertyChanged(nameof(IsInstalled));
-            OnPropertyChanged(nameof(StateText));
-            OnPropertyChanged(nameof(ActionText));
-            OnPropertyChanged(nameof(LocalizedStatusMessage));
+            UpdateInfoAndState();
+
+            OnPropertyChanged(nameof(VersionLabelText));
+            OnPropertyChanged(nameof(RegularVersionText));
+            OnPropertyChanged(nameof(ModVersionText));
         }
     }
 
@@ -178,7 +307,67 @@ namespace MacStyleHub.ViewModels
         private ObservableCollection<ProgramInstallItemViewModel> _programs = new();
 
         [ObservableProperty]
-        private bool _isZapretInstructionsVisible;
+        private bool _isModalVisible;
+
+        [ObservableProperty]
+        private bool _isZapretModalActive;
+
+        [ObservableProperty]
+        private bool _isVersionSelectorActive;
+
+        private ProgramInstallItemViewModel? _activeModalProg;
+        public ProgramInstallItemViewModel? ActiveModalProg
+        {
+            get => _activeModalProg;
+            set
+            {
+                if (_activeModalProg != null)
+                {
+                    _activeModalProg.PropertyChanged -= OnActiveModalProgPropertyChanged;
+                }
+                if (SetProperty(ref _activeModalProg, value))
+                {
+                    if (_activeModalProg != null)
+                    {
+                        _activeModalProg.PropertyChanged += OnActiveModalProgPropertyChanged;
+                    }
+                    NotifyModalPropertiesChanged();
+                }
+            }
+        }
+
+        private void OnActiveModalProgPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            NotifyModalPropertiesChanged();
+        }
+
+        private void NotifyModalPropertiesChanged()
+        {
+            OnPropertyChanged(nameof(ModalTitle));
+            OnPropertyChanged(nameof(ActiveModalAppName));
+            OnPropertyChanged(nameof(ActiveModalAppDescription));
+            OnPropertyChanged(nameof(ActiveModalVersionLabel));
+            OnPropertyChanged(nameof(ActiveModalRegularText));
+            OnPropertyChanged(nameof(ActiveModalModText));
+            OnPropertyChanged(nameof(ActiveModalIsModSelected));
+        }
+
+        public string ModalTitle => IsZapretModalActive 
+            ? ZapretModalTitle 
+            : LocalizationService.Instance.VersionSelectorModalTitle;
+
+        public string ActiveModalAppName => ActiveModalProg?.Name ?? "";
+        public string ActiveModalAppDescription => ActiveModalProg?.Description ?? "";
+        public string ActiveModalVersionLabel => ActiveModalProg?.VersionLabelText ?? "";
+        public string ActiveModalRegularText => ActiveModalProg?.RegularVersionText ?? "";
+        public string ActiveModalModText => ActiveModalProg?.ModVersionText ?? "";
+        public bool ActiveModalIsModSelected => ActiveModalProg?.IsModSelected ?? false;
+
+        public string ModalCancelText => LocalizationService.Instance.WeatherLocationDialogCancel;
+        public string ModalInstallText => LocalizationService.Instance.InstallerBtnInstall;
+
+        public string ZapretModalTitle => LocalizationService.Instance.ZapretModalTitle;
+        public string ZapretModalDesc => LocalizationService.Instance.ZapretModalDesc;
 
         public InstallerViewModel()
         {
@@ -212,8 +401,10 @@ namespace MacStyleHub.ViewModels
                 OnPropertyChanged(nameof(InstallerBtnScan));
                 OnPropertyChanged(nameof(ZapretModalTitle));
                 OnPropertyChanged(nameof(ZapretModalDesc));
-                OnPropertyChanged(nameof(ZapretModalCancel));
-                OnPropertyChanged(nameof(ZapretModalInstall));
+                OnPropertyChanged(nameof(ModalTitle));
+                OnPropertyChanged(nameof(ModalCancelText));
+                OnPropertyChanged(nameof(ModalInstallText));
+                NotifyModalPropertiesChanged();
             };
         }
 
@@ -225,10 +416,26 @@ namespace MacStyleHub.ViewModels
         {
             Dispatcher.UIThread.Post(() =>
             {
-                var prog = Programs.FirstOrDefault(p => p.Id == id);
+                string baseId = id;
+                bool isMod = false;
+                if (id.EndsWith("_reg"))
+                {
+                    baseId = id.Substring(0, id.Length - 4);
+                    isMod = false;
+                }
+                else if (id.EndsWith("_mod"))
+                {
+                    baseId = id.Substring(0, id.Length - 4);
+                    isMod = true;
+                }
+
+                var prog = Programs.FirstOrDefault(p => p.Id == baseId);
                 if (prog != null)
                 {
-                    prog.Update(state, progress, message);
+                    if (id == baseId || prog.IsModSelected == isMod)
+                    {
+                        prog.Update(state, progress, message);
+                    }
                 }
             });
         }
@@ -240,14 +447,26 @@ namespace MacStyleHub.ViewModels
         }
 
         [RelayCommand]
-        public void InstallProgram(string id)
+        public void InstallProgram(ProgramInstallItemViewModel prog)
         {
-            if (id == "zapret")
+            if (prog == null) return;
+            ActiveModalProg = prog;
+            if (prog.Id == "zapret")
             {
-                IsZapretInstructionsVisible = true;
-                return;
+                IsZapretModalActive = true;
+                IsVersionSelectorActive = false;
+                IsModalVisible = true;
             }
-            InstallerService.Instance.InstallProgram(id);
+            else if (prog.HasVersions)
+            {
+                IsZapretModalActive = false;
+                IsVersionSelectorActive = true;
+                IsModalVisible = true;
+            }
+            else
+            {
+                InstallerService.Instance.InstallProgram(prog.Id, prog.IsModSelected);
+            }
         }
 
         [RelayCommand]
@@ -256,7 +475,7 @@ namespace MacStyleHub.ViewModels
             var zapretProg = Programs.FirstOrDefault(p => p.Id == "zapret");
             if (zapretProg != null && zapretProg.IsSelected && zapretProg.IsNotInstalled)
             {
-                IsZapretInstructionsVisible = true;
+                InstallProgram(zapretProg);
                 return;
             }
 
@@ -264,36 +483,54 @@ namespace MacStyleHub.ViewModels
             {
                 if (prog.IsSelected && prog.IsNotInstalled)
                 {
-                    InstallerService.Instance.InstallProgram(prog.Id);
+                    InstallerService.Instance.InstallProgram(prog.Id, prog.IsModSelected);
                 }
             }
         }
 
         [RelayCommand]
-        public void ConfirmZapretInstall()
+        public void ConfirmModalInstall()
         {
-            IsZapretInstructionsVisible = false;
-            InstallerService.Instance.InstallProgram("zapret");
-
-            // Also install other selected programs
-            foreach (var prog in Programs)
+            IsModalVisible = false;
+            if (ActiveModalProg != null)
             {
-                if (prog.Id != "zapret" && prog.IsSelected && prog.IsNotInstalled)
+                InstallerService.Instance.InstallProgram(ActiveModalProg.Id, ActiveModalProg.IsModSelected);
+
+                if (ActiveModalProg.Id == "zapret")
                 {
-                    InstallerService.Instance.InstallProgram(prog.Id);
+                    foreach (var prog in Programs)
+                    {
+                        if (prog.Id != "zapret" && prog.IsSelected && prog.IsNotInstalled)
+                        {
+                            InstallerService.Instance.InstallProgram(prog.Id, prog.IsModSelected);
+                        }
+                    }
                 }
             }
         }
 
         [RelayCommand]
-        public void CancelZapretInstall()
+        public void CancelModal()
         {
-            IsZapretInstructionsVisible = false;
+            IsModalVisible = false;
         }
 
-        public string ZapretModalTitle => LocalizationService.Instance.ZapretModalTitle;
-        public string ZapretModalDesc => LocalizationService.Instance.ZapretModalDesc;
-        public string ZapretModalCancel => LocalizationService.Instance.WeatherLocationDialogCancel;
-        public string ZapretModalInstall => LocalizationService.Instance.InstallerBtnInstall;
+        [RelayCommand]
+        public void SelectModalRegular()
+        {
+            if (ActiveModalProg != null)
+            {
+                ActiveModalProg.IsModSelected = false;
+            }
+        }
+
+        [RelayCommand]
+        public void SelectModalMod()
+        {
+            if (ActiveModalProg != null)
+            {
+                ActiveModalProg.IsModSelected = true;
+            }
+        }
     }
 }

@@ -17,6 +17,22 @@ namespace MacStyleHub.Views
             BeginMoveDrag(e);
         }
 
+        private DynamicIslandWindow? _dynamicIsland;
+
+        protected override void OnOpened(System.EventArgs e)
+        {
+            base.OnOpened(e);
+
+            if (DataContext is ViewModels.MainWindowViewModel mainVm)
+            {
+                _dynamicIsland = new DynamicIslandWindow
+                {
+                    DataContext = mainVm
+                };
+                _dynamicIsland.Show();
+            }
+        }
+
         private bool _isExiting = false;
 
         public void ExitApp()
@@ -34,6 +50,11 @@ namespace MacStyleHub.Views
             }
             else
             {
+                if (DataContext is ViewModels.MainWindowViewModel mainVm)
+                {
+                    mainVm.ToolsVM.CleanupOnExit();
+                }
+                _dynamicIsland?.Close();
                 base.OnClosing(e);
             }
         }

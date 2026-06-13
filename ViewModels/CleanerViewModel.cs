@@ -23,6 +23,9 @@ namespace MacStyleHub.ViewModels
         private string _recycleBinSize = "0 B";
 
         [ObservableProperty]
+        private string _browserCacheSize = "0 B";
+
+        [ObservableProperty]
         private string _totalSize = "0 B";
 
         [ObservableProperty]
@@ -62,6 +65,7 @@ namespace MacStyleHub.ViewModels
                 SystemTempSize = result.FormattedSystemTemp;
                 PrefetchSize = result.FormattedPrefetch;
                 RecycleBinSize = result.FormattedRecycleBin;
+                BrowserCacheSize = result.FormattedBrowserCache;
                 TotalSize = result.FormattedTotal;
                 ScanCompleted = true;
             }
@@ -88,6 +92,7 @@ namespace MacStyleHub.ViewModels
                 SystemTempSize = result.FormattedSystemTemp;
                 PrefetchSize = result.FormattedPrefetch;
                 RecycleBinSize = result.FormattedRecycleBin;
+                BrowserCacheSize = result.FormattedBrowserCache;
                 TotalSize = result.FormattedTotal;
 
                 CleanCompleted = true;

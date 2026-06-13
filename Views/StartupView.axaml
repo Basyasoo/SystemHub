@@ -21,7 +21,7 @@
             </Grid>
 
             <!-- Autostart Toggle Switch for this App -->
-            <Border Classes="GlassCard" Padding="20" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderGray}">
+            <Border Classes="GlassCard" Padding="20">
                 <Grid ColumnDefinitions="*, Auto">
                     <StackPanel Grid.Column="0" Spacing="4" VerticalAlignment="Center">
                         <TextBlock Text="{Binding StartupToggleText, Source={x:Static services:LocalizationService.Instance}}" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>

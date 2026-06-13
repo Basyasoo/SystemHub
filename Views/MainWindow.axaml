@@ -2,319 +2,639 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:MacStyleHub.ViewModels"
         xmlns:services="using:MacStyleHub.Services"
+        xmlns:views="using:MacStyleHub.Views"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="1050" d:DesignHeight="680"
         Width="1050" Height="680"
         x:Class="MacStyleHub.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Icon="/Assets/app.ico"
+        Icon="avares://SystemHub/Assets/app.ico"
         Title="SystemHub"
         WindowDecorations="None"
         WindowStartupLocation="CenterScreen"
         TransparencyLevelHint="Mica,AcrylicBlur"
         Background="Transparent">
 
+    <Window.Styles>
+        <!-- Style for Title Bar buttons -->
+        <Style Selector="Button.TitleBarButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+            <Setter Property="Width" Value="46"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="0"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style Selector="Button.TitleBarButton /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.12"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        
+        <Style Selector="Button.TitleBarButton:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource SidebarHoverBg}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+        </Style>
+        
+        <Style Selector="Button.TitleBarButton:pressed /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource BorderGray}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+        </Style>
+
+        <!-- Specific style for Close Title Bar button -->
+        <Style Selector="Button.TitleBarCloseButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+            <Setter Property="Width" Value="46"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="0"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+        </Style>
+
+        <Style Selector="Button.TitleBarCloseButton /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.12"/>
+                    <BrushTransition Property="Foreground" Duration="0:0:0.12"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        
+        <Style Selector="Button.TitleBarCloseButton:pointerover">
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        
+        <Style Selector="Button.TitleBarCloseButton:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="#E81123"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        
+        <Style Selector="Button.TitleBarCloseButton:pressed">
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        
+        <Style Selector="Button.TitleBarCloseButton:pressed /template/ ContentPresenter">
+            <Setter Property="Background" Value="#F1707A"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        
+        <!-- Toggle Maximize/Restore icon based on Window State -->
+        <Style Selector="Window[WindowState=Maximized] Border#MaximizeIcon">
+            <Setter Property="IsVisible" Value="False"/>
+        </Style>
+        <Style Selector="Window[WindowState=Maximized] Canvas#RestoreIcon">
+            <Setter Property="IsVisible" Value="True"/>
+        </Style>
+        <Style Selector="Window[WindowState=Normal] Border#MaximizeIcon">
+            <Setter Property="IsVisible" Value="True"/>
+        </Style>
+        <Style Selector="Window[WindowState=Normal] Canvas#RestoreIcon">
+            <Setter Property="IsVisible" Value="False"/>
+        </Style>
+        
+        <!-- Window CornerRadius triggers -->
+        <Style Selector="Window[WindowState=Maximized] Border#MainWindowBorder">
+            <Setter Property="CornerRadius" Value="0"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+        <Style Selector="Window[WindowState=Normal] Border#MainWindowBorder">
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
+        <!-- Welcome Overlay Animation Styles -->
+        <Style Selector="Grid.welcome-overlay">
+            <Setter Property="Transitions">
+                <Transitions>
+                    <DoubleTransition Property="Opacity" Duration="0:0:0.6" Easing="0.1, 0.9, 0.2, 1.0"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        
+        <Style Selector="StackPanel.welcome-content">
+            <Setter Property="Opacity" Value="0"/>
+            <Setter Property="RenderTransform" Value="translateY(25px)"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <DoubleTransition Property="Opacity" Duration="0:0:0.8" Easing="0.1, 0.9, 0.2, 1.0"/>
+                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.8" Easing="0.1, 0.9, 0.2, 1.0"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        
+        <Style Selector="StackPanel.welcome-content.animate">
+            <Setter Property="Opacity" Value="1"/>
+            <Setter Property="RenderTransform" Value="none"/>
+        </Style>
+    </Window.Styles>
+
     <Design.DataContext>
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
     <!-- Main Window Border with Rounded Corners -->
-    <Border CornerRadius="10" ClipToBounds="True" Background="{DynamicResource MainBg}" BorderBrush="{DynamicResource BorderGray}" BorderThickness="1">
-        <Grid ColumnDefinitions="230, 1, *">
-            
-            <!-- Left Sidebar (macOS style) -->
-            <Grid Grid.Column="0" RowDefinitions="Auto, *, Auto" Background="{DynamicResource SidebarBg}">
-                
-                <!-- Custom Title Bar with traffic lights controls -->
-                <Grid Grid.Row="0" Height="50" Background="Transparent" Name="TitleBar" PointerPressed="TitleBar_OnPointerPressed">
-                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="20,0,0,0" VerticalAlignment="Center">
-                        <!-- Red Button (Close) -->
-                        <Button Width="12" Height="12" CornerRadius="6" Background="#FF5F56" BorderThickness="0" Padding="0" Click="Close_OnClick" ToolTip.Tip="{Binding ToolTipClose, Source={x:Static services:LocalizationService.Instance}}">
-                            <Button.Styles>
-                                <Style Selector="Button:pointerover">
-                                    <Setter Property="Background" Value="#E04C40"/>
-                                </Style>
-                            </Button.Styles>
-                        </Button>
-                        <!-- Yellow Button (Minimize) -->
-                        <Button Width="12" Height="12" CornerRadius="6" Background="#FFBD2E" BorderThickness="0" Padding="0" Click="Minimize_OnClick" ToolTip.Tip="{Binding ToolTipMinimize, Source={x:Static services:LocalizationService.Instance}}">
-                            <Button.Styles>
-                                <Style Selector="Button:pointerover">
-                                    <Setter Property="Background" Value="#DE9E1B"/>
-                                </Style>
-                            </Button.Styles>
-                        </Button>
-                        <!-- Green Button (Maximize) -->
-                        <Button Width="12" Height="12" CornerRadius="6" Background="#27C93F" BorderThickness="0" Padding="0" Click="Maximize_OnClick" ToolTip.Tip="{Binding ToolTipMaximize, Source={x:Static services:LocalizationService.Instance}}">
-                            <Button.Styles>
-                                <Style Selector="Button:pointerover">
-                                    <Setter Property="Background" Value="#1FA330"/>
-                                </Style>
-                            </Button.Styles>
-                        </Button>
-                    </StackPanel>
-                </Grid>
-
-                <!-- Sidebar Menu ListBox -->
-                <ListBox Grid.Row="1" Background="Transparent" BorderThickness="0" Margin="12,10,12,10"
-                         SelectedIndex="{Binding SelectedMenuIndex}">
+    <Border Name="MainWindowBorder" Background="{DynamicResource MainBg}" BorderBrush="{DynamicResource BorderGray}" CornerRadius="10" ClipToBounds="True" BorderThickness="1">
+        <Panel>
+            <!-- Normal App Layout -->
+            <Grid ColumnDefinitions="Auto, 1, *" IsVisible="{Binding ShowMainLayout}">
+                    <!-- Left Sidebar (macOS style) -->
+                    <Grid Grid.Column="0" Width="{Binding SidebarWidth}" RowDefinitions="Auto, *, Auto" Background="{DynamicResource SidebarBg}">
+                        <Grid.Transitions>
+                            <Transitions>
+                                <DoubleTransition Property="Width" Duration="0:0:0.25" Easing="0.1, 0.9, 0.2, 1.0"/>
+                            </Transitions>
+                        </Grid.Transitions>
                     
-                    <!-- Local styling for Sidebar items -->
-                    <ListBox.Styles>
-                        <Style Selector="ListBoxItem">
-                            <Setter Property="Background" Value="Transparent"/>
-                            <Setter Property="Foreground" Value="#8E8E93"/>
-                            <Setter Property="CornerRadius" Value="6"/>
-                            <Setter Property="Margin" Value="0,3"/>
-                            <Setter Property="Padding" Value="12,10"/>
-                            <Setter Property="Transitions">
-                                <Transitions>
-                                    <BrushTransition Property="Background" Duration="0:0:0.1"/>
-                                    <BrushTransition Property="Foreground" Duration="0:0:0.1"/>
-                                </Transitions>
-                            </Setter>
-                        </Style>
-                        <Style Selector="ListBoxItem:pointerover">
-                            <Setter Property="Background" Value="{DynamicResource SidebarHoverBg}"/>
-                            <Setter Property="Foreground" Value="{DynamicResource SidebarHoverFg}"/>
-                        </Style>
-                        <Style Selector="ListBoxItem:selected">
-                            <Setter Property="Background" Value="{StaticResource AccentBlue}"/>
-                            <Setter Property="Foreground" Value="White"/>
-                        </Style>
-                        <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
-                            <Setter Property="Background" Value="{StaticResource AccentBlue}"/>
-                            <Setter Property="Foreground" Value="White"/>
-                        </Style>
-                    </ListBox.Styles>
-
-                    <!-- Sidebar Menu Items (using vector icons) -->
-                    <ListBoxItem>
-                        <StackPanel Orientation="Horizontal" Spacing="12">
-                            <PathIcon Data="{StaticResource IconHome}" Width="16" Height="16" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding SidebarHome, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="Medium" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </ListBoxItem>
-                    
-                    <ListBoxItem>
-                        <StackPanel Orientation="Horizontal" Spacing="12">
-                            <PathIcon Data="{StaticResource IconMoon}" Width="16" Height="16" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding SidebarWeather, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="Medium" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </ListBoxItem>
-                    
-                    <ListBoxItem>
-                        <StackPanel Orientation="Horizontal" Spacing="12">
-                            <PathIcon Data="{StaticResource IconSystem}" Width="16" Height="16" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding SidebarSystem, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="Medium" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </ListBoxItem>
-                    
-                    <ListBoxItem>
-                        <StackPanel Orientation="Horizontal" Spacing="12">
-                            <PathIcon Data="{StaticResource IconCleaner}" Width="16" Height="16" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding SidebarCleaner, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="Medium" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </ListBoxItem>
-                    
-                    <ListBoxItem>
-                        <StackPanel Orientation="Horizontal" Spacing="12">
-                            <PathIcon Data="{StaticResource IconSettings}" Width="16" Height="16" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding SidebarStartup, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="Medium" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </ListBoxItem>
-
-                    <ListBoxItem>
-                        <StackPanel Orientation="Horizontal" Spacing="12">
-                            <PathIcon Data="{StaticResource IconMusic}" Width="16" Height="16" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding SidebarPlayer, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="Medium" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </ListBoxItem>
-
-                    <ListBoxItem>
-                        <StackPanel Orientation="Horizontal" Spacing="12">
-                            <PathIcon Data="{StaticResource IconFlash}" Width="16" Height="16" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding SidebarInstaller, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="Medium" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </ListBoxItem>
-                    
-                    <ListBoxItem>
-                        <StackPanel Orientation="Horizontal" Spacing="12">
-                            <PathIcon Data="{StaticResource IconTip}" Width="16" Height="16" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding SidebarAbout, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="Medium" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </ListBoxItem>
-                </ListBox>
-
-                <!-- Now Playing Widget (Footer) -->
-                <Border Grid.Row="2" Background="{DynamicResource SidebarBg}" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource BorderGray}" Padding="14,12" Height="68"
-                        IsVisible="{Binding PlaybackVM.HasMedia}">
-                    <Grid ColumnDefinitions="Auto, *, Auto" VerticalAlignment="Center">
-                        <!-- Playback indicator -->
-                        <Border Grid.Column="0" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderGray}" BorderThickness="1" Width="32" Height="32" CornerRadius="4" Margin="0,0,10,0">
-                            <PathIcon Data="{StaticResource IconMusic}" Width="14" Height="14" Foreground="{StaticResource AccentBlue}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        
-                        <!-- Song details -->
-                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
-                            <TextBlock Text="{Binding PlaybackVM.Title}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" TextTrimming="CharacterEllipsis"/>
-                            <TextBlock Text="{Binding PlaybackVM.Artist}" FontSize="10" Foreground="{DynamicResource TextSecondary}" TextTrimming="CharacterEllipsis"/>
-                        </StackPanel>
-
-                        <!-- Play/Pause indicators wrapper as Button -->
-                        <Button Grid.Column="2" Width="30" Height="30" Padding="0" CornerRadius="15" Background="Transparent" BorderThickness="0"
-                                Command="{Binding PlaybackVM.TogglePlayCommand}" Margin="5,0,0,0">
-                            <Grid>
-                                <PathIcon Data="{StaticResource IconPause}" Width="12" Height="12" Foreground="{StaticResource AccentBlue}" IsVisible="{Binding PlaybackVM.IsPlaying}"/>
-                                <PathIcon Data="{StaticResource IconPlay}" Width="12" Height="12" Foreground="{StaticResource TextSecondary}" IsVisible="{Binding !PlaybackVM.IsPlaying}"/>
-                            </Grid>
-                        </Button>
-                    </Grid>
-                </Border>
-            </Grid>
-
-            <!-- Sidebar Separator Line -->
-            <Border Grid.Column="1" Width="1" Background="{DynamicResource BorderGray}" VerticalAlignment="Stretch"/>
-
-            <!-- Right Main Content Panel -->
-            <Grid Grid.Column="2" RowDefinitions="Auto, *" Background="{DynamicResource MainBg}">
-                
-                <!-- Titlebar extension for dragging main window area -->
-                <Grid Grid.Row="0" Height="40" Background="Transparent" Name="RightTitleBar" PointerPressed="TitleBar_OnPointerPressed">
-                    <TextBlock Text="SystemHub" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.9" LetterSpacing="-0.2"/>
-                </Grid>
-                
-                <!-- Main Content Body with smooth page transitions and skeleton loading -->
-                <Grid Grid.Row="1">
-                    <!-- Main Content, visible when NOT loading -->
-                    <TransitioningContentControl Content="{Binding CurrentPageViewModel}" ClipToBounds="True" IsVisible="{Binding !IsAppLoading}">
-                        <TransitioningContentControl.PageTransition>
-                            <CompositePageTransition>
-                                <PageSlide Duration="0:0:0.35" Orientation="Horizontal">
-                                    <PageSlide.SlideInEasing>
-                                        <CubicEaseOut/>
-                                    </PageSlide.SlideInEasing>
-                                    <PageSlide.SlideOutEasing>
-                                        <CubicEaseOut/>
-                                    </PageSlide.SlideOutEasing>
-                                </PageSlide>
-                                <CrossFade Duration="0:0:0.25"/>
-                            </CompositePageTransition>
-                        </TransitioningContentControl.PageTransition>
-                    </TransitioningContentControl>
-
-                    <!-- Skeleton Loading View, visible when loading -->
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding IsAppLoading}">
-                        <StackPanel Margin="30" Spacing="25">
-                            <!-- Header Skeleton -->
-                            <Grid ColumnDefinitions="*, Auto">
-                                <StackPanel Grid.Column="0" Spacing="8">
-                                    <Border Classes="Skeleton" Width="220" Height="28" HorizontalAlignment="Left"/>
-                                    <Border Classes="Skeleton" Width="140" Height="14" HorizontalAlignment="Left"/>
-                                </StackPanel>
-                                <Border Grid.Column="1" Classes="Skeleton" Width="120" Height="48" CornerRadius="6" VerticalAlignment="Center"/>
-                            </Grid>
-
-                            <!-- Row 1: Weather & Player Skeleton -->
-                            <Grid ColumnDefinitions="*, *" RowDefinitions="Auto" HorizontalAlignment="Stretch">
-                                <!-- Weather Card Skeleton -->
-                                <Border Grid.Column="0" Classes="GlassCard" Margin="0,0,10,0" MinHeight="210" VerticalAlignment="Stretch">
-                                    <Grid RowDefinitions="Auto, *, Auto">
-                                        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8">
-                                            <Border Classes="Skeleton" Width="100" Height="14" HorizontalAlignment="Left"/>
-                                        </StackPanel>
-                                        <Grid Grid.Row="1" ColumnDefinitions="Auto, *" VerticalAlignment="Center" Margin="0,5">
-                                            <!-- Circle Avatar (similar to the user's icon load) -->
-                                            <Border Grid.Column="0" Classes="SkeletonCircle" Width="64" Height="64" Margin="0,0,20,0"/>
-                                            <StackPanel Grid.Column="1" Spacing="8" VerticalAlignment="Center">
-                                                <Border Classes="Skeleton" Width="80" Height="24" HorizontalAlignment="Left"/>
-                                                <Border Classes="Skeleton" Width="60" Height="14" HorizontalAlignment="Left"/>
-                                            </StackPanel>
-                                        </Grid>
-                                        <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="25">
-                                            <Border Classes="Skeleton" Width="60" Height="14"/>
-                                            <Border Classes="Skeleton" Width="60" Height="14"/>
-                                        </StackPanel>
-                                    </Grid>
-                                </Border>
-
-                                <!-- Player Card Skeleton -->
-                                <Border Grid.Column="1" Classes="GlassCard" Margin="10,0,0,0" MinHeight="210" VerticalAlignment="Stretch">
-                                    <Grid RowDefinitions="Auto, *">
-                                        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8">
-                                            <Border Classes="Skeleton" Width="120" Height="14" HorizontalAlignment="Left"/>
-                                        </StackPanel>
-                                        <Grid Grid.Row="1" RowDefinitions="*, Auto" Margin="0,10,0,0">
-                                            <StackPanel Grid.Row="0" Spacing="8" VerticalAlignment="Center">
-                                                <Border Classes="Skeleton" Width="180" Height="18" HorizontalAlignment="Left"/>
-                                                <Border Classes="Skeleton" Width="100" Height="14" HorizontalAlignment="Left"/>
-                                            </StackPanel>
-                                            <Grid Grid.Row="1" ColumnDefinitions="*, Auto" VerticalAlignment="Center" Margin="0,5,0,0">
-                                                <Border Grid.Column="0" Classes="Skeleton" Width="60" Height="14" HorizontalAlignment="Left"/>
-                                                <Border Grid.Column="1" Classes="Skeleton" Width="120" Height="14" HorizontalAlignment="Right"/>
-                                            </Grid>
-                                        </Grid>
-                                    </Grid>
-                                </Border>
-                            </Grid>
-
-                            <!-- Row 2: Resources Card Skeleton -->
-                            <Border Classes="SystemCard" HorizontalAlignment="Stretch" MinHeight="180">
-                                <Grid RowDefinitions="Auto, *">
-                                    <Border Grid.Row="0" Classes="Skeleton" Width="140" Height="16" HorizontalAlignment="Left" Margin="0,0,0,10"/>
-                                    <Grid Grid.Row="1" ColumnDefinitions="*, *" VerticalAlignment="Center">
-                                        <!-- CPU Circle Outline -->
-                                        <StackPanel Grid.Column="0" HorizontalAlignment="Center">
-                                            <Grid Width="100" Height="100">
-                                                <!-- Outline circle -->
-                                                <Ellipse Width="90" Height="90" Stroke="{DynamicResource BorderGray}" StrokeThickness="8"/>
-                                                <!-- Pulsing inner circle -->
-                                                <Border Classes="SkeletonCircle" Width="64" Height="64"/>
-                                            </Grid>
-                                        </StackPanel>
-                                        <!-- RAM Circle Outline -->
-                                        <StackPanel Grid.Column="1" HorizontalAlignment="Center">
-                                            <Grid Width="100" Height="100">
-                                                <Ellipse Width="90" Height="90" Stroke="{DynamicResource BorderGray}" StrokeThickness="8"/>
-                                                <Border Classes="SkeletonCircle" Width="64" Height="64"/>
-                                            </Grid>
-                                        </StackPanel>
-                                    </Grid>
-                                </Grid>
-                            </Border>
-
-                            <!-- Row 3: Tip Skeleton -->
-                            <Border Classes="GlassCard" HorizontalAlignment="Stretch">
-                                <Grid ColumnDefinitions="Auto, *">
-                                    <Border Grid.Column="0" Classes="SkeletonCircle" Width="20" Height="20" Margin="0,0,15,0" VerticalAlignment="Center"/>
-                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="6">
-                                        <Border Classes="Skeleton" Width="120" Height="14" HorizontalAlignment="Left"/>
-                                        <Border Classes="Skeleton" Width="400" Height="12" HorizontalAlignment="Left"/>
+                    <!-- Custom Title Bar with Windows-style Sidebar Header -->
+                    <Grid Grid.Row="0" Height="40" Background="Transparent" Name="TitleBar" PointerPressed="TitleBar_OnPointerPressed">
+                        <!-- Expanded Titlebar Layout -->
+                        <Panel IsVisible="{Binding !IsSidebarCollapsed}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <!-- Hamburger Toggle Button (Left aligned) -->
+                            <Button Width="28" Height="28" Padding="0" Background="Transparent" BorderThickness="0"
+                                    MinWidth="0" MinHeight="0"
+                                    HorizontalAlignment="Left" VerticalAlignment="Center"
+                                    Margin="16,0,0,0"
+                                    Command="{Binding ToggleSidebarCommand}" ToolTip.Tip="Свернуть/Развернуть боковую панель">
+                                <Button.Styles>
+                                    <Style Selector="Button">
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Setter Property="Transitions">
+                                            <Transitions>
+                                                <BrushTransition Property="Background" Duration="0:0:0.15"/>
+                                            </Transitions>
+                                        </Setter>
+                                    </Style>
+                                    <Style Selector="Button:pointerover">
+                                        <Setter Property="Background" Value="{DynamicResource SidebarHoverBg}"/>
+                                    </Style>
+                                </Button.Styles>
+                                <Grid Width="14" Height="8" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                    <StackPanel Spacing="1.5" VerticalAlignment="Center">
+                                        <Border Height="1.5" Background="{DynamicResource TextSecondary}" CornerRadius="0.75"/>
+                                        <Border Height="1.5" Background="{DynamicResource TextSecondary}" CornerRadius="0.75"/>
+                                        <Border Height="1.5" Background="{DynamicResource TextSecondary}" CornerRadius="0.75"/>
                                     </StackPanel>
                                 </Grid>
-                            </Border>
+                            </Button>
+                        </Panel>
 
-                            <!-- Row 4: Settings Skeleton -->
-                            <Border Classes="GlassCard" HorizontalAlignment="Stretch" Padding="20">
-                                <StackPanel Spacing="15">
-                                    <Border Classes="Skeleton" Width="150" Height="14" HorizontalAlignment="Left"/>
-                                    <Grid ColumnDefinitions="*, *">
-                                        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                                            <Border Classes="Skeleton" Width="60" Height="12" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                                            <Border Classes="Skeleton" Width="160" Height="24" CornerRadius="12"/>
-                                        </StackPanel>
-                                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right" VerticalAlignment="Center">
-                                            <Border Classes="Skeleton" Width="60" Height="12" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                                            <Border Classes="Skeleton" Width="120" Height="24" CornerRadius="12"/>
+                        <!-- Collapsed Titlebar Layout (Only Hamburger Button) -->
+                        <Panel IsVisible="{Binding IsSidebarCollapsed}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button Width="28" Height="28" Padding="0" Background="Transparent" BorderThickness="0"
+                                    MinWidth="0" MinHeight="0"
+                                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                                    Command="{Binding ToggleSidebarCommand}" ToolTip.Tip="Свернуть/Развернуть боковую панель">
+                                <Button.Styles>
+                                    <Style Selector="Button">
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Setter Property="Transitions">
+                                            <Transitions>
+                                                <BrushTransition Property="Background" Duration="0:0:0.15"/>
+                                            </Transitions>
+                                        </Setter>
+                                    </Style>
+                                    <Style Selector="Button:pointerover">
+                                        <Setter Property="Background" Value="{DynamicResource SidebarHoverBg}"/>
+                                    </Style>
+                                </Button.Styles>
+                                <Grid Width="14" Height="8" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                    <StackPanel Spacing="1.5" VerticalAlignment="Center">
+                                        <Border Height="1.5" Background="{DynamicResource TextSecondary}" CornerRadius="0.75"/>
+                                        <Border Height="1.5" Background="{DynamicResource TextSecondary}" CornerRadius="0.75"/>
+                                        <Border Height="1.5" Background="{DynamicResource TextSecondary}" CornerRadius="0.75"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Button>
+                        </Panel>
+                    </Grid>
+ 
+                    <!-- Sidebar Menu ListBox -->
+                    <ListBox Grid.Row="1" Background="Transparent" BorderThickness="0" Margin="12,10,12,10"
+                             SelectedIndex="{Binding SelectedMenuIndex}">
+                        
+                        <!-- Local styling for Sidebar items -->
+                        <ListBox.Styles>
+                            <Style Selector="ListBoxItem">
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="Foreground" Value="#8E8E93"/>
+                                <Setter Property="CornerRadius" Value="6"/>
+                                <Setter Property="Margin" Value="0,3"/>
+                                <Setter Property="Padding" Value="12,10"/>
+                                <Setter Property="Transitions">
+                                    <Transitions>
+                                        <BrushTransition Property="Background" Duration="0:0:0.1"/>
+                                        <BrushTransition Property="Foreground" Duration="0:0:0.1"/>
+                                    </Transitions>
+                                </Setter>
+                            </Style>
+                            <Style Selector="ListBoxItem:pointerover">
+                                <Setter Property="Background" Value="{DynamicResource SidebarHoverBg}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource SidebarHoverFg}"/>
+                            </Style>
+                            <Style Selector="ListBoxItem:selected">
+                                <Setter Property="Background" Value="{StaticResource AccentBlue}"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Style>
+                            <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+                                <Setter Property="Background" Value="{StaticResource AccentBlue}"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Style>
+                            <Style Selector="ListBoxItem.collapsed">
+                                <Setter Property="Padding" Value="0,10"/>
+                            </Style>
+                            <Style Selector="ListBoxItem.collapsed StackPanel">
+                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                            </Style>
+                        </ListBox.Styles>
+ 
+                        <!-- Sidebar Menu Items (using vector icons) -->
+                        <ListBoxItem Classes.collapsed="{Binding IsSidebarCollapsed}">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <PathIcon Data="{StaticResource IconHome}" Width="16" Height="16" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding SidebarHome, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="Medium" VerticalAlignment="Center" IsVisible="{Binding !IsSidebarCollapsed}"/>
+                            </StackPanel>
+                        </ListBoxItem>
+                        
+                        <ListBoxItem Classes.collapsed="{Binding IsSidebarCollapsed}">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <PathIcon Data="{StaticResource IconMoon}" Width="16" Height="16" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding SidebarWeather, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="Medium" VerticalAlignment="Center" IsVisible="{Binding !IsSidebarCollapsed}"/>
+                            </StackPanel>
+                        </ListBoxItem>
+                        
+                        <ListBoxItem Classes.collapsed="{Binding IsSidebarCollapsed}">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <PathIcon Data="{StaticResource IconSystem}" Width="16" Height="16" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding SidebarSystem, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="Medium" VerticalAlignment="Center" IsVisible="{Binding !IsSidebarCollapsed}"/>
+                            </StackPanel>
+                        </ListBoxItem>
+                        
+                        <ListBoxItem Classes.collapsed="{Binding IsSidebarCollapsed}">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <PathIcon Data="{StaticResource IconCleaner}" Width="16" Height="16" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding SidebarCleaner, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="Medium" VerticalAlignment="Center" IsVisible="{Binding !IsSidebarCollapsed}"/>
+                            </StackPanel>
+                        </ListBoxItem>
+                        
+                        <ListBoxItem Classes.collapsed="{Binding IsSidebarCollapsed}">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <PathIcon Data="{StaticResource IconSettings}" Width="16" Height="16" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding SidebarStartup, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="Medium" VerticalAlignment="Center" IsVisible="{Binding !IsSidebarCollapsed}"/>
+                            </StackPanel>
+                        </ListBoxItem>
+ 
+                        <ListBoxItem Classes.collapsed="{Binding IsSidebarCollapsed}">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <PathIcon Data="{StaticResource IconMusic}" Width="16" Height="16" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding SidebarPlayer, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="Medium" VerticalAlignment="Center" IsVisible="{Binding !IsSidebarCollapsed}"/>
+                            </StackPanel>
+                        </ListBoxItem>
+ 
+                        <ListBoxItem Classes.collapsed="{Binding IsSidebarCollapsed}">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <PathIcon Data="{StaticResource IconFlash}" Width="16" Height="16" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding SidebarInstaller, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="Medium" VerticalAlignment="Center" IsVisible="{Binding !IsSidebarCollapsed}"/>
+                            </StackPanel>
+                        </ListBoxItem>
+                        
+                        <ListBoxItem Classes.collapsed="{Binding IsSidebarCollapsed}">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <PathIcon Data="{StaticResource IconSettings}" Width="16" Height="16" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding SidebarTweaks, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="Medium" VerticalAlignment="Center" IsVisible="{Binding !IsSidebarCollapsed}"/>
+                            </StackPanel>
+                        </ListBoxItem>
+ 
+                        <ListBoxItem Classes.collapsed="{Binding IsSidebarCollapsed}">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <PathIcon Data="{StaticResource IconEdit}" Width="16" Height="16" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding SidebarTools, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="Medium" VerticalAlignment="Center" IsVisible="{Binding !IsSidebarCollapsed}"/>
+                            </StackPanel>
+                        </ListBoxItem>
+ 
+                        <ListBoxItem Classes.collapsed="{Binding IsSidebarCollapsed}">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <PathIcon Data="{StaticResource IconTip}" Width="16" Height="16" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding SidebarAbout, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="Medium" VerticalAlignment="Center" IsVisible="{Binding !IsSidebarCollapsed}"/>
+                            </StackPanel>
+                        </ListBoxItem>
+                    </ListBox>
+ 
+                    <!-- User Profile Footer Widget (macOS Style) -->
+                    <Border Grid.Row="2" Background="{DynamicResource SidebarBg}" BorderThickness="0,1,0,0" BorderBrush="{DynamicResource BorderGray}" Padding="12,10" Height="72">
+                        <Button HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                Classes.collapsed="{Binding IsSidebarCollapsed}"
+                                Background="Transparent" BorderThickness="0" CornerRadius="8" Padding="10,8" Cursor="Hand"
+                                Command="{Binding NavigateToProfileCommand}">
+                            <Button.Styles>
+                                <Style Selector="Button">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="BorderThickness" Value="0"/>
+                                    <Setter Property="Transitions">
+                                        <Transitions>
+                                            <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.25" Easing="0.1, 0.9, 0.2, 1.0"/>
+                                            <BrushTransition Property="Background" Duration="0:0:0.2"/>
+                                        </Transitions>
+                                    </Setter>
+                                    <Setter Property="RenderTransform" Value="none"/>
+                                </Style>
+                                <Style Selector="Button:pointerover">
+                                    <Setter Property="Background" Value="{DynamicResource SidebarHoverBg}"/>
+                                    <Setter Property="RenderTransform" Value="scale(1.02)"/>
+                                </Style>
+                                <Style Selector="Button:pressed">
+                                    <Setter Property="RenderTransform" Value="scale(0.97)"/>
+                                </Style>
+                                <Style Selector="Button.collapsed">
+                                    <Setter Property="Padding" Value="0,8"/>
+                                </Style>
+                                <Style Selector="Button.collapsed Grid">
+                                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                                </Style>
+                            </Button.Styles>
+                            <Grid ColumnDefinitions="Auto, *, Auto" VerticalAlignment="Center">
+                                <!-- User Avatar with hover glow and shadow -->
+                                <Border Grid.Column="0" Classes.collapsed="{Binding IsSidebarCollapsed}" Width="36" Height="36" CornerRadius="18" ClipToBounds="True" 
+                                        BorderBrush="#25FFFFFF" BorderThickness="1.5"
+                                        BoxShadow="0 4 12 0 #40000000">
+                                    <Border.Styles>
+                                        <Style Selector="Border">
+                                            <Setter Property="Margin" Value="0,0,10,0"/>
+                                        </Style>
+                                        <Style Selector="Border.collapsed">
+                                            <Setter Property="Margin" Value="0"/>
+                                        </Style>
+                                    </Border.Styles>
+                                    <Grid>
+                                        <Image Source="{Binding ProfileVM.AvatarBitmap}" IsVisible="{Binding ProfileVM.AvatarBitmap, Converter={x:Static ObjectConverters.IsNotNull}}" Stretch="UniformToFill"/>
+                                        <Border IsVisible="{Binding ProfileVM.AvatarBitmap, Converter={x:Static ObjectConverters.IsNull}}">
+                                            <Border.Background>
+                                                <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+                                                    <GradientStop Offset="0.0" Color="#48484A"/>
+                                                    <GradientStop Offset="1.0" Color="#2C2C2E"/>
+                                                </LinearGradientBrush>
+                                            </Border.Background>
+                                            <TextBlock Text="{Binding ProfileVM.Initials}" Foreground="White" FontSize="13" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </Grid>
+                                </Border>
+                                
+                                <!-- User Details -->
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2" IsVisible="{Binding !IsSidebarCollapsed}">
+                                    <TextBlock Text="{Binding ProfileVM.Username}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" TextTrimming="CharacterEllipsis"/>
+                                    <TextBlock Text="Личный кабинет" FontSize="11" Foreground="{DynamicResource TextSecondary}"/>
+                                </StackPanel>
+ 
+                                <!-- macOS Chevron/Arrow icon -->
+                                <PathIcon Grid.Column="2" Data="{StaticResource IconChevron}" Width="10" Height="10" Foreground="{DynamicResource TextSecondary}" Opacity="0.5" VerticalAlignment="Center" IsVisible="{Binding !IsSidebarCollapsed}">
+                                    <PathIcon.Styles>
+                                        <Style Selector="PathIcon">
+                                            <Setter Property="Transitions">
+                                                <Transitions>
+                                                    <ThicknessTransition Property="Margin" Duration="0:0:0.2" Easing="0.1, 0.9, 0.2, 1.0"/>
+                                                </Transitions>
+                                            </Setter>
+                                            <Setter Property="Margin" Value="0,0,0,0"/>
+                                        </Style>
+                                        <Style Selector="Button:pointerover PathIcon">
+                                            <Setter Property="Margin" Value="4,0,-4,0"/>
+                                        </Style>
+                                    </PathIcon.Styles>
+                                </PathIcon>
+                            </Grid>
+                        </Button>
+                    </Border>
+                </Grid>
+ 
+                <!-- Sidebar Separator Line -->
+                <Border Grid.Column="1" Width="1" Background="{DynamicResource BorderGray}" VerticalAlignment="Stretch"/>
+ 
+                <!-- Right Main Content Panel -->
+                <Grid Grid.Column="2" RowDefinitions="Auto, *" Background="{DynamicResource MainBg}">
+                    
+                    <!-- Titlebar extension for dragging main window area -->
+                    <Grid Grid.Row="0" Height="40" Background="Transparent" Name="RightTitleBar" PointerPressed="TitleBar_OnPointerPressed">
+                        <!-- Centered Title -->
+                        <TextBlock Text="SystemHub" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.9" LetterSpacing="-0.2"/>
+
+                        <!-- Windows-style Window Control Buttons -->
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Stretch" HorizontalAlignment="Right">
+                            <!-- Minimize Button -->
+                            <Button Classes="TitleBarButton" Click="Minimize_OnClick" ToolTip.Tip="{Binding ToolTipMinimize, Source={x:Static services:LocalizationService.Instance}}">
+                                <Rectangle Width="10" Height="1" Fill="{Binding $parent[Button].Foreground}"/>
+                            </Button>
+                            
+                            <!-- Maximize / Restore Button -->
+                            <Button Classes="TitleBarButton" Click="Maximize_OnClick" ToolTip.Tip="{Binding ToolTipMaximize, Source={x:Static services:LocalizationService.Instance}}">
+                                <Grid Width="10" Height="10">
+                                    <Border Name="MaximizeIcon" Width="9" Height="9" BorderThickness="1" BorderBrush="{Binding $parent[Button].Foreground}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <Canvas Name="RestoreIcon" Width="10" Height="10" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <Border Width="8" Height="8" BorderThickness="1" BorderBrush="{Binding $parent[Button].Foreground}" Canvas.Left="2" Canvas.Top="0"/>
+                                        <Border Width="8" Height="8" BorderThickness="1" BorderBrush="{Binding $parent[Button].Foreground}" Background="{DynamicResource MainBg}" Canvas.Left="0" Canvas.Top="2"/>
+                                    </Canvas>
+                                </Grid>
+                            </Button>
+                            
+                            <!-- Close Button -->
+                            <Button Classes="TitleBarCloseButton" Click="Close_OnClick" ToolTip.Tip="{Binding ToolTipClose, Source={x:Static services:LocalizationService.Instance}}">
+                                <Path Width="10" Height="10" Data="M 0,0 L 10,10 M 10,0 L 0,10" Stroke="{Binding $parent[Button].Foreground}" StrokeThickness="1" Stretch="Uniform"/>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                    
+                    <!-- Main Content Body with smooth page transitions and skeleton loading -->
+                    <Grid Grid.Row="1">
+                        <!-- Main Content, visible when NOT loading -->
+                        <TransitioningContentControl Content="{Binding CurrentPageViewModel}" ClipToBounds="True" IsVisible="{Binding !IsAppLoading}">
+                            <TransitioningContentControl.PageTransition>
+                                <CompositePageTransition>
+                                    <PageSlide Duration="0:0:0.35" Orientation="Horizontal">
+                                        <PageSlide.SlideInEasing>
+                                            <CubicEaseOut/>
+                                        </PageSlide.SlideInEasing>
+                                        <PageSlide.SlideOutEasing>
+                                            <CubicEaseOut/>
+                                        </PageSlide.SlideOutEasing>
+                                    </PageSlide>
+                                    <CrossFade Duration="0:0:0.25"/>
+                                </CompositePageTransition>
+                            </TransitioningContentControl.PageTransition>
+                        </TransitioningContentControl>
+
+                        <!-- Skeleton Loading View, visible when loading -->
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" IsVisible="{Binding IsAppLoading}">
+                            <StackPanel Margin="30" Spacing="25">
+                                <!-- Header Skeleton -->
+                                <Grid ColumnDefinitions="*, Auto">
+                                    <StackPanel Grid.Column="0" Spacing="8">
+                                        <Border Classes="Skeleton" Width="220" Height="28" HorizontalAlignment="Left"/>
+                                        <Border Classes="Skeleton" Width="140" Height="14" HorizontalAlignment="Left"/>
+                                    </StackPanel>
+                                    <Border Grid.Column="1" Classes="Skeleton" Width="120" Height="48" CornerRadius="6" VerticalAlignment="Center"/>
+                                </Grid>
+
+                                <!-- Row 1: Weather & Player Skeleton -->
+                                <Grid ColumnDefinitions="*, *" RowDefinitions="Auto" HorizontalAlignment="Stretch">
+                                    <!-- Weather Card Skeleton -->
+                                    <Border Grid.Column="0" Classes="GlassCard" Margin="0,0,10,0" MinHeight="210" VerticalAlignment="Stretch">
+                                        <Grid RowDefinitions="Auto, *, Auto">
+                                            <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8">
+                                                <Border Classes="Skeleton" Width="100" Height="14" HorizontalAlignment="Left"/>
+                                            </StackPanel>
+                                            <Grid Grid.Row="1" ColumnDefinitions="Auto, *" VerticalAlignment="Center" Margin="0,5">
+                                                <!-- Circle Avatar (similar to the user's icon load) -->
+                                                <Border Grid.Column="0" Classes="SkeletonCircle" Width="64" Height="64" Margin="0,0,20,0"/>
+                                                <StackPanel Grid.Column="1" Spacing="8" VerticalAlignment="Center">
+                                                    <Border Classes="Skeleton" Width="80" Height="24" HorizontalAlignment="Left"/>
+                                                    <Border Classes="Skeleton" Width="60" Height="14" HorizontalAlignment="Left"/>
+                                                </StackPanel>
+                                            </Grid>
+                                            <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="25">
+                                                <Border Classes="Skeleton" Width="60" Height="14"/>
+                                                <Border Classes="Skeleton" Width="60" Height="14"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- Player Card Skeleton -->
+                                    <Border Grid.Column="1" Classes="GlassCard" Margin="10,0,0,0" MinHeight="210" VerticalAlignment="Stretch">
+                                        <Grid RowDefinitions="Auto, *">
+                                            <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8">
+                                                <Border Classes="Skeleton" Width="120" Height="14" HorizontalAlignment="Left"/>
+                                            </StackPanel>
+                                            <Grid Grid.Row="1" RowDefinitions="*, Auto" Margin="0,10,0,0">
+                                                <StackPanel Grid.Row="0" Spacing="8" VerticalAlignment="Center">
+                                                    <Border Classes="Skeleton" Width="180" Height="18" HorizontalAlignment="Left"/>
+                                                    <Border Classes="Skeleton" Width="100" Height="14" HorizontalAlignment="Left"/>
+                                                </StackPanel>
+                                                <Grid Grid.Row="1" ColumnDefinitions="*, Auto" VerticalAlignment="Center" Margin="0,5,0,0">
+                                                    <Border Grid.Column="0" Classes="Skeleton" Width="60" Height="14" HorizontalAlignment="Left"/>
+                                                    <Border Grid.Column="1" Classes="Skeleton" Width="120" Height="14" HorizontalAlignment="Right"/>
+                                                </Grid>
+                                            </Grid>
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+
+                                <!-- Row 2: Resources Card Skeleton -->
+                                <Border Classes="SystemCard" HorizontalAlignment="Stretch" MinHeight="180">
+                                    <Grid RowDefinitions="Auto, *">
+                                        <Border Grid.Row="0" Classes="Skeleton" Width="140" Height="16" HorizontalAlignment="Left" Margin="0,0,0,10"/>
+                                        <Grid Grid.Row="1" ColumnDefinitions="*, *" VerticalAlignment="Center">
+                                            <!-- CPU Circle Outline -->
+                                            <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                                                <Grid Width="100" Height="100">
+                                                    <!-- Outline circle -->
+                                                    <Ellipse Width="90" Height="90" Stroke="{DynamicResource BorderGray}" StrokeThickness="8"/>
+                                                    <!-- Pulsing inner circle -->
+                                                    <Border Classes="SkeletonCircle" Width="64" Height="64"/>
+                                                </Grid>
+                                            </StackPanel>
+                                            <!-- RAM Circle Outline -->
+                                            <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                                                <Grid Width="100" Height="100">
+                                                    <Ellipse Width="90" Height="90" Stroke="{DynamicResource BorderGray}" StrokeThickness="8"/>
+                                                    <Border Classes="SkeletonCircle" Width="64" Height="64"/>
+                                                </Grid>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Grid>
+                                </Border>
+
+                                <!-- Row 3: Tip Skeleton -->
+                                <Border Classes="GlassCard" HorizontalAlignment="Stretch">
+                                    <Grid ColumnDefinitions="Auto, *">
+                                        <Border Grid.Column="0" Classes="SkeletonCircle" Width="20" Height="20" Margin="0,0,15,0" VerticalAlignment="Center"/>
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="6">
+                                            <Border Classes="Skeleton" Width="120" Height="14" HorizontalAlignment="Left"/>
+                                            <Border Classes="Skeleton" Width="400" Height="12" HorizontalAlignment="Left"/>
                                         </StackPanel>
                                     </Grid>
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
-                    </ScrollViewer>
+                                </Border>
+
+                                <!-- Row 4: Settings Skeleton -->
+                                <Border Classes="GlassCard" HorizontalAlignment="Stretch" Padding="20">
+                                    <StackPanel Spacing="15">
+                                        <Border Classes="Skeleton" Width="150" Height="14" HorizontalAlignment="Left"/>
+                                        <Grid ColumnDefinitions="*, *">
+                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                                                <Border Classes="Skeleton" Width="60" Height="12" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                                <Border Classes="Skeleton" Width="160" Height="24" CornerRadius="12"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                                <Border Classes="Skeleton" Width="60" Height="12" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                                <Border Classes="Skeleton" Width="120" Height="24" CornerRadius="12"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
                 </Grid>
             </Grid>
-        </Grid>
+
+            <!-- App Lock Overlay -->
+            <ContentControl Content="{Binding LockScreenVM}" IsVisible="{Binding IsAppLocked}"/>
+
+            <!-- Auth Overlay -->
+            <Panel IsVisible="{Binding IsAuthRequired}" Background="#1C1C1E">
+                <views:AuthView DataContext="{Binding AuthVM}"/>
+            </Panel>
+
+            <!-- Welcome Greeting Overlay -->
+            <Grid Classes="welcome-overlay"
+                  Background="#1C1C1E" 
+                  IsVisible="{Binding IsWelcomeOverlayVisible}" 
+                  Opacity="{Binding WelcomeOverlayOpacity}"
+                  HorizontalAlignment="Stretch"
+                  VerticalAlignment="Stretch">
+                <StackPanel Classes="welcome-content" Classes.animate="{Binding AnimateWelcomeText}"
+                            VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="8">
+                    <!-- User Avatar (Actual Image or Initials Fallback) -->
+                    <Border Width="80" Height="80" CornerRadius="40" ClipToBounds="True" BorderBrush="#35FFFFFF" BorderThickness="1.5" BoxShadow="0 8 20 0 #40000000" HorizontalAlignment="Center" Margin="0,0,0,16">
+                        <Grid>
+                            <Image Source="{Binding ProfileVM.AvatarBitmap}" IsVisible="{Binding ProfileVM.AvatarBitmap, Converter={x:Static ObjectConverters.IsNotNull}}" Stretch="UniformToFill"/>
+                            <Border IsVisible="{Binding ProfileVM.AvatarBitmap, Converter={x:Static ObjectConverters.IsNull}}">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+                                        <GradientStop Offset="0.0" Color="#48484A"/>
+                                        <GradientStop Offset="1.0" Color="#2C2C2E"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <TextBlock Text="{Binding ProfileVM.Initials}" Foreground="White" FontSize="32" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </Grid>
+                    </Border>
+                    
+                    <TextBlock Text="{Binding WelcomeGreeting}" 
+                               FontSize="36" 
+                               FontWeight="Bold" 
+                               Foreground="White" 
+                               HorizontalAlignment="Center"/>
+                    
+                    <TextBlock Text="{Binding WelcomeSubText}" 
+                               FontSize="16" 
+                               Foreground="#8E8E93" 
+                               HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+        </Panel>
     </Border>
 </Window>

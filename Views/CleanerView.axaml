@@ -17,7 +17,7 @@
             </StackPanel>
 
             <!-- Large Circular Clean Button Area (Premium Glass card) -->
-            <Border Classes="GlassCard" Padding="30" HorizontalAlignment="Stretch" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderGray}">
+            <Border Classes="GlassCard" Padding="30" HorizontalAlignment="Stretch">
                 <StackPanel Spacing="20" HorizontalAlignment="Center">
                     <Grid Width="180" Height="180" HorizontalAlignment="Center">
                         <!-- Background Circle/Ring -->
@@ -80,7 +80,7 @@
             <StackPanel Spacing="12">
                 <TextBlock Text="{Binding CleanerCategoriesHeader, Source={x:Static services:LocalizationService.Instance}}" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
                 
-                <Grid ColumnDefinitions="*, *" RowDefinitions="Auto, Auto" HorizontalAlignment="Stretch">
+                <Grid ColumnDefinitions="*, *" RowDefinitions="Auto, Auto, Auto" HorizontalAlignment="Stretch">
                     <!-- User Temp -->
                     <Border Grid.Column="0" Grid.Row="0" Classes="SystemCard" Margin="0,0,10,12" Padding="15" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderGray}">
                         <Grid ColumnDefinitions="Auto, *, Auto">
@@ -106,7 +106,7 @@
                     </Border>
 
                     <!-- Prefetch -->
-                    <Border Grid.Column="0" Grid.Row="1" Classes="SystemCard" Margin="0,0,10,0" Padding="15" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderGray}">
+                    <Border Grid.Column="0" Grid.Row="1" Classes="SystemCard" Margin="0,0,10,12" Padding="15" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderGray}">
                         <Grid ColumnDefinitions="Auto, *, Auto">
                             <PathIcon Grid.Column="0" Data="{StaticResource IconFlash}" Width="20" Height="20" Foreground="{DynamicResource TextSecondary}" Margin="0,0,14,0" VerticalAlignment="Center"/>
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
@@ -118,7 +118,7 @@
                     </Border>
 
                     <!-- Recycle Bin -->
-                    <Border Grid.Column="1" Grid.Row="1" Classes="SystemCard" Margin="10,0,0,0" Padding="15" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderGray}">
+                    <Border Grid.Column="1" Grid.Row="1" Classes="SystemCard" Margin="10,0,0,12" Padding="15" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderGray}">
                         <Grid ColumnDefinitions="Auto, *, Auto">
                             <PathIcon Grid.Column="0" Data="{StaticResource IconTrash}" Width="20" Height="20" Foreground="{DynamicResource TextSecondary}" Margin="0,0,14,0" VerticalAlignment="Center"/>
                             <StackPanel Grid.Column="1" VerticalAlignment="Center">
@@ -126,6 +126,18 @@
                                 <TextBlock Text="{Binding CleanerRecycleBinDesc, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" Foreground="{DynamicResource TextSecondary}"/>
                             </StackPanel>
                             <TextBlock Grid.Column="2" Text="{Binding RecycleBinSize}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Browser Cache -->
+                    <Border Grid.Column="0" Grid.Row="2" Classes="SystemCard" Margin="0,0,10,0" Padding="15" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderGray}">
+                        <Grid ColumnDefinitions="Auto, *, Auto">
+                            <PathIcon Grid.Column="0" Data="{StaticResource IconFolder}" Width="20" Height="20" Foreground="{DynamicResource TextSecondary}" Margin="0,0,14,0" VerticalAlignment="Center"/>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="Кэш браузеров" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                                <TextBlock Text="Временные файлы Chrome, Edge, Firefox" FontSize="11" Foreground="{DynamicResource TextSecondary}"/>
+                            </StackPanel>
+                            <TextBlock Grid.Column="2" Text="{Binding BrowserCacheSize}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" VerticalAlignment="Center" Margin="10,0,0,0"/>
                         </Grid>
                     </Border>
                 </Grid>

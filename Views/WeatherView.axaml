@@ -90,7 +90,7 @@
             </Border>
 
             <!-- Main Weather Card -->
-            <Border Classes="GlassCard" HorizontalAlignment="Stretch" Padding="25" MinHeight="230" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderGray}">
+            <Border Classes="GlassCard" HorizontalAlignment="Stretch" Padding="25" MinHeight="230">
                 <Grid RowDefinitions="Auto, *, Auto" ColumnDefinitions="*, Auto">
                     <!-- Loading overlay -->
                     <ProgressBar Grid.RowSpan="3" Grid.ColumnSpan="2" IsIndeterminate="True" IsVisible="{Binding IsLoading}" VerticalAlignment="Top" Background="Transparent" Foreground="{DynamicResource AccentBlue}"/>

@@ -11,12 +11,14 @@ namespace MacStyleHub.Services
         public long SystemTempSize { get; set; }
         public long PrefetchSize { get; set; }
         public long RecycleBinSize { get; set; }
-        public long TotalSize => UserTempSize + SystemTempSize + PrefetchSize + RecycleBinSize;
+        public long BrowserCacheSize { get; set; }
+        public long TotalSize => UserTempSize + SystemTempSize + PrefetchSize + RecycleBinSize + BrowserCacheSize;
 
         public string FormattedUserTemp => FormatBytes(UserTempSize);
         public string FormattedSystemTemp => FormatBytes(SystemTempSize);
         public string FormattedPrefetch => FormatBytes(PrefetchSize);
         public string FormattedRecycleBin => FormatBytes(RecycleBinSize);
+        public string FormattedBrowserCache => FormatBytes(BrowserCacheSize);
         public string FormattedTotal => FormatBytes(TotalSize);
 
         private string FormatBytes(long bytes)
@@ -114,6 +116,13 @@ namespace MacStyleHub.Services
                 }
                 catch { }
 
+                // 5. Browser Cache
+                try
+                {
+                    result.BrowserCacheSize = GetBrowserCacheSize();
+                }
+                catch { }
+
                 return result;
             });
         }
@@ -158,6 +167,13 @@ namespace MacStyleHub.Services
                     SHEmptyRecycleBin(IntPtr.Zero, null, SHERB_NOCONFIRMATION | SHERB_NOPROGRESSUI | SHERB_NOSOUND);
                 }
                 catch { }
+
+                // 5. Clean Browser Cache
+                try
+                {
+                    CleanBrowserCache();
+                }
+                catch { }
             });
         }
 
@@ -200,6 +216,104 @@ namespace MacStyleHub.Services
                         subDir.Delete(true);
                     }
                     catch { } // Skip locked folders
+                }
+            }
+            catch { }
+        }
+
+        private long GetBrowserCacheSize()
+        {
+            long size = 0;
+            string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+
+            // Chrome Cache
+            try
+            {
+                string chromeCache = Path.Combine(localAppData, @"Google\Chrome\User Data\Default\Cache");
+                if (Directory.Exists(chromeCache))
+                {
+                    size += GetDirectorySize(chromeCache);
+                }
+                string chromeCodeCache = Path.Combine(localAppData, @"Google\Chrome\User Data\Default\Code Cache");
+                if (Directory.Exists(chromeCodeCache))
+                {
+                    size += GetDirectorySize(chromeCodeCache);
+                }
+            }
+            catch { }
+
+            // Edge Cache
+            try
+            {
+                string edgeCache = Path.Combine(localAppData, @"Microsoft\Edge\User Data\Default\Cache");
+                if (Directory.Exists(edgeCache))
+                {
+                    size += GetDirectorySize(edgeCache);
+                }
+                string edgeCodeCache = Path.Combine(localAppData, @"Microsoft\Edge\User Data\Default\Code Cache");
+                if (Directory.Exists(edgeCodeCache))
+                {
+                    size += GetDirectorySize(edgeCodeCache);
+                }
+            }
+            catch { }
+
+            // Firefox Cache
+            try
+            {
+                string firefoxProfiles = Path.Combine(localAppData, @"Mozilla\Firefox\Profiles");
+                if (Directory.Exists(firefoxProfiles))
+                {
+                    foreach (var profile in Directory.GetDirectories(firefoxProfiles))
+                    {
+                        string cache2 = Path.Combine(profile, "cache2");
+                        if (Directory.Exists(cache2))
+                        {
+                            size += GetDirectorySize(cache2);
+                        }
+                    }
+                }
+            }
+            catch { }
+
+            return size;
+        }
+
+        private void CleanBrowserCache()
+        {
+            string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+
+            // Chrome Cache
+            try
+            {
+                string chromeCache = Path.Combine(localAppData, @"Google\Chrome\User Data\Default\Cache");
+                if (Directory.Exists(chromeCache)) CleanDirectoryContents(chromeCache);
+                string chromeCodeCache = Path.Combine(localAppData, @"Google\Chrome\User Data\Default\Code Cache");
+                if (Directory.Exists(chromeCodeCache)) CleanDirectoryContents(chromeCodeCache);
+            }
+            catch { }
+
+            // Edge Cache
+            try
+            {
+                string edgeCache = Path.Combine(localAppData, @"Microsoft\Edge\User Data\Default\Cache");
+                if (Directory.Exists(edgeCache)) CleanDirectoryContents(edgeCache);
+                string edgeCodeCache = Path.Combine(localAppData, @"Microsoft\Edge\User Data\Default\Code Cache");
+                if (Directory.Exists(edgeCodeCache)) CleanDirectoryContents(edgeCodeCache);
+            }
+            catch { }
+
+            // Firefox Cache
+            try
+            {
+                string firefoxProfiles = Path.Combine(localAppData, @"Mozilla\Firefox\Profiles");
+                if (Directory.Exists(firefoxProfiles))
+                {
+                    foreach (var profile in Directory.GetDirectories(firefoxProfiles))
+                    {
+                        string cache2 = Path.Combine(profile, "cache2");
+                        if (Directory.Exists(cache2)) CleanDirectoryContents(cache2);
+                    }
                 }
             }
             catch { }

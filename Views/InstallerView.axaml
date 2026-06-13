@@ -9,13 +9,36 @@
              x:DataType="vm:InstallerViewModel">
 
     <UserControl.Styles>
-        <Style Selector="Border.GlassCard">
-            <Setter Property="BorderBrush" Value="{DynamicResource BorderGray}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-        </Style>
         <Style Selector="Border.GlassCard.selected">
             <Setter Property="BorderBrush" Value="{DynamicResource AccentBlue}"/>
             <Setter Property="BorderThickness" Value="1.5"/>
+        </Style>
+
+        <!-- Segmented Controls for Versions -->
+        <Style Selector="Button.VersionSegmentBtn">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding" Value="18,6"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.12"/>
+                    <BrushTransition Property="Foreground" Duration="0:0:0.12"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Button.VersionSegmentBtn:pointerover">
+            <Setter Property="Background" Value="{DynamicResource SystemBtnHoverBg}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+        </Style>
+        <Style Selector="Button.VersionSegmentBtn.active">
+            <Setter Property="Background" Value="{DynamicResource AccentBlue}"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        <Style Selector="Button.VersionSegmentBtn.active:pointerover">
+            <Setter Property="Background" Value="#359AFF"/>
+            <Setter Property="Foreground" Value="White"/>
         </Style>
     </UserControl.Styles>
 
@@ -39,30 +62,28 @@
                 <ItemsControl ItemsSource="{Binding Programs}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Border Classes="GlassCard" Classes.selected="{Binding IsSelected}" Margin="0,0,0,12" Padding="18" Background="{DynamicResource CardBg}">
+                            <Border Classes="GlassCard" Classes.selected="{Binding IsSelected}" Margin="0,0,0,12" Padding="18">
                                 <Grid ColumnDefinitions="Auto, Auto, *, Auto, Auto" RowDefinitions="Auto, Auto">
                                     <!-- Checkbox to select -->
                                     <CheckBox Grid.Column="0" Grid.RowSpan="2" IsChecked="{Binding IsSelected}" IsEnabled="{Binding IsNotInstalled}" Margin="0,0,15,0" VerticalAlignment="Center"/>
     
                                     <!-- Icon -->
-                                    <Border Grid.Column="1" Grid.RowSpan="2" Background="{DynamicResource BorderGray}" Width="40" Height="40" CornerRadius="20" Margin="0,0,15,0" VerticalAlignment="Center">
-                                        <PathIcon Data="{StaticResource IconFlash}" Width="16" Height="16" Foreground="{DynamicResource AccentBlue}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <Border Grid.Column="1" Grid.RowSpan="2" Background="Transparent" Width="40" Height="40" CornerRadius="8" ClipToBounds="True" Margin="0,0,15,0" VerticalAlignment="Center">
+                                        <Panel>
+                                            <Image Source="{Binding AppIcon}" Width="40" Height="40" IsVisible="{Binding AppIcon, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                                            <PathIcon Data="{StaticResource IconFlash}" Width="16" Height="16" Foreground="{DynamicResource AccentBlue}" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding AppIcon, Converter={x:Static ObjectConverters.IsNull}}"/>
+                                        </Panel>
                                     </Border>
     
                                     <!-- Text Details -->
-                                    <StackPanel Grid.Column="2" Grid.Row="0" Spacing="2" VerticalAlignment="Center">
-                                        <StackPanel Orientation="Horizontal" Spacing="8">
-                                            <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
-                                            <Border Background="{DynamicResource BorderGray}" CornerRadius="4" Padding="5,1" VerticalAlignment="Center">
-                                                <TextBlock Text="{Binding Category}" FontSize="9" Foreground="{DynamicResource TextSecondary}" FontWeight="Bold"/>
-                                            </Border>
-                                        </StackPanel>
+                                    <StackPanel Grid.Column="2" Grid.Row="0" Spacing="4" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
                                         <TextBlock Text="{Binding Description}" FontSize="12" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap"/>
                                     </StackPanel>
     
                                     <!-- Progress Bar and Status -->
-                                    <StackPanel Grid.Column="2" Grid.Row="1" Orientation="Horizontal" Spacing="10" Margin="0,6,0,0" IsVisible="{Binding IsInstalling}">
-                                        <ProgressBar Value="{Binding Progress}" Minimum="0" Maximum="100" Width="180" Height="6" Foreground="{DynamicResource AccentBlue}" VerticalAlignment="Center"/>
+                                    <StackPanel Grid.Column="2" Grid.Row="1" Orientation="Horizontal" Spacing="10" Margin="0,6,0,0" IsVisible="{Binding ShowStatusMessage}">
+                                        <ProgressBar Value="{Binding Progress}" Minimum="0" Maximum="100" Width="180" Height="6" Foreground="{DynamicResource AccentBlue}" VerticalAlignment="Center" IsVisible="{Binding IsInstalling}"/>
                                         <TextBlock Text="{Binding LocalizedStatusMessage}" FontSize="11" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center"/>
                                     </StackPanel>
     
@@ -70,7 +91,7 @@
                                     <TextBlock Grid.Column="3" Grid.RowSpan="2" Text="{Binding StateText}" FontSize="13" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center" Margin="0,0,20,0" FontWeight="Medium"/>
     
                                     <!-- Action Button -->
-                                    <Button Grid.Column="4" Grid.RowSpan="2" Classes="SystemButton" Command="{Binding $parent[UserControl].((vm:InstallerViewModel)DataContext).InstallProgramCommand}" CommandParameter="{Binding Id}" IsEnabled="{Binding IsNotInstalled}" VerticalAlignment="Center" Width="120" HorizontalContentAlignment="Center">
+                                    <Button Grid.Column="4" Grid.RowSpan="2" Classes="SystemButton" Command="{Binding $parent[UserControl].((vm:InstallerViewModel)DataContext).InstallProgramCommand}" CommandParameter="{Binding}" IsEnabled="{Binding IsNotInstalled}" VerticalAlignment="Center" Width="120" HorizontalContentAlignment="Center">
                                         <TextBlock Text="{Binding ActionText}"/>
                                     </Button>
                                 </Grid>
@@ -81,9 +102,9 @@
             </StackPanel>
         </ScrollViewer>
 
-        <!-- Glassmorphic Modal Overlay for Zapret Instructions -->
+        <!-- Glassmorphic Modal Overlay for Version Selection / Zapret Instructions -->
         <Grid Background="#A0000000" 
-              IsVisible="{Binding IsZapretInstructionsVisible}"
+              IsVisible="{Binding IsModalVisible}"
               HorizontalAlignment="Stretch" 
               VerticalAlignment="Stretch">
             
@@ -99,33 +120,59 @@
                     BoxShadow="0 8 24 0 #80000000">
                 <StackPanel Spacing="18">
                     <!-- Title -->
-                    <TextBlock Text="{Binding ZapretModalTitle}" 
+                    <TextBlock Text="{Binding ModalTitle}" 
                                FontSize="18" 
                                FontWeight="SemiBold" 
                                Foreground="White"
                                HorizontalAlignment="Center"/>
                     
-                    <!-- Description / Guide -->
+                    <!-- Content 1: For Zapret (Instructions text) -->
                     <TextBlock Text="{Binding ZapretModalDesc}" 
                                FontSize="13" 
                                Foreground="#FFD1D1D6" 
                                TextWrapping="Wrap"
-                               LineHeight="20"/>
+                               LineHeight="20"
+                               IsVisible="{Binding IsZapretModalActive}"/>
+
+                    <!-- Content 2: For apps with versions (Segmented version selector + active description) -->
+                    <StackPanel Spacing="15" IsVisible="{Binding IsVersionSelectorActive}">
+                        <!-- Selector Pill directly under "Выберите, что будете скачивать" -->
+                        <Border Background="{DynamicResource BorderGray}" CornerRadius="8" Padding="3" HorizontalAlignment="Center">
+                            <StackPanel Orientation="Horizontal" Spacing="2">
+                                <Button Classes="VersionSegmentBtn" 
+                                        Command="{Binding SelectModalRegularCommand}"
+                                        Classes.active="{Binding !ActiveModalIsModSelected}">
+                                    <TextBlock Text="{Binding ActiveModalRegularText}" FontSize="13" FontWeight="SemiBold"/>
+                                </Button>
+                                <Button Classes="VersionSegmentBtn" 
+                                        Command="{Binding SelectModalModCommand}"
+                                        Classes.active="{Binding ActiveModalIsModSelected}">
+                                    <TextBlock Text="{Binding ActiveModalModText}" FontSize="13" FontWeight="SemiBold"/>
+                                </Button>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- App Name and current version description below the selector -->
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="{Binding ActiveModalAppName}" FontSize="16" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding ActiveModalAppDescription}" FontSize="13" Foreground="#FFD1D1D6" TextWrapping="Wrap" LineHeight="18" HorizontalAlignment="Center" TextAlignment="Center"/>
+                        </StackPanel>
+                    </StackPanel>
 
                     <!-- Buttons -->
                     <Grid ColumnDefinitions="*, *" RowDefinitions="Auto" Margin="0,10,0,0">
                         <Button Grid.Column="0" 
                                 Classes="SystemButton" 
-                                Content="{Binding ZapretModalCancel}" 
-                                Command="{Binding CancelZapretInstallCommand}"
+                                Content="{Binding ModalCancelText}" 
+                                Command="{Binding CancelModalCommand}"
                                 Margin="0,0,8,0"
                                 HorizontalAlignment="Stretch"
                                 HorizontalContentAlignment="Center"/>
                         
                         <Button Grid.Column="1" 
                                 Classes="SystemButton" 
-                                Content="{Binding ZapretModalInstall}" 
-                                Command="{Binding ConfirmZapretInstallCommand}"
+                                Content="{Binding ModalInstallText}" 
+                                Command="{Binding ConfirmModalInstallCommand}"
                                 Background="{StaticResource AccentBlue}"
                                 Foreground="White"
                                 Margin="8,0,0,0"

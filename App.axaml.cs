@@ -12,6 +12,8 @@ namespace MacStyleHub;
 
 public partial class App : Application
 {
+    private MainWindowViewModel? _mainViewModel;
+
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -21,13 +23,24 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
+            _mainViewModel = new MainWindowViewModel();
             desktop.MainWindow = new MainWindow
             {
-                DataContext = new MainWindowViewModel(),
+                DataContext = _mainViewModel,
             };
+            desktop.Exit += OnAppExit;
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private void OnAppExit(object? sender, ControlledApplicationLifetimeExitEventArgs e)
+    {
+        try
+        {
+            _mainViewModel?.ToolsVM?.CleanupOnExit();
+        }
+        catch { }
     }
 
     private void OnTrayIconClicked(object? sender, System.EventArgs e)

@@ -149,7 +149,7 @@
                             <StackPanel Spacing="10" HorizontalAlignment="Center">
                                 <PathIcon Data="{StaticResource IconMusic}" Width="28" Height="28" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center"/>
                                 <TextBlock Text="{Binding PlayerNoActive, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center"/>
-                                <TextBlock Text="{Binding PlayerLaunchRecommendation, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                                <TextBlock Text="{Binding PlayerLaunchRecommendation, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
                             </StackPanel>
                         </Grid>
                     </Grid>
@@ -251,6 +251,8 @@
                             </StackPanel>
                         </StackPanel>
                     </Grid>
+
+                    
                 </StackPanel>
             </Border>
         </StackPanel>

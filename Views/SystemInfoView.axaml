@@ -37,7 +37,7 @@
                 <TextBlock Text="{Binding SystemViewSubheader, Source={x:Static services:LocalizationService.Instance}}" FontSize="14" Foreground="{DynamicResource TextSecondary}"/>
             </StackPanel>
 
-            <Grid ColumnDefinitions="*, *" RowDefinitions="Auto, Auto" HorizontalAlignment="Stretch">
+            <Grid ColumnDefinitions="*, *" RowDefinitions="Auto, Auto, Auto" HorizontalAlignment="Stretch">
                 
                 <!-- OS Info Card -->
                 <Border Grid.Column="0" Grid.Row="0" Classes="SystemCard" Margin="0,0,10,15" VerticalAlignment="Stretch" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderGray}">
@@ -122,37 +122,155 @@
                 </Border>
 
                 <!-- CPU & RAM Realtime monitor -->
-                <Border Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Classes="GlassCard" Margin="0,5,0,15" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderGray}">
+                <Border Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Classes="GlassCard" Margin="0,5,0,15">
                     <StackPanel Spacing="15">
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <PathIcon Data="{StaticResource IconSettings}" Width="16" Height="16" Foreground="{DynamicResource AccentBlue}"/>
                             <TextBlock Text="{Binding SystemRealtimePerf, Source={x:Static services:LocalizationService.Instance}}" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
                         </StackPanel>
                         
-                        <Grid ColumnDefinitions="*, *">
+                        <Grid ColumnDefinitions="*, *, *">
                             <!-- CPU Usage -->
-                            <StackPanel Grid.Column="0" Margin="0,0,20,0" Spacing="6">
+                            <StackPanel Grid.Column="0" Margin="0,0,15,0" Spacing="6">
                                 <Grid ColumnDefinitions="*, Auto">
                                     <TextBlock Grid.Column="0" Text="{Binding SystemCpuLoad, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" Foreground="{DynamicResource TextPrimary}" FontWeight="Medium"/>
                                     <TextBlock Grid.Column="1" Text="{Binding CpuUsage, StringFormat={}{0}%}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}"/>
                                 </Grid>
                                 <ProgressBar Value="{Binding CpuUsage}" Minimum="0" Maximum="100" Height="8" CornerRadius="4" Background="#222224" Foreground="{DynamicResource AccentBlue}"/>
+                                
+                                <!-- CPU Temp History Sparkline -->
+                                <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+                                    <TextBlock Text="История температуры:" FontSize="9" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center"/>
+                                    <Border BorderBrush="{DynamicResource BorderGray}" BorderThickness="1" CornerRadius="4" Padding="2" Background="#0AFFFFFF" VerticalAlignment="Center">
+                                        <Canvas Width="150" Height="30">
+                                            <Polyline Points="{Binding CpuTempPoints}" Stroke="#FF9500" StrokeThickness="1.5"/>
+                                        </Canvas>
+                                    </Border>
+                                </StackPanel>
                             </StackPanel>
 
                             <!-- RAM Usage -->
-                            <StackPanel Grid.Column="1" Margin="20,0,0,0" Spacing="6">
+                            <StackPanel Grid.Column="1" Margin="15,0,15,0" Spacing="6">
                                 <Grid ColumnDefinitions="*, Auto">
-                                    <TextBlock Grid.Column="0" Text="{Binding SystemRamLabel, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" Foreground="{DynamicResource TextPrimary}" FontWeight="Medium" TextTrimming="CharacterEllipsis" Margin="0,0,10,0"/>
-                                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="5">
-                                        <TextBlock Text="{Binding RamUsed, StringFormat={}{0:F1} GB}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}"/>
-                                        <TextBlock Text="/" FontSize="13" Foreground="{DynamicResource TextSecondary}"/>
-                                        <TextBlock Text="{Binding TotalRam, StringFormat={}{0:F1} GB}" FontSize="13" Foreground="{DynamicResource TextSecondary}"/>
-                                        <TextBlock Text="{Binding RamSpeed, StringFormat={}({0} MHz)}" FontSize="11" Foreground="{DynamicResource TextSecondary}" Margin="5,0,0,0" VerticalAlignment="Center"/>
-                                    </StackPanel>
+                                    <TextBlock Grid.Column="0" Text="{Binding SystemRamLabel, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" Foreground="{DynamicResource TextPrimary}" FontWeight="Medium" TextTrimming="CharacterEllipsis"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding RamUsed, StringFormat={}{0:F1} GB}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}"/>
                                 </Grid>
                                 <ProgressBar Value="{Binding RamUsagePercent}" Minimum="0" Maximum="100" Height="8" CornerRadius="4" Background="#222224" Foreground="#34C759"/>
+                                <StackPanel Orientation="Horizontal" Spacing="5" Margin="0,2,0,0">
+                                    <TextBlock Text="Всего:" FontSize="10" Foreground="{DynamicResource TextSecondary}"/>
+                                    <TextBlock Text="{Binding TotalRam, StringFormat={}{0:F1} GB}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                                    <TextBlock Text="{Binding RamSpeed, StringFormat={}({0} MHz)}" FontSize="10" Foreground="{DynamicResource TextSecondary}"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- Network Speed -->
+                            <StackPanel Grid.Column="2" Margin="15,0,0,0" Spacing="6">
+                                <Grid ColumnDefinitions="*, Auto">
+                                    <TextBlock Grid.Column="0" Text="Скорость сети" FontSize="13" Foreground="{DynamicResource TextPrimary}" FontWeight="Medium"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding DownloadSpeedText}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource AccentBlue}"/>
+                                </Grid>
+                                
+                                <Grid ColumnDefinitions="*, *" Margin="0,6,0,0">
+                                    <StackPanel Grid.Column="0" Spacing="2">
+                                        <TextBlock Text="Загрузка (Download)" FontSize="9" Foreground="{DynamicResource TextSecondary}"/>
+                                        <TextBlock Text="{Binding DownloadSpeedText}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource AccentBlue}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Spacing="2" HorizontalAlignment="Right">
+                                        <TextBlock Text="Отдача (Upload)" FontSize="9" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Right"/>
+                                        <TextBlock Text="{Binding UploadSpeedText}" FontSize="12" FontWeight="SemiBold" Foreground="#34C759" HorizontalAlignment="Right"/>
+                                    </StackPanel>
+                                </Grid>
                             </StackPanel>
                         </Grid>
+
+                        <Separator Background="{DynamicResource BorderGray}" Margin="0,5"/>
+
+                        <!-- Temperatures monitor row -->
+                        <Grid ColumnDefinitions="*, *, *, *">
+                            <!-- CPU Temp -->
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                <PathIcon Data="{StaticResource WeatherSun}" Width="14" Height="14" Foreground="#FF9500"/>
+                                <TextBlock Text="{Binding HardwareCpuTemp, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" Foreground="{DynamicResource TextSecondary}" FontWeight="Medium" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding CpuTemperature, StringFormat={}{0}°C}" FontSize="12" FontWeight="Bold" Foreground="#FF9500" VerticalAlignment="Center"/>
+                            </StackPanel>
+
+                            <!-- GPU Temp -->
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                <PathIcon Data="{StaticResource WeatherSun}" Width="14" Height="14" Foreground="#FF5B56"/>
+                                <TextBlock Text="{Binding HardwareGpuTemp, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" Foreground="{DynamicResource TextSecondary}" FontWeight="Medium" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding GpuTemperature, StringFormat={}{0}°C}" FontSize="12" FontWeight="Bold" Foreground="#FF5B56" VerticalAlignment="Center"/>
+                            </StackPanel>
+
+                            <!-- Motherboard Temp -->
+                            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                <PathIcon Data="{StaticResource WeatherSun}" Width="14" Height="14" Foreground="#FFCC00"/>
+                                <TextBlock Text="Плата:" FontSize="11" Foreground="{DynamicResource TextSecondary}" FontWeight="Medium" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding MotherboardTemperature, StringFormat={}{0}°C}" FontSize="12" FontWeight="Bold" Foreground="#FFCC00" VerticalAlignment="Center"/>
+                            </StackPanel>
+
+                            <!-- Fan Speed -->
+                            <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                <PathIcon Data="{StaticResource IconSettings}" Width="14" Height="14" Foreground="#34C759"/>
+                                <TextBlock Text="Вентилятор:" FontSize="11" Foreground="{DynamicResource TextSecondary}" FontWeight="Medium" VerticalAlignment="Center"/>
+                                <TextBlock Text="{Binding CpuFanSpeed, StringFormat={}{0} RPM}" FontSize="12" FontWeight="Bold" Foreground="#34C759" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+                <!-- Top processes & Disk benchmark row -->
+                <!-- Top Processes Card -->
+                <Border Grid.Column="0" Grid.Row="2" Classes="GlassCard" Margin="0,5,10,15">
+                    <StackPanel Spacing="12">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <PathIcon Data="{StaticResource IconCpu}" Width="16" Height="16" Foreground="{DynamicResource AccentBlue}"/>
+                            <TextBlock Text="Тяжеловесы (Топ-5 процессов)" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                        </StackPanel>
+                        <Separator Background="{DynamicResource BorderGray}" Margin="0,-5"/>
+                        <Grid ColumnDefinitions="*, Auto, Auto" Margin="0,2">
+                            <TextBlock Grid.Column="0" Text="Процесс" FontSize="11" Foreground="{DynamicResource TextSecondary}" FontWeight="Bold"/>
+                            <TextBlock Grid.Column="1" Text="ЦПУ" FontSize="11" Foreground="{DynamicResource TextSecondary}" FontWeight="Bold" Width="50" TextAlignment="Right"/>
+                            <TextBlock Grid.Column="2" Text="Память" FontSize="11" Foreground="{DynamicResource TextSecondary}" FontWeight="Bold" Width="70" TextAlignment="Right"/>
+                        </Grid>
+                        <ItemsControl ItemsSource="{Binding TopProcesses}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid ColumnDefinitions="*, Auto, Auto" Margin="0,4">
+                                        <TextBlock Grid.Column="0" Text="{Binding Name}" FontSize="12" Foreground="{DynamicResource TextPrimary}" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding CpuPercent, StringFormat={}{0}%}" FontSize="12" Foreground="#FF9500" Width="50" TextAlignment="Right"/>
+                                        <TextBlock Grid.Column="2" Text="{Binding RamMB, StringFormat={}{0} MB}" FontSize="12" Foreground="{DynamicResource TextPrimary}" Width="70" TextAlignment="Right"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <!-- Disk Speed Test Card -->
+                <Border Grid.Column="1" Grid.Row="2" Classes="GlassCard" Margin="10,5,0,15">
+                    <StackPanel Spacing="12">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <PathIcon Data="{StaticResource IconFolder}" Width="16" Height="16" Foreground="{DynamicResource AccentBlue}"/>
+                            <TextBlock Text="Тест скорости дисков (Benchmark)" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                        </StackPanel>
+                        <Separator Background="{DynamicResource BorderGray}" Margin="0,-5"/>
+                        <TextBlock Text="Запустите тест производительности диска с помощью кнопки в списке дисков ниже. Тест замерит скорость записи и чтения файла 100 МБ." FontSize="11" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap"/>
+                        
+                        <Grid ColumnDefinitions="*, *" Margin="0,5">
+                            <StackPanel Grid.Column="0" Spacing="4">
+                                <TextBlock Text="Запись (Sequential Write)" FontSize="11" Foreground="{DynamicResource TextSecondary}"/>
+                                <TextBlock Text="{Binding BenchmarkWriteSpeed}" FontSize="18" FontWeight="Bold" Foreground="#34C759"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Spacing="4">
+                                <TextBlock Text="Чтение (Sequential Read)" FontSize="11" Foreground="{DynamicResource TextSecondary}"/>
+                                <TextBlock Text="{Binding BenchmarkReadSpeed}" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource AccentBlue}"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="*, Auto" IsVisible="{Binding IsBenchmarking}">
+                            <TextBlock Grid.Column="0" Text="{Binding BenchmarkStatus}" FontSize="11" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center"/>
+                            <ProgressBar Grid.Column="1" IsIndeterminate="True" Height="4" Width="100" VerticalAlignment="Center"/>
+                        </Grid>
+                        <TextBlock Text="{Binding BenchmarkStatus}" FontSize="11" Foreground="{DynamicResource TextSecondary}" IsVisible="{Binding !IsBenchmarking}"/>
                     </StackPanel>
                 </Border>
             </Grid>
@@ -167,7 +285,7 @@
                             <Border Classes="SystemCard" Margin="0,0,0,10" Padding="15" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderGray}">
                                 <StackPanel Spacing="10">
                                     <!-- Drive Header row -->
-                                    <Grid ColumnDefinitions="Auto, Auto, *, Auto" VerticalAlignment="Center">
+                                    <Grid ColumnDefinitions="Auto, Auto, *, Auto, Auto" VerticalAlignment="Center">
                                         <!-- Expand toggle Caret -->
                                         <ToggleButton Grid.Column="0" Classes="ExpandCaret" IsChecked="{Binding IsExpanded, Mode=TwoWay}" Margin="0,0,10,0">
                                             <PathIcon Data="{StaticResource IconChevron}" Width="10" Height="10" Foreground="{DynamicResource TextSecondary}"/>
@@ -183,10 +301,23 @@
                                                 <TextBlock Text="{Binding Name, StringFormat=({0})}" FontSize="13" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Bottom"/>
                                             </StackPanel>
                                             <ProgressBar Value="{Binding UsedPercent}" Minimum="0" Maximum="100" Height="6" CornerRadius="3" Background="#222224" Foreground="{DynamicResource AccentBlue}"/>
+                                            
+                                            <!-- SMART Health details -->
+                                            <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,2,0,0">
+                                                <StackPanel Orientation="Horizontal" Spacing="4">
+                                                    <TextBlock Text="{Binding HardwareSmartHealth, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" Foreground="{DynamicResource TextSecondary}"/>
+                                                    <TextBlock Text="{Binding SmartHealthPercent, StringFormat={}{0}%}" FontSize="11" FontWeight="Bold" Foreground="#34C759"/>
+                                                </StackPanel>
+                                                <TextBlock Text="•" FontSize="11" Foreground="{DynamicResource TextSecondary}"/>
+                                                <TextBlock Text="{Binding SmartHealthStatus}" FontSize="11" FontWeight="Medium" Foreground="{DynamicResource TextSecondary}"/>
+                                            </StackPanel>
                                         </StackPanel>
 
+                                        <!-- Disk Benchmark Button -->
+                                        <Button Grid.Column="3" Command="{Binding $parent[ItemsControl].((vm:SystemInfoViewModel)DataContext).RunDiskBenchmarkCommand}" CommandParameter="{Binding}" Content="Тест" Classes="SystemButton" Height="24" Width="60" Padding="0" FontSize="11" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="0,0,12,0" IsEnabled="{Binding !$parent[ItemsControl].((vm:SystemInfoViewModel)DataContext).IsBenchmarking}"/>
+
                                         <!-- Disk Capacity Text -->
-                                        <StackPanel Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Right" Spacing="4">
+                                        <StackPanel Grid.Column="4" VerticalAlignment="Center" HorizontalAlignment="Right" Spacing="4">
                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="4">
                                                 <TextBlock Text="{Binding FormattedFree}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}"/>
                                                 <TextBlock Text="{Binding SystemFreeLabel, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Bottom"/>

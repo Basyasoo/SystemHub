@@ -69,6 +69,28 @@ namespace MacStyleHub.Services
             _ => "О приложении"
         };
 
+        public string SidebarTweaks => CurrentLanguage switch
+        {
+            "EN" => "Customization",
+            "ZH" => "个性化",
+            _ => "Кастомизация"
+        };
+
+        public string SidebarTools => CurrentLanguage switch
+        {
+            "EN" => "Tools",
+            "ZH" => "工具",
+            _ => "Инструменты"
+        };
+
+        public string SidebarProfile => CurrentLanguage switch
+        {
+            "EN" => "Profile",
+            "ZH" => "个人中心",
+            _ => "Личный кабинет"
+        };
+
+
         // Dashboard
         public string DashboardLoadTitle => CurrentLanguage switch
         {
@@ -669,7 +691,7 @@ namespace MacStyleHub.Services
         {
             "EN" => "Memory (RAM)",
             "ZH" => "内存 (RAM)",
-            _ => "Оперативная память (RAM)"
+            _ => "Память (RAM)"
         };
 
         public string SystemDrivesTitle => CurrentLanguage switch
@@ -1193,6 +1215,101 @@ namespace MacStyleHub.Services
             _ => "Сканирование..."
         };
 
+        // Versions selection
+        public string VersionLabel => CurrentLanguage switch
+        {
+            "EN" => "Version:",
+            "ZH" => "版本:",
+            _ => "Версия:"
+        };
+
+        public string VersionSelectorModalTitle => CurrentLanguage switch
+        {
+            "EN" => "Choose what you will download",
+            "ZH" => "选择您要下载的版本",
+            _ => "Выберите, что будете скачивать"
+        };
+
+        public string VersionRegular => CurrentLanguage switch
+        {
+            "EN" => "Regular",
+            "ZH" => "原版",
+            _ => "Обычная"
+        };
+
+        public string VersionMod => CurrentLanguage switch
+        {
+            "EN" => "Mod",
+            "ZH" => "修改版",
+            _ => "Мод"
+        };
+
+        public string VersionOfficial => CurrentLanguage switch
+        {
+            "EN" => "Official",
+            "ZH" => "官方版",
+            _ => "Официальный"
+        };
+
+        public string VersionAyuGram => CurrentLanguage switch
+        {
+            "EN" => "AyuGram",
+            "ZH" => "AyuGram",
+            _ => "AyuGram"
+        };
+
+        public string VersionSpotX => CurrentLanguage switch
+        {
+            "EN" => "SpotX",
+            "ZH" => "SpotX",
+            _ => "SpotX"
+        };
+
+        // Spotify versions descriptions
+        public string SpotifyModName => CurrentLanguage switch
+        {
+            "EN" => "Spotify (SpotX)",
+            "ZH" => "Spotify (SpotX 修改版)",
+            _ => "Spotify (SpotX)"
+        };
+
+        public string DescSpotifyMod => CurrentLanguage switch
+        {
+            "EN" => "Modified Spotify client for PC without ads and with extra features.",
+            "ZH" => "无广告且包含额外功能的 Spotify (SpotX) 桌面修改版。",
+            _ => "Модифицированная версия Spotify для ПК без рекламы и с дополнительными функциями."
+        };
+
+        // Yandex Music versions descriptions
+        public string YandexMusicName => CurrentLanguage switch
+        {
+            "EN" => "Yandex Music",
+            "ZH" => "Yandex Music",
+            _ => "Яндекс Музыка"
+        };
+
+        public string DescYandexMusic => CurrentLanguage switch
+        {
+            "EN" => "Yandex Music streaming service for Windows.",
+            "ZH" => "Windows 平台 Yandex Music 流媒体服务客户端。",
+            _ => "Стриминговый сервис Яндекс Музыка для Windows."
+        };
+
+        // Telegram versions descriptions
+        public string TelegramModName => CurrentLanguage switch
+        {
+            "EN" => "AyuGram Desktop",
+            "ZH" => "AyuGram 桌面版",
+            _ => "AyuGram Desktop"
+        };
+
+        public string DescTelegramMod => CurrentLanguage switch
+        {
+            "EN" => "Modified Telegram client with anti-delete messages, ghost mode, and other improvements.",
+            "ZH" => "支持防撤回、隐身模式等功能的高级 Telegram 修改版客户端。",
+            _ => "Модифицированный клиент Telegram с защитой от удаления сообщений, скрытым режимом и другими улучшениями."
+        };
+
         public string YandexMusicModName => CurrentLanguage switch
         {
             "EN" => "Yandex Music Mod (Beta)",
@@ -1331,6 +1448,72 @@ namespace MacStyleHub.Services
         public string ToolTipMinimize => CurrentLanguage switch { "EN" => "Minimize", "ZH" => "最小化", _ => "Свернуть" };
         public string ToolTipMaximize => CurrentLanguage switch { "EN" => "Maximize", "ZH" => "最大化", _ => "Развернуть" };
         public string ToolTipPlayPause => CurrentLanguage switch { "EN" => "Play/Pause", "ZH" => "播放/暂停", _ => "Воспроизведение/Пауза" };
+
+        // Dynamic Island
+        public string DynamicIslandToggleLabel => CurrentLanguage switch { "EN" => "Enable Dynamic Island for media", "ZH" => "启用媒体灵动岛", _ => "Включить Dynamic Island для медиа" };
+        public string DynamicIslandSettingsHeader => CurrentLanguage switch { "EN" => "Dynamic Island Settings", "ZH" => "灵动岛设置", _ => "Настройки Dynamic Island" };
+
+        // Tweaks Page
+        public string TweaksTitle => CurrentLanguage switch { "EN" => "System Customization", "ZH" => "系统个性化", _ => "Кастомизация системы" };
+        public string TweakClassicMenu => CurrentLanguage switch { "EN" => "Classic Context Menu 🛡️", "ZH" => "经典上下文菜单 🛡️", _ => "Классическое контекстное меню 🛡️" };
+        public string TweakClassicMenuDesc => CurrentLanguage switch { "EN" => "Restores the full legacy Windows 10/11 context menu. Requires restarting Explorer.", "ZH" => "恢复完整的经典右键菜单。需要重启资源管理器。", _ => "Возвращает контекстное меню Windows 10 в Windows 11. Требуется перезапуск Проводника." };
+        public string TweakTranslucentTaskbar => CurrentLanguage switch { "EN" => "Translucent Taskbar", "ZH" => "透明任务栏", _ => "Прозрачная панель задач" };
+        public string TweakTranslucentTaskbarDesc => CurrentLanguage switch { "EN" => "Makes the taskbar translucent with blur effect.", "ZH" => "使任务栏半透明并带有模糊效果。", _ => "Делает панель задач прозрачной с эффектом размытия." };
+        public string TweakRemoveArrows => CurrentLanguage switch { "EN" => "Remove Shortcut Arrows 🛡️", "ZH" => "移除快捷方式箭头 🛡️", _ => "Убрать стрелочки ярлыков 🛡️" };
+        public string TweakRemoveArrowsDesc => CurrentLanguage switch { "EN" => "Removes the shortcut arrow overlay from desktop icons.", "ZH" => "移除桌面图标上的快捷方式小箭头。", _ => "Убирает стрелки на значках ярлыков на рабочем столе." };
+        public string TweakDisableUpdates => CurrentLanguage switch { "EN" => "Disable Auto Updates 🛡️", "ZH" => "禁用自动更新 🛡️", _ => "Отключить автообновления 🛡️" };
+        public string TweakDisableUpdatesDesc => CurrentLanguage switch { "EN" => "Forcefully stops and disables the Windows Update service.", "ZH" => "强制停止并禁用 Windows Update 服务。", _ => "Принудительно останавливает и отключает службу автоматического обновления Windows." };
+        public string TweakSystemFont => CurrentLanguage switch { "EN" => "System Font 🛡️", "ZH" => "系统字体 🛡️", _ => "Системный шрифт 🛡️" };
+        public string TweakSystemFontDesc => CurrentLanguage switch { "EN" => "Changes the default system font to a modern custom font.", "ZH" => "将默认系统字体更改为现代自定义字体。", _ => "Меняет системный шрифт окон и проводника на выбранный современный шрифт." };
+        public string TweakRestartExplorer => CurrentLanguage switch { "EN" => "Restart Explorer", "ZH" => "重启资源管理器", _ => "Перезапустить Проводник" };
+        public string TweakRestartExplorerSuccess => CurrentLanguage switch { "EN" => "Explorer restarted successfully!", "ZH" => "资源管理器已成功重启！", _ => "Проводник успешно перезапущен!" };
+        public string TweakApply => CurrentLanguage switch { "EN" => "Apply", "ZH" => "应用", _ => "Применить" };
+        public string TweakApplied => CurrentLanguage switch { "EN" => "Applied", "ZH" => "Применено", _ => "Применено" };
+        public string TweakRestore => CurrentLanguage switch { "EN" => "Restore", "ZH" => "恢复", _ => "Восстановить" };
+
+        // Tools Page
+        public string ToolsTitle => CurrentLanguage switch { "EN" => "Tools & Widgets", "ZH" => "工具与组件", _ => "Инструменты и Виджеты" };
+        public string ToolFocusTimer => CurrentLanguage switch { "EN" => "Focus Timer (Pomodoro)", "ZH" => "专注番茄钟", _ => "Таймер фокуса (Pomodoro)" };
+        public string FocusTimerStart => CurrentLanguage switch { "EN" => "Start", "ZH" => "开始", _ => "Старт" };
+        public string FocusTimerPause => CurrentLanguage switch { "EN" => "Pause", "ZH" => "暂停", _ => "Пауза" };
+        public string FocusTimerReset => CurrentLanguage switch { "EN" => "Reset", "ZH" => "重置", _ => "Сброс" };
+        public string FocusTimerWork => CurrentLanguage switch { "EN" => "Work Session", "ZH" => "工作时间", _ => "Время работы" };
+        public string FocusTimerBreak => CurrentLanguage switch { "EN" => "Break Session", "ZH" => "休息时间", _ => "Время отдыха" };
+        
+        public string ToolTempMail => CurrentLanguage switch { "EN" => "Temp Mail Widget", "ZH" => "临时邮箱组件", _ => "Временная почта" };
+        public string TempMailGenerate => CurrentLanguage switch { "EN" => "Generate Inbox", "ZH" => "生成邮箱", _ => "Создать ящик" };
+        public string TempMailCopied => CurrentLanguage switch { "EN" => "Address copied to clipboard!", "ZH" => "邮箱地址已复制到剪贴板！", _ => "Адрес скопирован в буфер обмена!" };
+        public string TempMailNoMessages => CurrentLanguage switch { "EN" => "No messages received yet.", "ZH" => "暂无收到邮件。", _ => "Сообщений пока нет." };
+        
+        public string ToolFileShredder => CurrentLanguage switch { "EN" => "Secure File Shredder", "ZH" => "安全文件粉碎机", _ => "Шредер файлов" };
+        public string FileShredderSelect => CurrentLanguage switch { "EN" => "Select Files...", "ZH" => "选择文件...", _ => "Выбрать файлы..." };
+        public string FileShredderDrag => CurrentLanguage switch { "EN" => "Drag and drop files here", "ZH" => "将文件拖放到此处", _ => "Перетащите файлы сюда" };
+        public string FileShredderWarning => CurrentLanguage switch { "EN" => "Warning! Selected files will be permanently overwritten and deleted. This action CANNOT be undone. Proceed?", "ZH" => "警告！所选文件将被永久覆写并删除。此操作无法撤销。是否继续？", _ => "Внимание! Выбранные файлы будут навсегда перезаписаны и удалены. Это действие НЕЛЬЗЯ отменить. Продолжить?" };
+        public string FileShredderSuccess => CurrentLanguage switch { "EN" => "Files shredded successfully!", "ZH" => "文件粉碎成功！", _ => "Файлы успешно стерты!" };
+        
+
+        public string ToolToDo => CurrentLanguage switch { "EN" => "To-Do List (macOS Style)", "ZH" => "待办清单", _ => "Виджет Задач (To-Do)" };
+        public string ToDoPlaceholder => CurrentLanguage switch { "EN" => "Add a new task...", "ZH" => "添加新任务...", _ => "Добавить задачу..." };
+        
+        public string ToolQrGenerator => CurrentLanguage switch { "EN" => "QR Code Generator", "ZH" => "二维码生成器", _ => "Генератор QR-кодов" };
+        public string QrPlaceholder => CurrentLanguage switch { "EN" => "Enter URL or text to encode...", "ZH" => "输入要编码的网址或文本...", _ => "Введите текст или ссылку для QR..." };
+        public string QrGenerate => CurrentLanguage switch { "EN" => "Generate QR", "ZH" => "生成二维码", _ => "Создать QR" };
+        
+        public string ToolDateCalc => CurrentLanguage switch { "EN" => "Date Calculator", "ZH" => "日期计算器", _ => "Калькулятор дат" };
+        public string DateCalcDiff => CurrentLanguage switch { "EN" => "Difference in Days", "ZH" => "天数差", _ => "Разница в днях" };
+        public string ToolWorldTime => CurrentLanguage switch { "EN" => "World Clocks", "ZH" => "世界时钟", _ => "Мировое время" };
+
+        public string TempMailSender => CurrentLanguage switch { "EN" => "From", "ZH" => "发件人", _ => "От" };
+        public string TempMailSubject => CurrentLanguage switch { "EN" => "Subject", "ZH" => "主题", _ => "Тема" };
+
+        public string HardwareSmartHealth => CurrentLanguage switch { "EN" => "Disk SMART Health", "ZH" => "硬盘健康度", _ => "Здоровье дисков S.M.A.R.T." };
+        public string HardwareTemperatures => CurrentLanguage switch { "EN" => "Temperatures", "ZH" => "温度监控", _ => "Температуры" };
+        public string HardwareCpuTemp => CurrentLanguage switch { "EN" => "CPU Temperature", "ZH" => "CPU 温度", _ => "Температура ЦП" };
+        public string HardwareGpuTemp => CurrentLanguage switch { "EN" => "GPU Temperature", "ZH" => "GPU 温度", _ => "Температура ГП" };
+        public string HardwareDiskHealthNormal => CurrentLanguage switch { "EN" => "Good (Healthy)", "ZH" => "良好 (健康)", _ => "Хорошее (Здоров)" };
+        public string HardwareDiskHealthWarning => CurrentLanguage switch { "EN" => "Warning (Degraded)", "ZH" => "警告 (有磨损)", _ => "Внимание (Есть износ)" };
+        public string HardwareDiskHealthCritical => CurrentLanguage switch { "EN" => "Critical! Replace SSD/HDD!", "ZH" => "严重！请更换硬盘！", _ => "Критическое! Замените диск!" };
+
     }
 }
 

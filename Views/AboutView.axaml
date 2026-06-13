@@ -15,7 +15,7 @@
             <StackPanel Spacing="20" HorizontalAlignment="Center">
                 <!-- Custom Glowing App Logo (Centered) -->
                 <Border Width="100" Height="100" CornerRadius="22" BorderBrush="#2FFFFFFF" BorderThickness="1" ClipToBounds="True" HorizontalAlignment="Center">
-                    <Image Source="/Assets/logo.jpg" Width="100" Height="100" Stretch="UniformToFill"/>
+                    <Image Source="avares://SystemHub/Assets/logo.jpg" Width="100" Height="100" Stretch="UniformToFill"/>
                 </Border>
 
                 <!-- Title and Version -->

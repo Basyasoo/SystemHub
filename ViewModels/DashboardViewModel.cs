@@ -118,7 +118,7 @@ namespace MacStyleHub.ViewModels
             });
         }
 
-        private void UpdateClock()
+        public void UpdateClock()
         {
             var now = DateTime.Now;
             TimeString = now.ToString("HH:mm");
@@ -133,13 +133,23 @@ namespace MacStyleHub.ViewModels
             DateString = now.ToString("dddd, d MMMM yyyy", culture);
 
             int hour = now.Hour;
-            Greeting = hour switch
+            string baseGreeting = hour switch
             {
                 >= 5 and < 12 => LocalizationService.Instance.CurrentLanguage switch { "EN" => "Good morning", "ZH" => "早上好", _ => "Доброе утро" },
                 >= 12 and < 18 => LocalizationService.Instance.CurrentLanguage switch { "EN" => "Good afternoon", "ZH" => "下午好", _ => "Добрый день" },
                 >= 18 and < 23 => LocalizationService.Instance.CurrentLanguage switch { "EN" => "Good evening", "ZH" => "晚上好", _ => "Добрый вечер" },
                 _ => LocalizationService.Instance.CurrentLanguage switch { "EN" => "Good night", "ZH" => "晚安", _ => "Доброй ночи" }
             };
+
+            var user = UserService.Instance.CurrentUser;
+            if (user != null && UserService.Instance.Settings.ShowUsernameInGreeting)
+            {
+                Greeting = $"{baseGreeting}, {user.Username}";
+            }
+            else
+            {
+                Greeting = baseGreeting;
+            }
         }
 
         private void UpdateStats()
