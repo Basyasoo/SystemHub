@@ -186,10 +186,10 @@ namespace SystemHub.Services
     public delegate int GetMasterVolumeLevelScalarDelegate(IntPtr self, out float level);
 
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-    public delegate int SetMuteDelegate(IntPtr self, bool mute, ref Guid eventContext);
+    public delegate int SetMuteDelegate(IntPtr self, [MarshalAs(UnmanagedType.Bool)] bool mute, ref Guid eventContext);
 
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-    public delegate int GetMuteDelegate(IntPtr self, out bool mute);
+    public delegate int GetMuteDelegate(IntPtr self, [MarshalAs(UnmanagedType.Bool)] out bool mute);
 
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]
     public delegate int EnumAudioEndpointsDelegate(IntPtr self, int dataFlow, int dwStateMask, out IntPtr ppDevices);
@@ -506,7 +506,7 @@ namespace SystemHub.Services
             try
             {
                 IntPtr vtable = Marshal.ReadIntPtr(volume);
-                IntPtr pGetMute = Marshal.ReadIntPtr(vtable, 11 * IntPtr.Size);
+                IntPtr pGetMute = Marshal.ReadIntPtr(vtable, 15 * IntPtr.Size);
                 var getMute = Marshal.GetDelegateForFunctionPointer<GetMuteDelegate>(pGetMute);
                 int hr = getMute(volume, out bool mute);
                 return hr == 0 && mute;
@@ -529,7 +529,7 @@ namespace SystemHub.Services
             try
             {
                 IntPtr vtable = Marshal.ReadIntPtr(volume);
-                IntPtr pSetMute = Marshal.ReadIntPtr(vtable, 10 * IntPtr.Size);
+                IntPtr pSetMute = Marshal.ReadIntPtr(vtable, 14 * IntPtr.Size);
                 var setMute = Marshal.GetDelegateForFunctionPointer<SetMuteDelegate>(pSetMute);
                 var guid = Guid.Empty;
                 setMute(volume, mute, ref guid);
