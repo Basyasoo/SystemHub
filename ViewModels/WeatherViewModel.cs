@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 using Avalonia.Input.Platform;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MacStyleHub.Services;
+using SystemHub.Services;
 
-namespace MacStyleHub.ViewModels
+namespace SystemHub.ViewModels
 {
     public partial class WeatherViewModel : ViewModelBase
     {
@@ -274,4 +274,5 @@ namespace MacStyleHub.ViewModels
         }
     }
 }
+
 

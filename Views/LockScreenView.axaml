@@ -1,0 +1,47 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:SystemHub.ViewModels"
+             xmlns:services="using:SystemHub.Services"
+             mc:Ignorable="d" d:DesignWidth="1050" d:DesignHeight="680"
+             x:Class="SystemHub.Views.LockScreenView"
+             x:DataType="vm:LockScreenViewModel">
+
+    <Grid Background="Transparent">
+        <!-- Semi-transparent dark overlay for background depth -->
+        <Border Background="#25000000" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
+
+        <Border Classes="GlassCard" Width="360" Height="340" HorizontalAlignment="Center" VerticalAlignment="Center"
+                Background="{DynamicResource GlassBg}" BorderBrush="{DynamicResource GlassBorder}" CornerRadius="16" Padding="30">
+            <StackPanel Spacing="18" VerticalAlignment="Center" HorizontalAlignment="Stretch">
+                
+                <!-- Logo Avatar -->
+                <Border Width="80" Height="80" CornerRadius="20" BorderBrush="#2FFFFFFF" BorderThickness="1.5" ClipToBounds="True" HorizontalAlignment="Center">
+                    <Image Source="avares://SystemHub/Assets/logo.jpg" Width="80" Height="80" Stretch="UniformToFill"/>
+                </Border>
+
+                <!-- Titles -->
+                <StackPanel Spacing="4" HorizontalAlignment="Center">
+                    <TextBlock Text="SystemHub" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" HorizontalAlignment="Center" LetterSpacing="-0.5"/>
+                    <TextBlock Text="{Binding AppLockScreenTitle, Source={x:Static services:LocalizationService.Instance}}" FontSize="12" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Password input row -->
+                <Grid ColumnDefinitions="*, Auto" Margin="0,10,0,0">
+                    <TextBox Grid.Column="0" Text="{Binding PasswordInput}" PlaceholderText="{Binding AppLockInputPlaceholder, Source={x:Static services:LocalizationService.Instance}}" PasswordChar="•" 
+                             Height="34" CornerRadius="8,0,0,8" BorderThickness="1,1,0,1" FontSize="13" VerticalContentAlignment="Center"/>
+                    <Button Grid.Column="1" Command="{Binding UnlockCommand}" IsDefault="True" Classes="AccentButton" 
+                            Width="36" Height="34" CornerRadius="0,8,8,0" Padding="0">
+                        <PathIcon Data="{StaticResource IconChevron}" Width="12" Height="12" Foreground="White"/>
+                    </Button>
+                </Grid>
+
+                <!-- Error feedback -->
+                <TextBlock Text="{Binding ErrorMessage}" FontSize="12" Foreground="#FF453A" FontWeight="Medium" HorizontalAlignment="Center"
+                           IsVisible="{Binding ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>
+

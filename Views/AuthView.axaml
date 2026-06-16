@@ -1,0 +1,405 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:SystemHub.ViewModels"
+             xmlns:services="using:SystemHub.Services"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+             x:Class="SystemHub.Views.AuthView"
+             x:DataType="vm:AuthViewModel">
+
+    <UserControl.Styles>
+        <Style Selector="TextBlock.active">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+        <Style Selector="TextBlock.inactive">
+            <Setter Property="Foreground" Value="#8E8E93"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        
+        <!-- Toggle button transparent pointerover style to keep design flat -->
+        <Style Selector="ToggleButton:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+        <Style Selector="ToggleButton:checked /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Grid Background="Transparent">
+        <!-- Center Glass Card -->
+        <Border Classes="GlassCard" 
+                Width="370" 
+                MinHeight="380"
+                CornerRadius="16" 
+                BorderBrush="#2DFFFFFF" 
+                BorderThickness="1" 
+                Background="#E51C1C1E" 
+                BoxShadow="0 15 35 0 #90000000"
+                HorizontalAlignment="Center" 
+                VerticalAlignment="Center"
+                ClipToBounds="True">
+            
+            <Grid RowDefinitions="Auto, *, Auto" Margin="24">
+                
+                <!-- Title & Toggle Switch (Only for Login & Register) -->
+                <StackPanel Grid.Row="0" Spacing="6" HorizontalAlignment="Center" Margin="0,0,0,10">
+                    <TextBlock Text="SystemHub" FontSize="26" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" LetterSpacing="-0.5"/>
+                    
+                    <!-- Mode titles -->
+                    <TextBlock Text="{Binding AuthLoginTitle, Source={x:Static services:LocalizationService.Instance}}" FontSize="12" Foreground="#8E8E93" HorizontalAlignment="Center" IsVisible="{Binding IsLoginMode}"/>
+                    <TextBlock Text="{Binding AuthRegisterTitle, Source={x:Static services:LocalizationService.Instance}}" FontSize="12" Foreground="#8E8E93" HorizontalAlignment="Center" IsVisible="{Binding IsRegisterMode}"/>
+                    <TextBlock Text="{Binding AuthVerifyEmailTitle, Source={x:Static services:LocalizationService.Instance}}" FontSize="12" Foreground="#8E8E93" HorizontalAlignment="Center" IsVisible="{Binding IsVerifyEmailMode}"/>
+                    <TextBlock Text="{Binding AuthForgotPasswordTitle, Source={x:Static services:LocalizationService.Instance}}" FontSize="12" Foreground="#8E8E93" HorizontalAlignment="Center" IsVisible="{Binding IsForgotPasswordMode}"/>
+                    <TextBlock Text="{Binding AuthResetPasswordTitle, Source={x:Static services:LocalizationService.Instance}}" FontSize="12" Foreground="#8E8E93" HorizontalAlignment="Center" IsVisible="{Binding IsResetPasswordMode}"/>
+                    
+                    <Grid ColumnDefinitions="*, *" Width="200" Margin="0,5" IsVisible="{Binding IsLoginOrRegisterMode}">
+                        <Button Grid.Column="0" 
+                                Command="{Binding ToggleModeCommand}" 
+                                IsEnabled="{Binding IsRegisterMode}"
+                                Background="Transparent" BorderThickness="0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding AuthTabLogin, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" Classes.active="{Binding IsLoginMode}" Classes.inactive="{Binding IsRegisterMode}"/>
+                        </Button>
+                        <Button Grid.Column="1" 
+                                Command="{Binding ToggleModeCommand}" 
+                                IsEnabled="{Binding IsLoginMode}"
+                                Background="Transparent" BorderThickness="0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding AuthTabRegister, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" Classes.active="{Binding IsRegisterMode}" Classes.inactive="{Binding IsLoginMode}"/>
+                        </Button>
+                    </Grid>
+                </StackPanel>
+
+                <!-- Input Fields & Mode Panels -->
+                <StackPanel Grid.Row="1" Spacing="12" VerticalAlignment="Center">
+                    
+                    <!-- 1. LOGIN MODE -->
+                    <StackPanel Spacing="12" IsVisible="{Binding IsLoginMode}">
+                        <!-- Username / Email Input -->
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{Binding AuthEmailUserLabel, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" FontWeight="SemiBold" Foreground="#8E8E93"/>
+                            <TextBox Text="{Binding Email}" 
+                                     PlaceholderText="{Binding AuthEmailUserPlaceholder, Source={x:Static services:LocalizationService.Instance}}"
+                                     Height="34" 
+                                     CornerRadius="6" 
+                                     Background="#0CFFFFFF" 
+                                     BorderBrush="#2DFFFFFF"
+                                     FontSize="12"
+                                     VerticalContentAlignment="Center"/>
+                        </StackPanel>
+
+                        <!-- Password Input with Reveal Toggle -->
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{Binding AuthPasswordLabel, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" FontWeight="SemiBold" Foreground="#8E8E93"/>
+                            <TextBox Text="{Binding Password}" 
+                                     PasswordChar="{Binding PasswordCharChar}" 
+                                     PlaceholderText="{Binding AuthPasswordPlaceholder, Source={x:Static services:LocalizationService.Instance}}"
+                                     Height="34" 
+                                     CornerRadius="6" 
+                                     Background="#0CFFFFFF" 
+                                     BorderBrush="#2DFFFFFF"
+                                     FontSize="12"
+                                     VerticalContentAlignment="Center">
+                                <TextBox.InnerRightContent>
+                                    <ToggleButton IsChecked="{Binding RevealPassword}"
+                                                  Background="Transparent"
+                                                  BorderThickness="0"
+                                                  Width="30"
+                                                  Height="30"
+                                                  Padding="0"
+                                                  Margin="0,0,4,0"
+                                                  Cursor="Hand">
+                                        <Panel>
+                                            <PathIcon Data="{StaticResource IconEye}" Width="14" Height="14" Foreground="#8E8E93" IsVisible="{Binding RevealPassword}"/>
+                                            <PathIcon Data="{StaticResource IconEyeSlash}" Width="14" Height="14" Foreground="#8E8E93" IsVisible="{Binding !RevealPassword}"/>
+                                        </Panel>
+                                    </ToggleButton>
+                                </TextBox.InnerRightContent>
+                            </TextBox>
+                        </StackPanel>
+
+                        <Grid ColumnDefinitions="*, Auto" Margin="0,5">
+                            <CheckBox Grid.Column="0" IsChecked="{Binding RememberMe}" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding AuthRememberMe, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" Foreground="#8E8E93"/>
+                            </CheckBox>
+                            <Button Grid.Column="1" Command="{Binding GotoForgotPasswordCommand}" Background="Transparent" BorderThickness="0" Padding="0" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding AuthForgotPasswordLink, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" Foreground="{StaticResource AccentBlue}" FontWeight="Medium"/>
+                            </Button>
+                        </Grid>
+                    </StackPanel>
+
+                    <!-- 2. REGISTER MODE -->
+                    <StackPanel Spacing="12" IsVisible="{Binding IsRegisterMode}">
+                        <!-- Username -->
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{Binding AuthUsernameLabel, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" FontWeight="SemiBold" Foreground="#8E8E93"/>
+                            <TextBox Text="{Binding Username}" 
+                                     PlaceholderText="{Binding AuthUsernamePlaceholder, Source={x:Static services:LocalizationService.Instance}}"
+                                     Height="34" 
+                                     CornerRadius="6" 
+                                     Background="#0CFFFFFF" 
+                                     BorderBrush="#2DFFFFFF"
+                                     FontSize="12"
+                                     VerticalContentAlignment="Center"/>
+                        </StackPanel>
+
+                        <!-- Email -->
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{Binding AuthEmailLabel, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" FontWeight="SemiBold" Foreground="#8E8E93"/>
+                            <TextBox Text="{Binding Email}" 
+                                     PlaceholderText="example@domain.com"
+                                     Height="34" 
+                                     CornerRadius="6" 
+                                     Background="#0CFFFFFF" 
+                                     BorderBrush="#2DFFFFFF"
+                                     FontSize="12"
+                                     VerticalContentAlignment="Center"/>
+                        </StackPanel>
+
+                        <!-- Password -->
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{Binding AuthPasswordLabel, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" FontWeight="SemiBold" Foreground="#8E8E93"/>
+                            <TextBox Text="{Binding Password}" 
+                                     PasswordChar="{Binding PasswordCharChar}" 
+                                     PlaceholderText="{Binding AuthPasswordNewPlaceholder, Source={x:Static services:LocalizationService.Instance}}"
+                                     Height="34" 
+                                     CornerRadius="6" 
+                                     Background="#0CFFFFFF" 
+                                     BorderBrush="#2DFFFFFF"
+                                     FontSize="12"
+                                     VerticalContentAlignment="Center">
+                                <TextBox.InnerRightContent>
+                                    <ToggleButton IsChecked="{Binding RevealPassword}"
+                                                  Background="Transparent"
+                                                  BorderThickness="0"
+                                                  Width="30"
+                                                  Height="30"
+                                                  Padding="0"
+                                                  Margin="0,0,4,0"
+                                                  Cursor="Hand">
+                                        <Panel>
+                                            <PathIcon Data="{StaticResource IconEye}" Width="14" Height="14" Foreground="#8E8E93" IsVisible="{Binding RevealPassword}"/>
+                                            <PathIcon Data="{StaticResource IconEyeSlash}" Width="14" Height="14" Foreground="#8E8E93" IsVisible="{Binding !RevealPassword}"/>
+                                        </Panel>
+                                    </ToggleButton>
+                                </TextBox.InnerRightContent>
+                            </TextBox>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- 3. VERIFY EMAIL MODE -->
+                    <StackPanel Spacing="12" IsVisible="{Binding IsVerifyEmailMode}">
+                        <TextBlock Text="{Binding AuthVerifyEmailDesc, Source={x:Static services:LocalizationService.Instance}}" 
+                                   FontSize="12" Foreground="#8E8E93" TextWrapping="Wrap" TextAlignment="Center" Margin="0,0,0,5"/>
+                        
+                        <!-- Offline debug mode code banner -->
+                        <Border Background="#1A34C759" BorderBrush="#3D34C759" BorderThickness="1" CornerRadius="8" Padding="10" 
+                                IsVisible="{Binding DebugCodeMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                            <TextBlock Text="{Binding DebugCodeMessage}" Foreground="#30D158" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                        </Border>
+
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{Binding AuthVerifyCodeLabel, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" FontWeight="SemiBold" Foreground="#8E8E93"/>
+                            <TextBox Text="{Binding VerificationCode}" 
+                                     PlaceholderText="{Binding AuthVerifyCodePlaceholder, Source={x:Static services:LocalizationService.Instance}}"
+                                     Height="34" 
+                                     CornerRadius="6" 
+                                     Background="#0CFFFFFF" 
+                                     BorderBrush="#2DFFFFFF"
+                                     FontSize="14"
+                                     HorizontalContentAlignment="Center"
+                                     VerticalContentAlignment="Center"
+                                     MaxLength="6"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- 4. FORGOT PASSWORD MODE -->
+                    <StackPanel Spacing="12" IsVisible="{Binding IsForgotPasswordMode}">
+                        <TextBlock Text="{Binding AuthForgotPasswordDesc, Source={x:Static services:LocalizationService.Instance}}" 
+                                   FontSize="12" Foreground="#8E8E93" TextWrapping="Wrap" TextAlignment="Center" Margin="0,0,0,10"/>
+                        
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{Binding AuthEmailResetLabel, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" FontWeight="SemiBold" Foreground="#8E8E93"/>
+                            <TextBox Text="{Binding Email}" 
+                                     PlaceholderText="example@domain.com"
+                                     Height="34" 
+                                     CornerRadius="6" 
+                                     Background="#0CFFFFFF" 
+                                     BorderBrush="#2DFFFFFF"
+                                     FontSize="12"
+                                     VerticalContentAlignment="Center"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- 5. RESET PASSWORD MODE -->
+                    <StackPanel Spacing="12" IsVisible="{Binding IsResetPasswordMode}">
+                        <TextBlock Text="{Binding AuthResetPasswordDesc, Source={x:Static services:LocalizationService.Instance}}" 
+                                   FontSize="12" Foreground="#8E8E93" TextWrapping="Wrap" TextAlignment="Center" Margin="0,0,0,5"/>
+
+                        <!-- Offline debug code banner -->
+                        <Border Background="#1A34C759" BorderBrush="#3D34C759" BorderThickness="1" CornerRadius="8" Padding="10" 
+                                IsVisible="{Binding DebugCodeMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                            <TextBlock Text="{Binding DebugCodeMessage}" Foreground="#30D158" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                        </Border>
+
+                        <!-- Recovery Code -->
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{Binding AuthResetCodeLabel, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" FontWeight="SemiBold" Foreground="#8E8E93"/>
+                            <TextBox Text="{Binding VerificationCode}" 
+                                     PlaceholderText="{Binding AuthResetCodePlaceholder, Source={x:Static services:LocalizationService.Instance}}"
+                                     Height="34" 
+                                     CornerRadius="6" 
+                                     Background="#0CFFFFFF" 
+                                     BorderBrush="#2DFFFFFF"
+                                     FontSize="13"
+                                     HorizontalContentAlignment="Center"
+                                     VerticalContentAlignment="Center"
+                                     MaxLength="6"/>
+                        </StackPanel>
+
+                        <!-- New Password -->
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{Binding AuthPasswordNew, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" FontWeight="SemiBold" Foreground="#8E8E93"/>
+                            <TextBox Text="{Binding NewPassword}" 
+                                     PasswordChar="{Binding PasswordCharChar}" 
+                                     PlaceholderText="{Binding AuthPasswordNewPlaceholder, Source={x:Static services:LocalizationService.Instance}}"
+                                     Height="34" 
+                                     CornerRadius="6" 
+                                     Background="#0CFFFFFF" 
+                                     BorderBrush="#2DFFFFFF"
+                                     FontSize="12"
+                                     VerticalContentAlignment="Center">
+                                <TextBox.InnerRightContent>
+                                    <ToggleButton IsChecked="{Binding RevealPassword}"
+                                                  Background="Transparent"
+                                                  BorderThickness="0"
+                                                  Width="30"
+                                                  Height="30"
+                                                  Padding="0"
+                                                  Margin="0,0,4,0"
+                                                  Cursor="Hand">
+                                        <Panel>
+                                            <PathIcon Data="{StaticResource IconEye}" Width="14" Height="14" Foreground="#8E8E93" IsVisible="{Binding RevealPassword}"/>
+                                            <PathIcon Data="{StaticResource IconEyeSlash}" Width="14" Height="14" Foreground="#8E8E93" IsVisible="{Binding !RevealPassword}"/>
+                                        </Panel>
+                                    </ToggleButton>
+                                </TextBox.InnerRightContent>
+                            </TextBox>
+                        </StackPanel>
+
+                        <!-- Confirm Password -->
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="Подтвердите новый пароль:" FontSize="11" FontWeight="SemiBold" Foreground="#8E8E93"/>
+                            <TextBox Text="{Binding ConfirmPassword}" 
+                                     PasswordChar="{Binding PasswordCharChar}" 
+                                     PlaceholderText="Повторите новый пароль..."
+                                     Height="34" 
+                                     CornerRadius="6" 
+                                     Background="#0CFFFFFF" 
+                                     BorderBrush="#2DFFFFFF"
+                                     FontSize="12"
+                                     VerticalContentAlignment="Center">
+                                <TextBox.InnerRightContent>
+                                    <ToggleButton IsChecked="{Binding RevealPassword}"
+                                                  Background="Transparent"
+                                                  BorderThickness="0"
+                                                  Width="30"
+                                                  Height="30"
+                                                  Padding="0"
+                                                  Margin="0,0,4,0"
+                                                  Cursor="Hand">
+                                        <Panel>
+                                            <PathIcon Data="{StaticResource IconEye}" Width="14" Height="14" Foreground="#8E8E93" IsVisible="{Binding RevealPassword}"/>
+                                            <PathIcon Data="{StaticResource IconEyeSlash}" Width="14" Height="14" Foreground="#8E8E93" IsVisible="{Binding !RevealPassword}"/>
+                                        </Panel>
+                                    </ToggleButton>
+                                </TextBox.InnerRightContent>
+                            </TextBox>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Error display -->
+                    <TextBlock Text="{Binding ErrorMessage}" 
+                               Foreground="#FF453A" 
+                               FontSize="11" 
+                               FontWeight="Medium" 
+                               HorizontalAlignment="Center" 
+                               TextAlignment="Center" 
+                               TextWrapping="Wrap" 
+                               IsVisible="{Binding ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                </StackPanel>
+
+                <!-- Actions -->
+                <StackPanel Grid.Row="2" Spacing="10" VerticalAlignment="Bottom" Margin="0,15,0,0">
+                    <!-- 1. Login Command -->
+                    <Button Classes="AccentButton" 
+                            Command="{Binding PerformAuthCommand}" 
+                            Height="38" 
+                            HorizontalAlignment="Stretch" 
+                            HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            IsVisible="{Binding IsLoginMode}">
+                        <TextBlock Text="{Binding AuthLoginBtn, Source={x:Static services:LocalizationService.Instance}}" FontWeight="Bold" FontSize="13"/>
+                    </Button>
+
+                    <!-- 2. Register Command -->
+                    <Button Classes="AccentButton" 
+                            Command="{Binding PerformAuthCommand}" 
+                            Height="38" 
+                            HorizontalAlignment="Stretch" 
+                            HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            IsVisible="{Binding IsRegisterMode}">
+                        <TextBlock Text="{Binding AuthRegisterBtn, Source={x:Static services:LocalizationService.Instance}}" FontWeight="Bold" FontSize="13"/>
+                    </Button>
+
+                    <!-- 3. Verify Email Code Command -->
+                    <Button Classes="AccentButton" 
+                            Command="{Binding VerifyCodeCommand}" 
+                            Height="38" 
+                            HorizontalAlignment="Stretch" 
+                            HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            IsVisible="{Binding IsVerifyEmailMode}">
+                        <TextBlock Text="{Binding AuthConfirmBtn, Source={x:Static services:LocalizationService.Instance}}" FontWeight="Bold" FontSize="13"/>
+                    </Button>
+
+                    <!-- 4. Send Forgot Password Code Command -->
+                    <Button Classes="AccentButton" 
+                            Command="{Binding SendForgotPasswordCodeCommand}" 
+                            Height="38" 
+                            HorizontalAlignment="Stretch" 
+                            HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            IsVisible="{Binding IsForgotPasswordMode}">
+                        <TextBlock Text="{Binding AuthSendResetBtn, Source={x:Static services:LocalizationService.Instance}}" FontWeight="Bold" FontSize="13"/>
+                    </Button>
+
+                    <!-- 5. Reset Password Action Command -->
+                    <Button Classes="AccentButton" 
+                            Command="{Binding ResetPasswordActionCommand}" 
+                            Height="38" 
+                            HorizontalAlignment="Stretch" 
+                            HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            IsVisible="{Binding IsResetPasswordMode}">
+                        <TextBlock Text="{Binding AuthSavePasswordBtn, Source={x:Static services:LocalizationService.Instance}}" FontWeight="Bold" FontSize="13"/>
+                    </Button>
+
+                    <!-- Secondary Back-to-Login Buttons -->
+                    <Button Classes="SystemButton" 
+                            Command="{Binding GotoLoginCommand}" 
+                            Height="34" 
+                            HorizontalAlignment="Stretch" 
+                            HorizontalContentAlignment="Center"
+                            VerticalContentAlignment="Center"
+                            IsVisible="{Binding IsBackVisible}">
+                        <TextBlock Text="{Binding AuthBackBtn, Source={x:Static services:LocalizationService.Instance}}" FontSize="12"/>
+                    </Button>
+                </StackPanel>
+                
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>
+

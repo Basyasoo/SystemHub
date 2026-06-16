@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using Microsoft.Win32;
 using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace MacStyleHub.Services
+namespace SystemHub.Services
 {
     public partial class StartupItem : ObservableObject
     {
@@ -242,3 +242,4 @@ namespace MacStyleHub.Services
         }
     }
 }
+

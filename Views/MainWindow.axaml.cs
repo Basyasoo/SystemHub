@@ -2,7 +2,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 
-namespace MacStyleHub.Views
+namespace SystemHub.Views
 {
     public partial class MainWindow : Window
     {

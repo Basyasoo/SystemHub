@@ -5,10 +5,10 @@ using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using System.Linq;
 using Avalonia.Markup.Xaml;
-using MacStyleHub.ViewModels;
-using MacStyleHub.Views;
+using SystemHub.ViewModels;
+using SystemHub.Views;
 
-namespace MacStyleHub;
+namespace SystemHub;
 
 public partial class App : Application
 {

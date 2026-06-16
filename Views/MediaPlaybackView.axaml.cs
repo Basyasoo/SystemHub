@@ -4,9 +4,9 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Threading;
-using MacStyleHub.ViewModels;
+using SystemHub.ViewModels;
 
-namespace MacStyleHub.Views
+namespace SystemHub.Views
 {
     public partial class MediaPlaybackView : UserControl
     {
@@ -137,3 +137,4 @@ namespace MacStyleHub.Views
         }
     }
 }
+

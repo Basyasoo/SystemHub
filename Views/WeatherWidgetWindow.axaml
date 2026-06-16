@@ -1,0 +1,62 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:SystemHub.ViewModels"
+        xmlns:services="using:SystemHub.Services"
+        x:Class="SystemHub.Views.WeatherWidgetWindow"
+        x:DataType="vm:WeatherViewModel"
+        Width="260" Height="110"
+        Title="Weather Widget"
+        WindowDecorations="None"
+        CanResize="False"
+        Background="Transparent"
+        TransparencyLevelHint="Transparent"
+        Topmost="False"
+        ShowInTaskbar="False"
+        PointerPressed="OnPointerPressed">
+
+    <Border Background="#E61C1C1E"
+            BorderBrush="#26FFFFFF"
+            BorderThickness="1"
+            CornerRadius="16"
+            Padding="14"
+            ClipToBounds="True"
+            BoxShadow="0 8 24 0 #40000000">
+        <Grid RowDefinitions="Auto, *">
+            <!-- Top Row: Location & Refresh -->
+            <Grid Grid.Row="0" ColumnDefinitions="*, Auto">
+                <TextBlock Grid.Column="0" Text="{Binding CityLocalized}" FontSize="13" FontWeight="SemiBold" Foreground="White" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                <Button Grid.Column="1" Command="{Binding LoadWeatherCommand}" Width="24" Height="24" Padding="0" Background="Transparent" BorderThickness="0" CornerRadius="12" ToolTip.Tip="{Binding WeatherWidgetRefresh, Source={x:Static services:LocalizationService.Instance}}">
+                    <PathIcon Data="M19,8 l-4,4 h3 c0,3.31-2.69,6-6,6 c-1.01,0-1.97-.25-2.8-.7 l-1.46,1.46 C8.97,19.54,10.43,20,12,20 c4.42,0,8-3.58,8-8 h3 L19,8 z M6,12 c0-3.31,2.69-6,6-6 c1.01,0,1.97,.25,2.8,.7 l1.46-1.46 C15.03,4.46,13.57,4,12,4 c-4.42,0-8,3.58-8,8 H1 l4,4 l4,-4 H6 z" Width="12" Height="12" Foreground="#8A8A8F"/>
+                </Button>
+            </Grid>
+
+            <!-- Bottom Row: Temperature & Icon/Condition -->
+            <Grid Grid.Row="1" ColumnDefinitions="Auto, *" Margin="0,6,0,0">
+                <!-- Temperature -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,15,0">
+                    <TextBlock Text="{Binding Temperature, StringFormat='{}{0:F0}'}" FontSize="32" FontWeight="Bold" Foreground="White"/>
+                    <TextBlock Text="°C" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource AccentBlue}" Margin="2,4,0,0"/>
+                </StackPanel>
+                
+                <!-- Icon and condition -->
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <TextBlock Text="{Binding Icon}" FontSize="18" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding ConditionLocalized}" FontSize="12" Foreground="White" TextTrimming="CharacterEllipsis" FontWeight="Medium" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,2,0,0">
+                        <StackPanel Orientation="Horizontal" Spacing="3" ToolTip.Tip="{Binding WeatherWidgetHumidity, Source={x:Static services:LocalizationService.Instance}}">
+                            <TextBlock Text="💧" FontSize="11" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Humidity, StringFormat='{}{0}%'}" FontSize="10" Foreground="#8A8A8F" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="3" ToolTip.Tip="{Binding WeatherWindSpeed, Source={x:Static services:LocalizationService.Instance}}">
+                            <TextBlock Text="💨" FontSize="11" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding WindSpeedLocalized}" FontSize="10" Foreground="#8A8A8F" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>
+

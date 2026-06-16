@@ -6,7 +6,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Windows.Devices.Geolocation;
 
-namespace MacStyleHub.Services
+namespace SystemHub.Services
 {
     public class WeatherInfo
     {
@@ -54,7 +54,7 @@ namespace MacStyleHub.Services
         static WeatherService()
         {
             HttpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
-            HttpClient.DefaultRequestHeaders.UserAgent.ParseAdd("MacStyleHubWeatherClient/1.2 (contact.basyasoo.weather@localmail.net)");
+            HttpClient.DefaultRequestHeaders.UserAgent.ParseAdd("SystemHubWeatherClient/1.2 (contact.basyasoo.weather@localmail.net)");
         }
 
         private static string GetSettingsPath()
@@ -1734,3 +1734,4 @@ namespace MacStyleHub.Services
         }
     }
 }
+

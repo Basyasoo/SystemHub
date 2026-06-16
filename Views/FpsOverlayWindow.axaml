@@ -1,0 +1,35 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="SystemHub.Views.FpsOverlayWindow"
+        Width="140" Height="45"
+        Title="FPS Monitor"
+        WindowDecorations="None"
+        CanResize="False"
+        Background="Transparent"
+        TransparencyLevelHint="Transparent"
+        Topmost="True"
+        ShowInTaskbar="False"
+        PointerPressed="OnPointerPressed">
+
+    <Border Background="#E61C1C1E"
+            BorderBrush="#26FFFFFF"
+            BorderThickness="1"
+            CornerRadius="8"
+            Padding="8,6"
+            ClipToBounds="True">
+        <Grid ColumnDefinitions="*, Auto" VerticalAlignment="Center">
+            <!-- Left: FPS Number -->
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Name="FpsText" Text="144" FontSize="18" FontWeight="Bold" Foreground="#30D158" VerticalAlignment="Center"/>
+                <TextBlock Text=" FPS" FontSize="10" FontWeight="SemiBold" Foreground="#8A8A8F" Margin="1,0,0,1" VerticalAlignment="Bottom"/>
+            </StackPanel>
+
+            <!-- Right: Frametime -->
+            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="0" Margin="10,0,0,0">
+                <TextBlock Name="FrametimeText" Text="6.9 ms" FontSize="10" FontWeight="Medium" Foreground="#E5E5EA" HorizontalAlignment="Right"/>
+                <TextBlock Text="Frametime" FontSize="8" Foreground="#8A8A8F" HorizontalAlignment="Right"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>
+

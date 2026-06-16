@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.Media.Control;
 
-namespace MacStyleHub.Services
+namespace SystemHub.Services
 {
     public class MediaPlaybackService
     {
@@ -188,7 +188,7 @@ namespace MacStyleHub.Services
                 // Refine player display names
                 if (player.Contains("Spotify", StringComparison.OrdinalIgnoreCase)) player = "Spotify";
                 else if (player.Contains("Chrome", StringComparison.OrdinalIgnoreCase)) player = "Google Chrome";
-                else if (player.Contains("YandexMusic", StringComparison.OrdinalIgnoreCase) || (player.Contains("Yandex", StringComparison.OrdinalIgnoreCase) && player.Contains("music", StringComparison.OrdinalIgnoreCase))) player = "Яндекс.Музыка";
+                else if (player.Contains("YandexMusic", StringComparison.OrdinalIgnoreCase) || (player.Contains("Yandex", StringComparison.OrdinalIgnoreCase) && player.Contains("music", StringComparison.OrdinalIgnoreCase))) player = LocalizationService.Instance.MediaYandexMusic;
                 else if (player.Contains("VLC", StringComparison.OrdinalIgnoreCase)) player = "VLC Media Player";
                 else if (player.Contains("Telegram", StringComparison.OrdinalIgnoreCase)) player = "Telegram";
                 else if (player.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
@@ -367,3 +367,4 @@ namespace MacStyleHub.Services
         }
     }
 }
+

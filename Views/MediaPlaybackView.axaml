@@ -2,10 +2,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:vm="using:MacStyleHub.ViewModels"
-             xmlns:services="using:MacStyleHub.Services"
+             xmlns:vm="using:SystemHub.ViewModels"
+             xmlns:services="using:SystemHub.Services"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="550"
-             x:Class="MacStyleHub.Views.MediaPlaybackView"
+             x:Class="SystemHub.Views.MediaPlaybackView"
              x:DataType="vm:MediaPlaybackViewModel">
 
     <UserControl.Resources>
@@ -378,10 +378,10 @@
                     <Button Classes="SystemButton" 
                             Command="{Binding ToggleEqualizerCommand}" 
                             VerticalAlignment="Center"
-                            ToolTip.Tip="Открыть/закрыть эквалайзер">
+                            ToolTip.Tip="{Binding MediaEqTooltip, Source={x:Static services:LocalizationService.Instance}}">
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <PathIcon Data="{StaticResource IconSettings}" Width="16" Height="16" Foreground="{DynamicResource AccentBlue}"/>
-                            <TextBlock Text="Эквалайзер" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding MediaEqHeader, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                 </StackPanel>
@@ -580,8 +580,8 @@
                     <Grid RowDefinitions="Auto, *, Auto" Margin="16">
                         <!-- Header -->
                         <StackPanel Grid.Row="0" Spacing="4" Margin="0,0,0,15">
-                            <TextBlock Text="Визуализатор спектра" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
-                            <TextBlock Text="Анализ и отображение частот воспроизведения системного звука" FontSize="11" Foreground="{DynamicResource TextSecondary}"/>
+                            <TextBlock Text="{Binding MediaVisualizerHeader, Source={x:Static services:LocalizationService.Instance}}" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                            <TextBlock Text="{Binding MediaVisualizerDesc, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" Foreground="{DynamicResource TextSecondary}"/>
                         </StackPanel>
 
                         <!-- Visualizer Area -->
@@ -591,7 +591,7 @@
 
                         <!-- Presets Area -->
                         <StackPanel Grid.Row="2" Spacing="8" Margin="0,10,0,0">
-                            <TextBlock Text="Пресеты эквалайзера:" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondary}"/>
+                            <TextBlock Text="{Binding MediaEqPresetsHeader, Source={x:Static services:LocalizationService.Instance}}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondary}"/>
                             <Grid ColumnDefinitions="*, Auto, Auto, Auto, Auto">
                                 <ComboBox Grid.Column="0"
                                           ItemsSource="{Binding EqualizerPresets}" 
@@ -612,7 +612,7 @@
                                         Width="32" 
                                         Margin="6,0,0,0" 
                                         Classes="SystemButton"
-                                        ToolTip.Tip="Сохранить изменения в пресет"
+                                        ToolTip.Tip="{Binding MediaSavePresetTooltip, Source={x:Static services:LocalizationService.Instance}}"
                                         IsVisible="{Binding IsCustomPresetSelected}">
                                     <PathIcon Data="{StaticResource IconCheck}" Width="13" Height="13" Foreground="{DynamicResource AccentBlue}"/>
                                 </Button>
@@ -623,7 +623,7 @@
                                         Width="32" 
                                         Margin="6,0,0,0" 
                                         Classes="SystemButton"
-                                        ToolTip.Tip="Удалить пресет"
+                                        ToolTip.Tip="{Binding MediaDeletePresetTooltip, Source={x:Static services:LocalizationService.Instance}}"
                                         IsVisible="{Binding IsCustomPresetSelected}">
                                     <PathIcon Data="{StaticResource IconTrash}" Width="13" Height="13" Foreground="{DynamicResource TextSecondary}"/>
                                 </Button>
@@ -634,7 +634,7 @@
                                         Width="32" 
                                         Margin="6,0,0,0" 
                                         Classes="SystemButton"
-                                        ToolTip.Tip="Импортировать пресет (.json)">
+                                        ToolTip.Tip="{Binding MediaImportPresetTooltip, Source={x:Static services:LocalizationService.Instance}}">
                                     <PathIcon Data="{StaticResource IconImport}" Width="13" Height="13" Foreground="{DynamicResource AccentBlue}"/>
                                 </Button>
 
@@ -644,20 +644,20 @@
                                         Width="32" 
                                         Margin="6,0,0,0" 
                                         Classes="SystemButton"
-                                        ToolTip.Tip="Экспортировать выбранный пресет (.json)">
+                                        ToolTip.Tip="{Binding MediaExportPresetTooltip, Source={x:Static services:LocalizationService.Instance}}">
                                     <PathIcon Data="{StaticResource IconExport}" Width="13" Height="13" Foreground="{DynamicResource AccentBlue}"/>
                                 </Button>
                             </Grid>
                             
                             <Grid ColumnDefinitions="*, Auto" Margin="0,4,0,0">
-                                <TextBox PlaceholderText="Имя нового пресета..." 
+                                <TextBox PlaceholderText="{Binding MediaNewPresetPlaceholder, Source={x:Static services:LocalizationService.Instance}}" 
                                          Text="{Binding NewPresetName}" 
                                          Height="32" 
                                          CornerRadius="6"
                                          VerticalAlignment="Center"/>
                                 <Button Grid.Column="1" 
                                         Command="{Binding SaveCurrentAsPresetCommand}" 
-                                        Content="Сохранить" 
+                                        Content="{Binding MediaSaveBtn, Source={x:Static services:LocalizationService.Instance}}" 
                                         Height="32" 
                                         Margin="6,0,0,0" 
                                         Classes="SystemButton"
@@ -674,7 +674,7 @@
                         <Grid ColumnDefinitions="*, Auto">
                             <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                                 <PathIcon Data="{StaticResource IconSettings}" Width="15" Height="15" Foreground="{DynamicResource AccentBlue}"/>
-                                <TextBlock Text="Эквалайзер" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                                <TextBlock Text="{Binding MediaEqHeader, Source={x:Static services:LocalizationService.Instance}}" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
                             </StackPanel>
                             <ToggleSwitch Grid.Column="1" Classes="EqToggle" IsChecked="{Binding IsEqualizerEnabled}" Foreground="{DynamicResource AccentBlue}" OnContent="" OffContent="" Padding="0" MinWidth="0" VerticalAlignment="Center"/>
                         </Grid>
@@ -685,7 +685,7 @@
 
                             <!-- Audio Device Selector -->
                             <StackPanel Spacing="6" Margin="0,4,0,4">
-                                <TextBlock Text="Устройство вывода:" FontSize="12" Foreground="{DynamicResource TextSecondary}"/>
+                                <TextBlock Text="{Binding MediaOutputDeviceLabel, Source={x:Static services:LocalizationService.Instance}}" FontSize="12" Foreground="{DynamicResource TextSecondary}"/>
                                 <ComboBox ItemsSource="{Binding AudioDevices}" 
                                           SelectedItem="{Binding SelectedAudioDevice}" 
                                           HorizontalAlignment="Stretch" 
@@ -703,7 +703,7 @@
                             <Border Background="#150A84FF" BorderBrush="#300A84FF" BorderThickness="1" CornerRadius="6" Padding="10" Margin="0,-4,0,-4">
                                 <Grid ColumnDefinitions="Auto, *">
                                     <PathIcon Grid.Column="0" Data="{StaticResource IconTip}" Width="14" Height="14" Foreground="{DynamicResource AccentBlue}" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Column="1" Text="Если слышно эхо/дублирование: в Windows откройте свойства записи 'CABLE Output' -> вкладка 'Прослушивать' -> снимите флажок 'Прослушивать с данного устройства'." Foreground="{DynamicResource TextSecondary}" FontSize="10.5" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding MediaEchoNotice, Source={x:Static services:LocalizationService.Instance}}" Foreground="{DynamicResource TextSecondary}" FontSize="10.5" TextWrapping="Wrap" VerticalAlignment="Center"/>
                                 </Grid>
                             </Border>
 
@@ -730,7 +730,7 @@
                                             <TextBlock Grid.Row="2" Text="-12dB" FontSize="8.5" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Bottom"/>
                                         </Grid>
                                     </Grid>
-                                    <TextBlock Text="уровень" FontSize="11" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center" Margin="0,6,0,0"/>
+                                    <TextBlock Text="{Binding MediaMasterLevelLabel, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center" Margin="0,6,0,0"/>
                                 </StackPanel>
 
                                 <!-- Vertical Divider -->
@@ -797,3 +797,4 @@
         </StackPanel>
     </ScrollViewer>
 </UserControl>
+

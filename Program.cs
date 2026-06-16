@@ -1,7 +1,7 @@
 using Avalonia;
 using System;
 
-namespace MacStyleHub;
+namespace SystemHub;
 
 sealed class Program
 {
@@ -58,3 +58,4 @@ sealed class Program
             .WithInterFont()
             .LogToTrace();
 }
+

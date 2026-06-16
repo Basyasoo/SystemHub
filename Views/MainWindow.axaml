@@ -1,13 +1,13 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:MacStyleHub.ViewModels"
-        xmlns:services="using:MacStyleHub.Services"
-        xmlns:views="using:MacStyleHub.Views"
+        xmlns:vm="using:SystemHub.ViewModels"
+        xmlns:services="using:SystemHub.Services"
+        xmlns:views="using:SystemHub.Views"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="1050" d:DesignHeight="680"
         Width="1050" Height="680"
-        x:Class="MacStyleHub.Views.MainWindow"
+        x:Class="SystemHub.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="avares://SystemHub/Assets/app.ico"
         Title="SystemHub"
@@ -171,7 +171,7 @@
                                     MinWidth="0" MinHeight="0"
                                     HorizontalAlignment="Left" VerticalAlignment="Center"
                                     Margin="16,0,0,0"
-                                    Command="{Binding ToggleSidebarCommand}" ToolTip.Tip="Свернуть/Развернуть боковую панель">
+                                    Command="{Binding ToggleSidebarCommand}" ToolTip.Tip="{Binding MainSidebarToggleTooltip, Source={x:Static services:LocalizationService.Instance}}">
                                 <Button.Styles>
                                     <Style Selector="Button">
                                         <Setter Property="Background" Value="Transparent"/>
@@ -200,7 +200,7 @@
                             <Button Width="28" Height="28" Padding="0" Background="Transparent" BorderThickness="0"
                                     MinWidth="0" MinHeight="0"
                                     HorizontalAlignment="Center" VerticalAlignment="Center"
-                                    Command="{Binding ToggleSidebarCommand}" ToolTip.Tip="Свернуть/Развернуть боковую панель">
+                                    Command="{Binding ToggleSidebarCommand}" ToolTip.Tip="{Binding MainSidebarToggleTooltip, Source={x:Static services:LocalizationService.Instance}}">
                                 <Button.Styles>
                                     <Style Selector="Button">
                                         <Setter Property="Background" Value="Transparent"/>
@@ -398,7 +398,7 @@
                                 <!-- User Details -->
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2" IsVisible="{Binding !IsSidebarCollapsed}">
                                     <TextBlock Text="{Binding ProfileVM.Username}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" TextTrimming="CharacterEllipsis"/>
-                                    <TextBlock Text="Личный кабинет" FontSize="11" Foreground="{DynamicResource TextSecondary}"/>
+                                    <TextBlock Text="{Binding SidebarProfile, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" Foreground="{DynamicResource TextSecondary}"/>
                                 </StackPanel>
  
                                 <!-- macOS Chevron/Arrow icon -->
@@ -638,3 +638,4 @@
         </Panel>
     </Border>
 </Window>
+

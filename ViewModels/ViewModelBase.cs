@@ -1,7 +1,8 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace MacStyleHub.ViewModels;
+namespace SystemHub.ViewModels;
 
 public abstract class ViewModelBase : ObservableObject
 {
 }
+

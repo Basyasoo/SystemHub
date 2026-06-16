@@ -5,7 +5,7 @@ using System.Management;
 using System.Runtime.InteropServices;
 using System.Net.NetworkInformation;
 
-namespace MacStyleHub.Services
+namespace SystemHub.Services
 {
     public class DiskInfo
     {
@@ -621,3 +621,4 @@ namespace MacStyleHub.Services
         }
     }
 }
+

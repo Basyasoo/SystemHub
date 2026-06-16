@@ -5,9 +5,9 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MacStyleHub.Services;
+using SystemHub.Services;
 
-namespace MacStyleHub.ViewModels
+namespace SystemHub.ViewModels
 {
     public partial class AboutViewModel : ViewModelBase
     {
@@ -77,7 +77,7 @@ namespace MacStyleHub.ViewModels
             {
                 using (var client = new HttpClient())
                 {
-                    client.DefaultRequestHeaders.Add("User-Agent", "MacStyleHub-App");
+                    client.DefaultRequestHeaders.Add("User-Agent", "SystemHub-App");
                     var response = await client.GetAsync("https://api.github.com/repos/Basyasoo/SystemHub/releases/latest");
                     if (response.IsSuccessStatusCode)
                     {
@@ -214,7 +214,7 @@ namespace MacStyleHub.ViewModels
                 
                 using (var client = new HttpClient())
                 {
-                    client.DefaultRequestHeaders.Add("User-Agent", "MacStyleHub-App");
+                    client.DefaultRequestHeaders.Add("User-Agent", "SystemHub-App");
                     using (var response = await client.GetAsync(DownloadUrl, HttpCompletionOption.ResponseHeadersRead))
                     {
                         response.EnsureSuccessStatusCode();
@@ -293,3 +293,4 @@ namespace MacStyleHub.ViewModels
         }
     }
 }
+

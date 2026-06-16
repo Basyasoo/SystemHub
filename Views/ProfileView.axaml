@@ -1,0 +1,200 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:SystemHub.ViewModels"
+             xmlns:services="using:SystemHub.Services"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+             x:Class="SystemHub.Views.ProfileView"
+             x:DataType="vm:ProfileViewModel">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid RowDefinitions="Auto, *" Margin="30" MaxWidth="620" HorizontalAlignment="Center">
+            <!-- Header -->
+            <StackPanel Grid.Row="0" Spacing="6" Margin="0,0,0,25">
+                <TextBlock Text="{Binding ProfileTitle, Source={x:Static services:LocalizationService.Instance}}" FontSize="26" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}"/>
+                <StackPanel Orientation="Horizontal" Spacing="5">
+                    <TextBlock Text="{Binding ProfileRegDateLabel, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" Foreground="{DynamicResource TextSecondary}"/>
+                    <TextBlock Text="{Binding RegistrationDate}" FontSize="13" Foreground="{DynamicResource TextSecondary}" FontWeight="Medium"/>
+                </StackPanel>
+            </StackPanel>
+ 
+            <!-- Settings list -->
+            <StackPanel Grid.Row="1" Spacing="20">
+                <!-- Edit Profile (Username & Avatar combined) -->
+                <Border Classes="GlassCard" Padding="20" CornerRadius="12" BorderThickness="1" BorderBrush="#25FFFFFF">
+                    <StackPanel Spacing="15">
+                        <TextBlock Text="{Binding ProfileEditHeader, Source={x:Static services:LocalizationService.Instance}}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}"/>
+                        
+                        <Grid ColumnDefinitions="Auto, *" RowDefinitions="Auto, Auto" Margin="0,10,0,0">
+                            <!-- Left: Avatar controls -->
+                            <StackPanel Grid.Column="0" Spacing="12" Margin="0,0,24,0" VerticalAlignment="Center">
+                                <!-- Avatar Preview -->
+                                <Border Width="90" Height="90" CornerRadius="45" BorderBrush="#35FFFFFF" BorderThickness="1.5" ClipToBounds="True" BoxShadow="0 6 15 0 #50000000" HorizontalAlignment="Center">
+                                    <Grid>
+                                        <Image Source="{Binding AvatarBitmap}" IsVisible="{Binding AvatarBitmap, Converter={x:Static ObjectConverters.IsNotNull}}" Stretch="UniformToFill"/>
+                                        <!-- Gradient fallback with normal colors -->
+                                        <Border IsVisible="{Binding AvatarBitmap, Converter={x:Static ObjectConverters.IsNull}}">
+                                            <Border.Background>
+                                                <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+                                                    <GradientStop Offset="0.0" Color="#48484A"/>
+                                                    <GradientStop Offset="1.0" Color="#2C2C2E"/>
+                                                </LinearGradientBrush>
+                                            </Border.Background>
+                                            <TextBlock Text="{Binding Initials}" Foreground="White" FontSize="28" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                    </Grid>
+                                </Border>
+                                <!-- Avatar Actions -->
+                                <StackPanel Spacing="6" Width="130">
+                                    <Button Classes="AccentButton" Content="{Binding ProfileSelectPhoto, Source={x:Static services:LocalizationService.Instance}}" Command="{Binding SelectAvatarCommand}" Height="30" FontSize="12" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                                    <Button Classes="SystemButton" Content="{Binding ProfileDeletePhoto, Source={x:Static services:LocalizationService.Instance}}" Command="{Binding ClearAvatarCommand}" Height="30" FontSize="12" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" IsEnabled="{Binding AvatarPath, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+                                </StackPanel>
+                            </StackPanel>
+                            
+                            <!-- Right: Username Settings -->
+                            <StackPanel Grid.Column="1" VerticalAlignment="Top" Margin="0,5,0,0" Spacing="10">
+                                <TextBlock Text="{Binding ProfileUsernameLabel, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" Foreground="{DynamicResource TextSecondary}" FontWeight="Medium"/>
+                                <Grid ColumnDefinitions="*, Auto" VerticalAlignment="Center">
+                                    <TextBox Grid.Column="0" Text="{Binding Username}" PlaceholderText="{Binding ProfileUsernamePlaceholder, Source={x:Static services:LocalizationService.Instance}}" Height="34" CornerRadius="8" Background="#0CFFFFFF" BorderBrush="#2DFFFFFF" FontSize="13" VerticalContentAlignment="Center" Margin="0,0,10,0">
+                                        <TextBox.InnerLeftContent>
+                                            <PathIcon Data="{StaticResource IconEdit}" Width="14" Height="14" Foreground="#8E8E93" Margin="10,0,0,0"/>
+                                        </TextBox.InnerLeftContent>
+                                    </TextBox>
+                                    <Button Grid.Column="1" Classes="AccentButton" Content="{Binding ProfileSaveBtn, Source={x:Static services:LocalizationService.Instance}}" Command="{Binding SaveProfileCommand}" Height="34" Width="110" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                                </Grid>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+ 
+                <!-- Change Password -->
+                <Border Classes="GlassCard" Padding="20" CornerRadius="12" BorderThickness="1" BorderBrush="#25FFFFFF">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="{Binding ProfileSecurityHeader, Source={x:Static services:LocalizationService.Instance}}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}"/>
+                        <Grid RowDefinitions="Auto, Auto, Auto" ColumnDefinitions="*, *">
+                            <!-- Old Password -->
+                            <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Spacing="5" Margin="0,0,0,12">
+                                <TextBlock Text="{Binding ProfileOldPasswordLabel, Source={x:Static services:LocalizationService.Instance}}" FontSize="12" Foreground="{DynamicResource TextSecondary}" FontWeight="Medium"/>
+                                <TextBox Text="{Binding OldPassword}" PasswordChar="{Binding PasswordCharOld}" PlaceholderText="{Binding ProfileOldPasswordPlaceholder, Source={x:Static services:LocalizationService.Instance}}" Height="34" CornerRadius="8" Background="#0CFFFFFF" BorderBrush="#2DFFFFFF" FontSize="13" VerticalContentAlignment="Center">
+                                    <TextBox.InnerLeftContent>
+                                        <PathIcon Data="{StaticResource IconLock}" Width="14" Height="14" Foreground="#8E8E93" Margin="10,0,0,0"/>
+                                    </TextBox.InnerLeftContent>
+                                    <TextBox.InnerRightContent>
+                                        <ToggleButton IsChecked="{Binding RevealOldPassword}" Background="Transparent" BorderThickness="0" Width="30" Height="30" Padding="0" Margin="0,0,4,0" Cursor="Hand">
+                                            <Panel>
+                                                <PathIcon Data="{StaticResource IconEye}" Width="14" Height="14" Foreground="#8E8E93" IsVisible="{Binding RevealOldPassword}"/>
+                                                <PathIcon Data="{StaticResource IconEyeSlash}" Width="14" Height="14" Foreground="#8E8E93" IsVisible="{Binding !RevealOldPassword}"/>
+                                            </Panel>
+                                        </ToggleButton>
+                                    </TextBox.InnerRightContent>
+                                </TextBox>
+                            </StackPanel>
+ 
+                            <!-- New Password -->
+                            <StackPanel Grid.Row="1" Grid.Column="0" Spacing="5" Margin="0,0,8,12">
+                                <TextBlock Text="{Binding ProfileNewPasswordLabel, Source={x:Static services:LocalizationService.Instance}}" FontSize="12" Foreground="{DynamicResource TextSecondary}" FontWeight="Medium"/>
+                                <TextBox Text="{Binding NewPassword}" PasswordChar="{Binding PasswordCharNew}" PlaceholderText="{Binding ProfileNewPasswordPlaceholder, Source={x:Static services:LocalizationService.Instance}}" Height="34" CornerRadius="8" Background="#0CFFFFFF" BorderBrush="#2DFFFFFF" FontSize="13" VerticalContentAlignment="Center">
+                                    <TextBox.InnerLeftContent>
+                                        <PathIcon Data="{StaticResource IconLock}" Width="14" Height="14" Foreground="#8E8E93" Margin="10,0,0,0"/>
+                                    </TextBox.InnerLeftContent>
+                                    <TextBox.InnerRightContent>
+                                        <ToggleButton IsChecked="{Binding RevealNewPassword}" Background="Transparent" BorderThickness="0" Width="30" Height="30" Padding="0" Margin="0,0,4,0" Cursor="Hand">
+                                            <Panel>
+                                                <PathIcon Data="{StaticResource IconEye}" Width="14" Height="14" Foreground="#8E8E93" IsVisible="{Binding RevealNewPassword}"/>
+                                                <PathIcon Data="{StaticResource IconEyeSlash}" Width="14" Height="14" Foreground="#8E8E93" IsVisible="{Binding !RevealNewPassword}"/>
+                                            </Panel>
+                                        </ToggleButton>
+                                    </TextBox.InnerRightContent>
+                                </TextBox>
+                            </StackPanel>
+ 
+                            <!-- Confirm New Password -->
+                            <StackPanel Grid.Row="1" Grid.Column="1" Spacing="5" Margin="8,0,0,12">
+                                <TextBlock Text="{Binding ProfileConfirmPasswordLabel, Source={x:Static services:LocalizationService.Instance}}" FontSize="12" Foreground="{DynamicResource TextSecondary}" FontWeight="Medium"/>
+                                <TextBox Text="{Binding ConfirmPassword}" PasswordChar="{Binding PasswordCharConfirm}" PlaceholderText="{Binding ProfileConfirmPasswordPlaceholder, Source={x:Static services:LocalizationService.Instance}}" Height="34" CornerRadius="8" Background="#0CFFFFFF" BorderBrush="#2DFFFFFF" FontSize="13" VerticalContentAlignment="Center">
+                                    <TextBox.InnerLeftContent>
+                                        <PathIcon Data="{StaticResource IconLock}" Width="14" Height="14" Foreground="#8E8E93" Margin="10,0,0,0"/>
+                                    </TextBox.InnerLeftContent>
+                                    <TextBox.InnerRightContent>
+                                        <ToggleButton IsChecked="{Binding RevealConfirmPassword}" Background="Transparent" BorderThickness="0" Width="30" Height="30" Padding="0" Margin="0,0,4,0" Cursor="Hand">
+                                            <Panel>
+                                                <PathIcon Data="{StaticResource IconEye}" Width="14" Height="14" Foreground="#8E8E93" IsVisible="{Binding RevealConfirmPassword}"/>
+                                                <PathIcon Data="{StaticResource IconEyeSlash}" Width="14" Height="14" Foreground="#8E8E93" IsVisible="{Binding !RevealConfirmPassword}"/>
+                                            </Panel>
+                                        </ToggleButton>
+                                    </TextBox.InnerRightContent>
+                                </TextBox>
+                            </StackPanel>
+ 
+                            <!-- Change Password Button -->
+                            <Button Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Classes="SystemButton" Content="{Binding ProfileChangePasswordBtn, Source={x:Static services:LocalizationService.Instance}}" Command="{Binding ChangePasswordCommand}" Height="34" HorizontalAlignment="Right" Width="160" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+ 
+                <!-- Options & Preferences -->
+                <Border Classes="GlassCard" Padding="20" CornerRadius="12" BorderThickness="1" BorderBrush="#25FFFFFF">
+                    <StackPanel Spacing="15">
+                        <TextBlock Text="{Binding ProfileAuthSettingsHeader, Source={x:Static services:LocalizationService.Instance}}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}"/>
+                        
+                        <!-- Toggle 1: Remember Me -->
+                        <Grid ColumnDefinitions="*, Auto" Margin="0,5">
+                            <StackPanel Spacing="3" Grid.Column="0" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding ProfileAutoLoginTitle, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="Medium" Foreground="{DynamicResource TextPrimary}"/>
+                                <TextBlock Text="{Binding ProfileAutoLoginDesc, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap"/>
+                            </StackPanel>
+                            <ToggleSwitch Grid.Column="1" IsChecked="{Binding RememberMe}" OnContent="" OffContent="" Padding="0" VerticalAlignment="Center"/>
+                        </Grid>
+ 
+                        <Border Height="1" Background="{DynamicResource BorderGray}" Margin="0,5"/>
+ 
+                        <!-- Toggle 2: Show Nickname in Greetings -->
+                        <Grid ColumnDefinitions="*, Auto" Margin="0,5">
+                            <StackPanel Spacing="3" Grid.Column="0" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding ProfileShowNicknameTitle, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="Medium" Foreground="{DynamicResource TextPrimary}"/>
+                                <TextBlock Text="{Binding ProfileShowNicknameDesc, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap"/>
+                            </StackPanel>
+                            <ToggleSwitch Grid.Column="1" IsChecked="{Binding ShowUsernameInGreeting}" OnContent="" OffContent="" Padding="0" VerticalAlignment="Center"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+ 
+                <!-- Logout Card -->
+                <Border Classes="GlassCard" Padding="20" CornerRadius="12" BorderThickness="1" BorderBrush="#25FFFFFF">
+                    <Grid ColumnDefinitions="*, Auto">
+                        <StackPanel Grid.Column="0" Spacing="4" VerticalAlignment="Center" Margin="0,0,12,0">
+                            <TextBlock Text="{Binding ProfileLogoutHeader, Source={x:Static services:LocalizationService.Instance}}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}"/>
+                            <TextBlock Text="{Binding ProfileLogoutDesc, Source={x:Static services:LocalizationService.Instance}}" FontSize="12" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap"/>
+                        </StackPanel>
+                        <Button Grid.Column="1" Content="{Binding ProfileLogoutBtn, Source={x:Static services:LocalizationService.Instance}}" Command="{Binding LogoutCommand}" Height="34" Width="100" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+                            <Button.Styles>
+                                <Style Selector="Button">
+                                    <Setter Property="Background" Value="#1C1C1E"/>
+                                    <Setter Property="BorderBrush" Value="#FF453A"/>
+                                    <Setter Property="BorderThickness" Value="1"/>
+                                    <Setter Property="Foreground" Value="#FF453A"/>
+                                    <Setter Property="CornerRadius" Value="6"/>
+                                </Style>
+                                <Style Selector="Button:pointerover">
+                                    <Setter Property="Background" Value="#FF453A"/>
+                                    <Setter Property="Foreground" Value="White"/>
+                                </Style>
+                            </Button.Styles>
+                        </Button>
+                    </Grid>
+                </Border>
+ 
+                <!-- Status Feedback Overlay -->
+                <TextBlock Text="{Binding StatusMessage}" 
+                           Foreground="{Binding StatusColor}" 
+                           FontSize="13" 
+                           FontWeight="Medium" 
+                           HorizontalAlignment="Center" 
+                           Margin="0,5,0,0"
+                           IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</UserControl>
+

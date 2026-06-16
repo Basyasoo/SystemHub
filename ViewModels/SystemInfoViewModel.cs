@@ -7,9 +7,9 @@ using Avalonia;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MacStyleHub.Services;
+using SystemHub.Services;
 
-namespace MacStyleHub.ViewModels
+namespace SystemHub.ViewModels
 {
     public class ProcessItem
     {
@@ -336,7 +336,7 @@ namespace MacStyleHub.ViewModels
         {
             if (disk == null || IsBenchmarking) return;
             IsBenchmarking = true;
-            BenchmarkStatus = "Подготовка...";
+            BenchmarkStatus = LocalizationService.Instance.SysInfoBenchmarkPreparing;
             BenchmarkReadSpeed = "- MB/s";
             BenchmarkWriteSpeed = "- MB/s";
 
@@ -365,7 +365,7 @@ namespace MacStyleHub.ViewModels
                     const FileOptions NoBuffering = (FileOptions)0x20000000;
 
                     // Write test
-                    Dispatcher.UIThread.Post(() => BenchmarkStatus = "Тест записи...");
+                    Dispatcher.UIThread.Post(() => BenchmarkStatus = LocalizationService.Instance.SysInfoBenchmarkWriting);
                     var sw = System.Diagnostics.Stopwatch.StartNew();
                     bool writeSuccess = false;
                     try
@@ -396,7 +396,7 @@ namespace MacStyleHub.ViewModels
                         }
                         catch (Exception ex)
                         {
-                            throw new Exception("Не удалось записать тестовый файл: " + ex.Message);
+                            throw new Exception(LocalizationService.Instance.SysInfoWriteError + ex.Message);
                         }
                     }
                     sw.Stop();
@@ -406,7 +406,7 @@ namespace MacStyleHub.ViewModels
                     }
 
                     // Read test
-                    Dispatcher.UIThread.Post(() => BenchmarkStatus = "Тест чтения...");
+                    Dispatcher.UIThread.Post(() => BenchmarkStatus = LocalizationService.Instance.SysInfoBenchmarkReading);
                     sw.Restart();
                     bool readSuccess = false;
                     try
@@ -433,7 +433,7 @@ namespace MacStyleHub.ViewModels
                         }
                         catch (Exception ex)
                         {
-                            throw new Exception("Не удалось прочитать тестовый файл: " + ex.Message);
+                            throw new Exception(LocalizationService.Instance.SysInfoReadError + ex.Message);
                         }
                     }
                     sw.Stop();
@@ -452,12 +452,12 @@ namespace MacStyleHub.ViewModels
                     {
                         BenchmarkWriteSpeed = $"{writeSpeed:F1} MB/s";
                         BenchmarkReadSpeed = $"{readSpeed:F1} MB/s";
-                        BenchmarkStatus = "Завершено";
+                        BenchmarkStatus = LocalizationService.Instance.SysInfoBenchmarkCompleted;
                     });
                 }
                 catch (Exception ex)
                 {
-                    Dispatcher.UIThread.Post(() => BenchmarkStatus = $"Ошибка: {ex.Message}");
+                    Dispatcher.UIThread.Post(() => BenchmarkStatus = $"{LocalizationService.Instance.ToolsError}: {ex.Message}");
                 }
                 finally
                 {
@@ -482,3 +482,4 @@ namespace MacStyleHub.ViewModels
         }
     }
 }
+

@@ -1,7 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:views="using:MacStyleHub.Views"
-             x:Class="MacStyleHub.Views.WeatherIcon"
+             xmlns:views="using:SystemHub.Views"
+             x:Class="SystemHub.Views.WeatherIcon"
              Name="self">
     <UserControl.Styles>
         <!-- Default: all paths hidden -->
@@ -134,3 +134,4 @@
         </Canvas>
     </Viewbox>
 </UserControl>
+

@@ -1,0 +1,279 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:SystemHub.ViewModels"
+             xmlns:services="using:SystemHub.Services"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="550"
+             x:Class="SystemHub.Views.TweaksView"
+             x:DataType="vm:TweaksViewModel">
+
+    <UserControl.Styles>
+        <Style Selector="Border.GlassCard">
+            <Setter Property="RenderTransformOrigin" Value="50%,50%"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.25" Easing="0.0, 0.0, 0.2, 1.0"/>
+                    <BrushTransition Property="Background" Duration="0:0:0.2"/>
+                    <BrushTransition Property="BorderBrush" Duration="0:0:0.2"/>
+                    <BoxShadowsTransition Property="BoxShadow" Duration="0:0:0.2"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Border.GlassCard:pointerover">
+            <Setter Property="RenderTransform" Value="scale(1.02) translate(0px, -4px)"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBlue}"/>
+            <Setter Property="BoxShadow" Value="0 8 20 0 #40000000"/>
+        </Style>
+
+        <!-- Custom macOS-style Accent Slider -->
+        <Style Selector="Slider.SystemSlider">
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="MinHeight" Value="24"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource AccentBlue}"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="ClipToBounds" Value="False"/>
+        </Style>
+        <Style Selector="Slider.SystemSlider /template/ Border#SliderContainer">
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="ClipToBounds" Value="False"/>
+        </Style>
+        <Style Selector="Slider.SystemSlider /template/ Track#PART_Track">
+            <Setter Property="Grid.Row" Value="0"/>
+            <Setter Property="Grid.RowSpan" Value="3"/>
+            <Setter Property="ClipToBounds" Value="False"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="Slider.SystemSlider /template/ Grid">
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="ClipToBounds" Value="False"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="Slider.SystemSlider /template/ ContentPresenter">
+            <Setter Property="IsVisible" Value="False"/>
+        </Style>
+        <Style Selector="Slider.SystemSlider /template/ TickBar">
+            <Setter Property="IsVisible" Value="False"/>
+        </Style>
+        <Style Selector="Slider.SystemSlider /template/ RepeatButton#PART_DecreaseButton">
+            <Setter Property="Background" Value="{DynamicResource AccentBlue}"/>
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Name="TrackBorder" Background="{TemplateBinding Background}" Height="3" CornerRadius="1.5 0 0 1.5" VerticalAlignment="Center"/>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+        <Style Selector="Slider.SystemSlider /template/ RepeatButton#PART_IncreaseButton">
+            <Setter Property="Background" Value="{DynamicResource BorderGray}"/>
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Name="TrackBorder" Background="{TemplateBinding Background}" Height="3" CornerRadius="0 1.5 1.5 0" VerticalAlignment="Center"/>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+        <Style Selector="Slider.SystemSlider /template/ Thumb">
+            <Setter Property="Width" Value="14"/>
+            <Setter Property="Height" Value="14"/>
+            <Setter Property="Background" Value="{DynamicResource AccentBlue}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="ClipToBounds" Value="False"/>
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Background="{TemplateBinding Background}" Width="14" Height="14" CornerRadius="7" VerticalAlignment="Center"/>
+                </ControlTemplate>
+            </Setter>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.15" Easing="CubicEaseOut"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Slider.SystemSlider /template/ Thumb:pointerover">
+            <Setter Property="RenderTransform" Value="scale(1.15)"/>
+        </Style>
+    </UserControl.Styles>
+
+    <Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="24" Spacing="20" HorizontalAlignment="Stretch">
+                <!-- Header -->
+                <Grid ColumnDefinitions="*, Auto">
+                    <StackPanel Grid.Column="0" Spacing="5">
+                        <TextBlock Text="{Binding TweaksTitle, Source={x:Static services:LocalizationService.Instance}}" FontSize="28" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" LetterSpacing="-0.5"/>
+                        <TextBlock Text="{Binding TweakSubheader, Source={x:Static services:LocalizationService.Instance}}" FontSize="14" Foreground="{DynamicResource TextSecondary}"/>
+                    </StackPanel>
+    
+                    <!-- Explorer Restart button in header -->
+                    <Button Grid.Column="1" Classes="SystemButton" Command="{Binding RestartExplorerCommand}" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <PathIcon Data="{StaticResource IconSettings}" Width="14" Height="14" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding TweakRestartExplorer, Source={x:Static services:LocalizationService.Instance}}" VerticalAlignment="Center" FontSize="13" FontWeight="Medium"/>
+                        </StackPanel>
+                    </Button>
+                </Grid>
+    
+                <!-- Status Banner -->
+                <Border Background="#1A34C759" BorderBrush="#3D34C759" BorderThickness="1" CornerRadius="8" Padding="12" IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                    <Grid ColumnDefinitions="Auto, *">
+                        <PathIcon Grid.Column="0" Data="{StaticResource IconCheck}" Width="16" Height="16" Foreground="#34C759" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="1" Text="{Binding StatusMessage}" Foreground="#34C759" FontSize="13" FontWeight="Medium" VerticalAlignment="Center"/>
+                    </Grid>
+                </Border>
+    
+                <!-- Admin Alert Banner -->
+                <Border Background="#1AFF9500" BorderBrush="#3DFF9500" BorderThickness="1" CornerRadius="8" Padding="12" IsVisible="{Binding !IsRunningAsAdmin}">
+                    <Grid ColumnDefinitions="Auto, *, Auto">
+                        <PathIcon Grid.Column="0" Data="{StaticResource IconSettings}" Width="16" Height="16" Foreground="#FF9500" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="1" Text="{Binding TweakAdminDesc, Source={x:Static services:LocalizationService.Instance}}" Foreground="#FF9500" FontSize="13" FontWeight="Medium" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                        <Button Grid.Column="2" Command="{Binding RunAsAdminCommand}" Classes="SystemButton" Height="26" Padding="10,2" VerticalAlignment="Center" Margin="10,0,0,0">
+                            <TextBlock Text="{Binding TweakRestartBtn, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" Foreground="#FF9500"/>
+                        </Button>
+                    </Grid>
+                </Border>
+    
+                <!-- Tweaks Cards -->
+                <StackPanel Spacing="16">
+                    <!-- Dynamic Island Configuration Panel -->
+                    <Border Classes="GlassCard">
+                        <StackPanel Spacing="12">
+                            <Grid ColumnDefinitions="*, Auto">
+                                <StackPanel Grid.Column="0" Spacing="6" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding TweakDynamicIslandTitle, Source={x:Static services:LocalizationService.Instance}}" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                                    <TextBlock Text="{Binding TweakDynamicIslandDesc, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap"/>
+                                </StackPanel>
+                                <ToggleSwitch Grid.Column="1" IsChecked="{Binding IsDynamicIslandEnabled}" OnContent="" OffContent="" Padding="0" VerticalAlignment="Center"/>
+                            </Grid>
+                            
+                            <Separator Background="{DynamicResource BorderGray}" Margin="0,-5"/>
+                            
+                            <Grid ColumnDefinitions="*, *" IsEnabled="{Binding IsDynamicIslandEnabled}" ClipToBounds="False">
+                                <!-- Left Column: Sliders for Width and Margin -->
+                                <StackPanel Grid.Column="0" Spacing="10" Margin="0,0,10,0" ClipToBounds="False">
+                                    <StackPanel Spacing="3" ClipToBounds="False">
+                                        <Grid ColumnDefinitions="*, Auto">
+                                            <TextBlock Grid.Column="0" Text="{Binding TweakDiWidth, Source={x:Static services:LocalizationService.Instance}}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding DynamicIslandWidth, StringFormat='{}{0:F0}px'}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource AccentBlue}"/>
+                                        </Grid>
+                                        <Slider Value="{Binding DynamicIslandWidth}" Minimum="180" Maximum="300" SmallChange="5" LargeChange="20" Classes="SystemSlider"/>
+                                    </StackPanel>
+     
+                                    <StackPanel Spacing="3" Margin="0,6,0,0" ClipToBounds="False">
+                                        <Grid ColumnDefinitions="*, Auto">
+                                            <TextBlock Grid.Column="0" Text="{Binding TweakDiTopMargin, Source={x:Static services:LocalizationService.Instance}}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding DynamicIslandTopMargin, StringFormat='{}{0:F0}px'}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource AccentBlue}"/>
+                                        </Grid>
+                                        <Slider Value="{Binding DynamicIslandTopMargin}" Minimum="0" Maximum="60" SmallChange="1" LargeChange="5" Classes="SystemSlider"/>
+                                    </StackPanel>
+ 
+                                    <StackPanel Spacing="3" Margin="0,6,0,0">
+                                        <TextBlock Text="{Binding TweakDiScreen, Source={x:Static services:LocalizationService.Instance}}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                                        <ComboBox ItemsSource="{Binding AvailableScreens}" 
+                                                  SelectedIndex="{Binding SelectedScreenIndex}" 
+                                                  HorizontalAlignment="Stretch" 
+                                                  CornerRadius="6"
+                                                  Height="30"
+                                                  Margin="0,4,0,0">
+                                        </ComboBox>
+                                    </StackPanel>
+                                </StackPanel>
+                                
+                                <!-- Right Column: Active modules -->
+                                <StackPanel Grid.Column="1" Spacing="4" Margin="10,0,0,0">
+                                    <TextBlock Text="{Binding TweakDiModules, Source={x:Static services:LocalizationService.Instance}}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" Margin="0,0,0,4"/>
+                                    
+                                    <Grid ColumnDefinitions="*, Auto" Margin="0,1">
+                                        <TextBlock Grid.Column="0" Text="{Binding TweakModuleMusic, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" Foreground="{DynamicResource TextPrimary}" VerticalAlignment="Center"/>
+                                        <ToggleSwitch Grid.Column="1" IsChecked="{Binding DynamicIslandEnableMusic}" OnContent="" OffContent="" Padding="0" MinWidth="0" VerticalAlignment="Center"/>
+                                    </Grid>
+                                    
+                                    <Grid ColumnDefinitions="*, Auto" Margin="0,1">
+                                        <TextBlock Grid.Column="0" Text="{Binding TweakModuleOverheat, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" Foreground="{DynamicResource TextPrimary}" VerticalAlignment="Center"/>
+                                        <ToggleSwitch Grid.Column="1" IsChecked="{Binding DynamicIslandEnableOverheat}" OnContent="" OffContent="" Padding="0" MinWidth="0" VerticalAlignment="Center"/>
+                                    </Grid>
+                                    
+                                    <Grid ColumnDefinitions="*, Auto" Margin="0,1">
+                                        <TextBlock Grid.Column="0" Text="{Binding TweakModuleFocus, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" Foreground="{DynamicResource TextPrimary}" VerticalAlignment="Center"/>
+                                        <ToggleSwitch Grid.Column="1" IsChecked="{Binding DynamicIslandEnableFocus}" OnContent="" OffContent="" Padding="0" MinWidth="0" VerticalAlignment="Center"/>
+                                    </Grid>
+                                    
+                                    <Grid ColumnDefinitions="*, Auto" Margin="0,1">
+                                        <TextBlock Grid.Column="0" Text="{Binding TweakModuleScreenshot, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" Foreground="{DynamicResource TextPrimary}" VerticalAlignment="Center"/>
+                                        <ToggleSwitch Grid.Column="1" IsChecked="{Binding DynamicIslandEnableScreenshot}" OnContent="" OffContent="" Padding="0" MinWidth="0" VerticalAlignment="Center"/>
+                                    </Grid>
+                                    
+                                    <Grid ColumnDefinitions="*, Auto" Margin="0,1">
+                                        <TextBlock Grid.Column="0" Text="{Binding TweakModuleVpn, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" Foreground="{DynamicResource TextPrimary}" VerticalAlignment="Center"/>
+                                        <ToggleSwitch Grid.Column="1" IsChecked="{Binding DynamicIslandEnableVpn}" OnContent="" OffContent="" Padding="0" MinWidth="0" VerticalAlignment="Center"/>
+                                    </Grid>
+                                    
+                                    <Grid ColumnDefinitions="*, Auto" Margin="0,1">
+                                        <TextBlock Grid.Column="0" Text="{Binding TweakModuleCamMic, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" Foreground="{DynamicResource TextPrimary}" VerticalAlignment="Center"/>
+                                        <ToggleSwitch Grid.Column="1" IsChecked="{Binding DynamicIslandEnableCamMic}" OnContent="" OffContent="" Padding="0" MinWidth="0" VerticalAlignment="Center"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+ 
+                    <!-- Font Changer Card -->
+                    <Border Classes="GlassCard">
+                        <StackPanel Spacing="15">
+                            <Grid ColumnDefinitions="*, Auto">
+                                <StackPanel Grid.Column="0" Spacing="6" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding TweakSystemFont, Source={x:Static services:LocalizationService.Instance}}" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                                    <TextBlock Text="{Binding TweakSystemFontDesc, Source={x:Static services:LocalizationService.Instance}}" FontSize="12" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap"/>
+                                </StackPanel>
+                                
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0,0,0">
+                                    <TextBlock Text="{Binding TweakCurrentFont, Source={x:Static services:LocalizationService.Instance}}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource AccentBlue}"/>
+                                    <TextBlock Text="{Binding SelectedFont}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource AccentBlue}"/>
+                                </StackPanel>
+                            </Grid>
+ 
+                            <Separator Background="{DynamicResource BorderGray}" Margin="0,-5"/>
+ 
+                            <Grid ColumnDefinitions="*, *">
+                                <Button Grid.Column="0" Classes="SystemButton" Command="{Binding SelectAndApplyFontCommand}" HorizontalAlignment="Stretch" Margin="0,0,8,0">
+                                    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                        <PathIcon Data="{StaticResource IconImport}" Width="14" Height="14" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding TweakFontSelectApply, Source={x:Static services:LocalizationService.Instance}}" VerticalAlignment="Center" FontSize="12" FontWeight="Medium"/>
+                                    </StackPanel>
+                                </Button>
+ 
+                                <Button Grid.Column="1" Classes="SystemButton" Command="{Binding RestoreDefaultFontCommand}" HorizontalAlignment="Stretch" Margin="8,0,0,0">
+                                    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                        <PathIcon Data="{StaticResource IconTrash}" Width="14" Height="14" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{Binding TweakFontRestoreDefault, Source={x:Static services:LocalizationService.Instance}}" VerticalAlignment="Center" FontSize="12" FontWeight="Medium"/>
+                                    </StackPanel>
+                                </Button>
+                            </Grid>
+ 
+                            <!-- Restart PC Action Area (visible only when restart is required) -->
+                            <Border Classes="SystemCard" Background="#1AFF9500" BorderBrush="#3DFF9500" BorderThickness="1" Padding="12" CornerRadius="8" IsVisible="{Binding IsRestartRequired}">
+                                <Grid ColumnDefinitions="*, Auto">
+                                    <StackPanel Grid.Column="0" Spacing="4" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding TweakFontRestartRequired, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="SemiBold" Foreground="#FF9500"/>
+                                        <TextBlock Text="{Binding TweakFontRestartDesc, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                    <Button Grid.Column="1" Command="{Binding RestartPcCommand}" Classes="AccentButton" Background="#FF9500" VerticalAlignment="Center" Padding="14,6" Margin="15,0,0,0">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <PathIcon Data="{StaticResource IconSettings}" Width="14" Height="14" Foreground="White" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{Binding TweakFontRestartNow, Source={x:Static services:LocalizationService.Instance}}" FontSize="12" FontWeight="SemiBold" Foreground="White"/>
+                                        </StackPanel>
+                                    </Button>
+                                </Grid>
+                            </Border>
+ 
+                            <!-- Font Disclaimer -->
+                            <TextBlock Text="{Binding TweakFontDisclaimer, Source={x:Static services:LocalizationService.Instance}}" FontSize="10" Foreground="{DynamicResource TextSecondary}"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>
+

@@ -1,0 +1,608 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:SystemHub.ViewModels"
+             xmlns:services="using:SystemHub.Services"
+             mc:Ignorable="d" d:DesignWidth="850" d:DesignHeight="750"
+             x:Class="SystemHub.Views.ToolsView"
+             x:DataType="vm:ToolsViewModel">
+
+    <UserControl.Styles>
+        <Style Selector="TextBlock.completed">
+            <Setter Property="TextDecorations" Value="Strikethrough"/>
+            <Setter Property="Opacity" Value="0.55"/>
+        </Style>
+        <Style Selector="Button.SystemButton.active">
+            <Setter Property="Background" Value="{DynamicResource AccentBlue}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+        <Style Selector="Button.SystemButton.active:pointerover">
+            <Setter Property="Background" Value="#359AFF"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+        
+        <!-- Custom Equalizer Sliders Style -->
+        <Style Selector="Slider.EqSlider">
+            <Setter Property="Width" Value="24"/>
+            <Setter Property="MinWidth" Value="24"/>
+            <Setter Property="Height" Value="140"/>
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+        <Style Selector="Slider.EqSlider /template/ Border#TrackBackground">
+            <Setter Property="IsVisible" Value="False"/>
+        </Style>
+        <Style Selector="Slider.EqSlider /template/ RepeatButton#PART_DecreaseButton">
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Name="TrackBorder" Background="#555555" Width="2" HorizontalAlignment="Center"/>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+        <Style Selector="Slider.EqSlider /template/ RepeatButton#PART_IncreaseButton">
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Name="TrackBorder" Background="#555555" Width="2" HorizontalAlignment="Center"/>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+        <Style Selector="Slider.EqSlider Thumb">
+            <Setter Property="Width" Value="14"/>
+            <Setter Property="Height" Value="14"/>
+            <Setter Property="Background" Value="#222222"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBlue}"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="CornerRadius" Value="7"/>
+        </Style>
+        <Style Selector="Slider.EqSlider Thumb:pointerover">
+            <Setter Property="Background" Value="#2C2C2C"/>
+            <Setter Property="BorderBrush" Value="#359AFF"/>
+        </Style>
+        <Style Selector="Slider.EqSlider Thumb:pressed">
+            <Setter Property="Background" Value="#151515"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBlue}"/>
+        </Style>
+
+        <!-- Custom AccentBlue ToggleSwitch Style -->
+        <Style Selector="ToggleSwitch.EqToggle:checked /template/ Border#SwitchKnob">
+            <Setter Property="Background" Value="Black"/>
+        </Style>
+        <Style Selector="ToggleSwitch.EqToggle:checked /template/ Border#SwitchKnobBounds">
+            <Setter Property="Background" Value="{DynamicResource AccentBlue}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBlue}"/>
+        </Style>
+
+        <!-- Equalizer Animated Panel Styles -->
+        <Style Selector="Border.eq-card-left">
+            <Setter Property="Opacity" Value="1"/>
+            <Setter Property="Width" Value="370"/>
+            <Setter Property="Height" Value="420"/>
+            <Setter Property="MinHeight" Value="420"/>
+            <Setter Property="Margin" Value="0,0,16,0"/>
+            <Setter Property="RenderTransform" Value="scale(1) translate(0, 0)"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <DoubleTransition Property="Opacity" Duration="0:0:0.35" Easing="CubicEaseOut"/>
+                    <DoubleTransition Property="Width" Duration="0:0:0.35" Easing="CubicEaseOut"/>
+                    <DoubleTransition Property="Height" Duration="0:0:0.35" Easing="CubicEaseOut"/>
+                    <DoubleTransition Property="MinHeight" Duration="0:0:0.35" Easing="CubicEaseOut"/>
+                    <ThicknessTransition Property="Margin" Duration="0:0:0.35" Easing="CubicEaseOut"/>
+                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.35" Easing="CubicEaseOut"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Border.eq-card-left.hidden">
+            <Setter Property="Opacity" Value="0"/>
+            <Setter Property="Width" Value="0"/>
+            <Setter Property="Height" Value="0"/>
+            <Setter Property="MinHeight" Value="0"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="RenderTransform" Value="scale(0.9) translate(-20px, 0)"/>
+            <Setter Property="IsHitTestVisible" Value="False"/>
+        </Style>
+
+        <Style Selector="Border.eq-card-right">
+            <Setter Property="Width" Value="380"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
+        </Style>
+
+        <Style Selector="StackPanel.eq-controls-right">
+            <Setter Property="Opacity" Value="1"/>
+            <Setter Property="MaxHeight" Value="400"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <DoubleTransition Property="Opacity" Duration="0:0:0.3" Easing="CubicEaseOut"/>
+                    <DoubleTransition Property="MaxHeight" Duration="0:0:0.35" Easing="CubicEaseOut"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="StackPanel.eq-controls-right.hidden">
+            <Setter Property="Opacity" Value="0"/>
+            <Setter Property="MaxHeight" Value="0"/>
+            <Setter Property="IsHitTestVisible" Value="False"/>
+        </Style>
+    </UserControl.Styles>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="24" Spacing="20" HorizontalAlignment="Stretch">
+            <!-- Header -->
+            <StackPanel Spacing="5">
+                <TextBlock Text="{Binding ToolsTitle, Source={x:Static services:LocalizationService.Instance}}" FontSize="28" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" LetterSpacing="-0.5"/>
+                <TextBlock Text="{Binding ToolsSubheader, Source={x:Static services:LocalizationService.Instance}}" FontSize="14" Foreground="{DynamicResource TextSecondary}"/>
+            </StackPanel>
+
+            <!-- Tabs Navigation -->
+            <Border CornerRadius="8" Background="{DynamicResource CardBg}" BorderBrush="{DynamicResource BorderGray}" BorderThickness="1" Padding="4" HorizontalAlignment="Center" Margin="0,0,0,10">
+                <Grid ColumnDefinitions="Auto, Auto">
+                    <Button Grid.Column="0" Command="{Binding SetToolsTabCommand}" CommandParameter="0" Classes="SystemButton" Classes.active="{Binding IsToolsTab0}" Height="30" Padding="20,4" Margin="0,0,4,0" MinHeight="0" MinWidth="0" CornerRadius="6">
+                        <TextBlock Text="{Binding ToolsTabFocus, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    </Button>
+                    <Button Grid.Column="1" Command="{Binding SetToolsTabCommand}" CommandParameter="1" Classes="SystemButton" Classes.active="{Binding IsToolsTab1}" Height="30" Padding="20,4" MinHeight="0" MinWidth="0" CornerRadius="6">
+                        <TextBlock Text="{Binding ToolsTabUtils, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    </Button>
+                </Grid>
+            </Border>
+
+            <!-- Status Alerts -->
+            <Border Background="#1A0A84FF" BorderBrush="#3D0A84FF" BorderThickness="1" CornerRadius="8" Padding="12" IsVisible="{Binding ShredStatus, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                <Grid ColumnDefinitions="Auto, *">
+                    <PathIcon Grid.Column="0" Data="{StaticResource IconTip}" Width="16" Height="16" Foreground="{DynamicResource AccentBlue}" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Column="1" Text="{Binding ShredStatus}" Foreground="{DynamicResource TextPrimary}" FontSize="13" FontWeight="Medium" VerticalAlignment="Center"/>
+                </Grid>
+            </Border>
+
+            <!-- TAB 0: FOCUS -->
+            <Grid ColumnDefinitions="*, *" IsVisible="{Binding IsToolsTab0}" HorizontalAlignment="Stretch">
+                <!-- LEFT COLUMN -->
+                <StackPanel Grid.Column="0" Margin="0,0,10,0" Spacing="20">
+                    <!-- Pomodoro Focus Timer -->
+                    <Border Classes="GlassCard">
+                        <StackPanel Spacing="15">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="{StaticResource IconSettings}" Width="15" Height="15" Foreground="{DynamicResource AccentBlue}"/>
+                                <TextBlock Text="{Binding ToolFocusTimer, Source={x:Static services:LocalizationService.Instance}}" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                            </StackPanel>
+                            
+                            <Separator Background="{DynamicResource BorderGray}" Margin="0,-5"/>
+
+                            <Grid ColumnDefinitions="Auto, *">
+                                <!-- Circular visual timer indicator -->
+                                <Grid Grid.Column="0" Width="120" Height="120" Margin="10,0,20,0">
+                                    <Arc StartAngle="0" SweepAngle="360" Stroke="{DynamicResource BorderGray}" StrokeThickness="6" Width="110" Height="110"/>
+                                    <Arc StartAngle="-90" SweepAngle="{Binding FocusProgress}" Stroke="{StaticResource AccentBlue}" StrokeThickness="6" Width="110" Height="110" StrokeLineCap="Round"/>
+                                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                        <TextBlock Text="{Binding FocusTimeDisplay}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="{Binding FocusStateText}" FontSize="9" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </Grid>
+
+                                <!-- Controls -->
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="10">
+                                    <Button Classes="AccentButton" Command="{Binding ToggleFocusCommand}" HorizontalAlignment="Stretch">
+                                        <Grid>
+                                            <TextBlock Text="{Binding FocusTimerPause, Source={x:Static services:LocalizationService.Instance}}" HorizontalAlignment="Center" IsVisible="{Binding IsFocusRunning}"/>
+                                            <TextBlock Text="{Binding FocusTimerStart, Source={x:Static services:LocalizationService.Instance}}" HorizontalAlignment="Center" IsVisible="{Binding !IsFocusRunning}"/>
+                                        </Grid>
+                                    </Button>
+                                    <Button Classes="SystemButton" Command="{Binding ResetFocusCommand}" Content="{Binding FocusTimerReset, Source={x:Static services:LocalizationService.Instance}}" HorizontalAlignment="Stretch"/>
+
+                                    <!-- Duration adjustments -->
+                                    <StackPanel Spacing="6" Margin="0,5,0,0">
+                                        <Grid ColumnDefinitions="*, Auto">
+                                            <TextBlock Text="{Binding ToolsFocusWork, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center"/>
+                                            <NumericUpDown Grid.Column="1" Value="{Binding WorkSessionMinutes}" ShowButtonSpinner="False" Minimum="1" Maximum="120" Increment="1" FormatString="0" Height="26" Width="80" FontSize="11" VerticalAlignment="Center"/>
+                                        </Grid>
+                                        <Grid ColumnDefinitions="*, Auto">
+                                            <TextBlock Text="{Binding ToolsFocusBreak, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center"/>
+                                            <NumericUpDown Grid.Column="1" Value="{Binding BreakSessionMinutes}" ShowButtonSpinner="False" Minimum="1" Maximum="60" Increment="1" FormatString="0" Height="26" Width="80" FontSize="11" VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- RIGHT COLUMN -->
+                <StackPanel Grid.Column="1" Margin="10,0,0,0" Spacing="20">
+                    <!-- To-Do List -->
+                    <Border Classes="GlassCard">
+                        <StackPanel Spacing="15">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="{StaticResource IconEdit}" Width="15" Height="15" Foreground="{DynamicResource AccentBlue}"/>
+                                <TextBlock Text="{Binding ToolToDo, Source={x:Static services:LocalizationService.Instance}}" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                            </StackPanel>
+
+                            <Separator Background="{DynamicResource BorderGray}" Margin="0,-5"/>
+
+                            <ItemsControl ItemsSource="{Binding ToDoItems}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid ColumnDefinitions="Auto, *, Auto" Margin="0,3">
+                                            <CheckBox Grid.Column="0" IsChecked="{Binding IsCompleted}" Margin="0,0,10,0"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding Text}" FontSize="13" Classes.completed="{Binding IsCompleted}" Foreground="{DynamicResource TextPrimary}" VerticalAlignment="Center"/>
+                                            <Button Grid.Column="2" Classes="SystemButton" Command="{Binding $parent[UserControl].((vm:ToolsViewModel)DataContext).RemoveToDoItemCommand}" CommandParameter="{Binding}" Padding="4" Background="Transparent" BorderThickness="0">
+                                                <PathIcon Data="{StaticResource IconClose}" Width="10" Height="10" Foreground="{DynamicResource TextSecondary}"/>
+                                            </Button>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <!-- Add To-Do Input -->
+                            <Grid ColumnDefinitions="*, Auto" Margin="0,5,0,0">
+                                <TextBox Grid.Column="0" Text="{Binding NewToDoText}" PlaceholderText="{Binding ToDoPlaceholder, Source={x:Static services:LocalizationService.Instance}}" CornerRadius="6" Height="32" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                <Button Grid.Column="1" Classes="SystemButton" Command="{Binding AddToDoItemCommand}" Height="32" VerticalAlignment="Center">
+                                    <PathIcon Data="{StaticResource IconCheck}" Width="12" Height="12"/>
+                                </Button>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+
+            <!-- TAB 1: UTILITIES -->
+            <Grid ColumnDefinitions="*, *" IsVisible="{Binding IsToolsTab1}" HorizontalAlignment="Stretch">
+                <!-- LEFT COLUMN -->
+                <StackPanel Grid.Column="0" Margin="0,0,10,0" Spacing="20">
+                    <!-- Temp Mail Widget -->
+                    <Border Classes="GlassCard">
+                        <StackPanel Spacing="15">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="{StaticResource IconFolder}" Width="15" Height="15" Foreground="{DynamicResource AccentBlue}"/>
+                                <TextBlock Text="{Binding ToolTempMail, Source={x:Static services:LocalizationService.Instance}}" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                            </StackPanel>
+
+                            <Separator Background="{DynamicResource BorderGray}" Margin="0,-5"/>
+
+                            <!-- Address Box & Button -->
+                            <Grid ColumnDefinitions="*, Auto">
+                                <TextBox Grid.Column="0" Text="{Binding TempMailAddress}" IsReadOnly="True" PlaceholderText="{Binding ToolsMailPlaceholder, Source={x:Static services:LocalizationService.Instance}}" FontSize="12" CornerRadius="6" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                <Button Grid.Column="1" Classes="SystemButton" Command="{Binding GenerateTempMailCommand}" IsEnabled="{Binding !IsMailLoading}" Height="34" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding TempMailGenerate, Source={x:Static services:LocalizationService.Instance}}" VerticalAlignment="Center"/>
+                                </Button>
+                            </Grid>
+
+                            <!-- Copy button -->
+                            <Button Classes="SystemButton" Command="{Binding CopyMailToClipboardCommand}" IsVisible="{Binding TempMailAddress, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" HorizontalAlignment="Stretch">
+                                <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                                    <PathIcon Data="{StaticResource IconFolder}" Width="12" Height="12"/>
+                                    <TextBlock Text="{Binding ToolsMailCopy, Source={x:Static services:LocalizationService.Instance}}" FontSize="12" FontWeight="Medium"/>
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Messages list -->
+                            <TextBlock Text="{Binding ToolsMailIncoming, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" Margin="0,5,0,0"/>
+                            
+                            <Border CornerRadius="8" Background="#0AFFFFFF" BorderBrush="{DynamicResource BorderGray}" BorderThickness="1" MinHeight="120" MaxHeight="180" ClipToBounds="True">
+                                <Grid>
+                                    <!-- List of incoming emails -->
+                                    <ListBox ItemsSource="{Binding MailMessages}" SelectedItem="{Binding SelectedMessage}" Background="Transparent" BorderThickness="0" IsVisible="{Binding MailMessages.Count}">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid ColumnDefinitions="*, Auto" Margin="5">
+                                                    <StackPanel Grid.Column="0" Spacing="2">
+                                                        <TextBlock Text="{Binding From}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}"/>
+                                                        <TextBlock Text="{Binding Subject}" FontSize="11" Foreground="{DynamicResource TextSecondary}" TextTrimming="CharacterEllipsis"/>
+                                                    </StackPanel>
+                                                    <TextBlock Grid.Column="1" Text="{Binding Date}" FontSize="10" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                    </ListBox>
+
+                                    <!-- Empty state -->
+                                    <TextBlock Text="{Binding TempMailNoMessages, Source={x:Static services:LocalizationService.Instance}}" FontSize="12" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding !MailMessages.Count}"/>
+                                </Grid>
+                            </Border>
+
+                            <!-- Selected email reader overlay/popup body -->
+                            <Border Background="{DynamicResource MainBg}" BorderBrush="{DynamicResource BorderGray}" BorderThickness="1" CornerRadius="8" Padding="12" IsVisible="{Binding SelectedMessage, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                <StackPanel Spacing="8">
+                                    <Grid ColumnDefinitions="Auto, *">
+                                        <TextBlock Grid.Column="0" Text="{Binding TempMailSender, Source={x:Static services:LocalizationService.Instance}}" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource TextSecondary}" Width="40"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding SelectedMessage.From}" FontSize="11" Foreground="{DynamicResource TextPrimary}"/>
+                                    </Grid>
+                                    <Grid ColumnDefinitions="Auto, *">
+                                        <TextBlock Grid.Column="0" Text="{Binding TempMailSubject, Source={x:Static services:LocalizationService.Instance}}" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource TextSecondary}" Width="40"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding SelectedMessage.Subject}" FontSize="11" Foreground="{DynamicResource TextPrimary}" TextWrapping="Wrap"/>
+                                    </Grid>
+                                    <Separator Background="{DynamicResource BorderGray}"/>
+                                    <ScrollViewer MaxHeight="150" VerticalScrollBarVisibility="Auto">
+                                        <TextBlock Text="{Binding SelectedMessage.TextBody}" FontSize="12" Foreground="{DynamicResource TextPrimary}" TextWrapping="Wrap"/>
+                                    </ScrollViewer>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Secure File Shredder -->
+                    <Border Classes="GlassCard">
+                        <StackPanel Spacing="15">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="{StaticResource IconTrash}" Width="15" Height="15" Foreground="{DynamicResource AccentBlue}"/>
+                                <TextBlock Text="{Binding ToolFileShredder, Source={x:Static services:LocalizationService.Instance}}" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                            </StackPanel>
+                            
+                            <Separator Background="{DynamicResource BorderGray}" Margin="0,-5"/>
+
+                            <!-- Drag and drop zone -->
+                            <Border Name="DragDropShredder" Height="90" CornerRadius="8" Background="#0AFFFFFF" BorderBrush="{DynamicResource BorderGray}" BorderThickness="1.5" DragDrop.AllowDrop="True">
+                                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="8">
+                                    <PathIcon Data="{StaticResource IconTrash}" Width="24" Height="24" Foreground="{DynamicResource TextSecondary}"/>
+                                    <TextBlock Text="{Binding FileShredderDrag, Source={x:Static services:LocalizationService.Instance}}" FontSize="12" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center"/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Calculator Card -->
+                    <Border Classes="GlassCard">
+                        <StackPanel Spacing="10">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="{StaticResource IconEdit}" Width="15" Height="15" Foreground="{DynamicResource AccentBlue}"/>
+                                <TextBlock Text="{Binding ToolsCalcTitle, Source={x:Static services:LocalizationService.Instance}}" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                            </StackPanel>
+                            
+                            <Separator Background="{DynamicResource BorderGray}" Margin="0,-5"/>
+
+                            <!-- Display -->
+                            <Border Background="#1A000000" CornerRadius="10" Padding="14,10" BorderBrush="{DynamicResource BorderGray}" BorderThickness="1">
+                                <TextBlock Text="{Binding CalculatorDisplay}" FontSize="28" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" HorizontalAlignment="Right" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" FontFamily="Courier New"/>
+                            </Border>
+
+                             <!-- Button Grid -->
+                             <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto" ColumnDefinitions="*, *, *, *" Margin="0,5,0,0">
+                                 <!-- Row 0: AC/C, +/-, %, ÷ -->
+                                 <Button Grid.Row="0" Grid.Column="0" Command="{Binding CalculatorPressCommand}" CommandParameter="C" Content="{Binding CalculatorClearText}" Background="#A5A5A5" Foreground="Black" Height="38" Margin="3" CornerRadius="19" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="14" FontWeight="Bold" BorderThickness="0"/>
+                                 <Button Grid.Row="0" Grid.Column="1" Command="{Binding CalculatorPressCommand}" CommandParameter="±" Content="+/-" Background="#A5A5A5" Foreground="Black" Height="38" Margin="3" CornerRadius="19" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="14" FontWeight="Bold" BorderThickness="0"/>
+                                 <Button Grid.Row="0" Grid.Column="2" Command="{Binding CalculatorPressCommand}" CommandParameter="%" Content="%" Background="#A5A5A5" Foreground="Black" Height="38" Margin="3" CornerRadius="19" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="14" FontWeight="Bold" BorderThickness="0"/>
+                                 <Button Grid.Row="0" Grid.Column="3" Command="{Binding CalculatorPressCommand}" CommandParameter="/" Content="÷" Background="#FF9F0A" Foreground="White" Height="38" Margin="3" CornerRadius="19" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="17" FontWeight="Bold" BorderThickness="0"/>
+ 
+                                 <!-- Row 1: 7, 8, 9, × -->
+                                 <Button Grid.Row="1" Grid.Column="0" Command="{Binding CalculatorPressCommand}" CommandParameter="7" Content="7" Background="#333333" Foreground="White" Height="38" Margin="3" CornerRadius="19" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="15" FontWeight="Medium" BorderThickness="0"/>
+                                 <Button Grid.Row="1" Grid.Column="1" Command="{Binding CalculatorPressCommand}" CommandParameter="8" Content="8" Background="#333333" Foreground="White" Height="38" Margin="3" CornerRadius="19" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="15" FontWeight="Medium" BorderThickness="0"/>
+                                 <Button Grid.Row="1" Grid.Column="2" Command="{Binding CalculatorPressCommand}" CommandParameter="9" Content="9" Background="#333333" Foreground="White" Height="38" Margin="3" CornerRadius="19" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="15" FontWeight="Medium" BorderThickness="0"/>
+                                 <Button Grid.Row="1" Grid.Column="3" Command="{Binding CalculatorPressCommand}" CommandParameter="*" Content="×" Background="#FF9F0A" Foreground="White" Height="38" Margin="3" CornerRadius="19" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="17" FontWeight="Bold" BorderThickness="0"/>
+ 
+                                 <!-- Row 2: 4, 5, 6, - -->
+                                 <Button Grid.Row="2" Grid.Column="0" Command="{Binding CalculatorPressCommand}" CommandParameter="4" Content="4" Background="#333333" Foreground="White" Height="38" Margin="3" CornerRadius="19" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="15" FontWeight="Medium" BorderThickness="0"/>
+                                 <Button Grid.Row="2" Grid.Column="1" Command="{Binding CalculatorPressCommand}" CommandParameter="5" Content="5" Background="#333333" Foreground="White" Height="38" Margin="3" CornerRadius="19" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="15" FontWeight="Medium" BorderThickness="0"/>
+                                 <Button Grid.Row="2" Grid.Column="2" Command="{Binding CalculatorPressCommand}" CommandParameter="6" Content="6" Background="#333333" Foreground="White" Height="38" Margin="3" CornerRadius="19" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="15" FontWeight="Medium" BorderThickness="0"/>
+                                 <Button Grid.Row="2" Grid.Column="3" Command="{Binding CalculatorPressCommand}" CommandParameter="-" Content="-" Background="#FF9F0A" Foreground="White" Height="38" Margin="3" CornerRadius="19" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="17" FontWeight="Bold" BorderThickness="0"/>
+ 
+                                 <!-- Row 3: 1, 2, 3, + -->
+                                 <Button Grid.Row="3" Grid.Column="0" Command="{Binding CalculatorPressCommand}" CommandParameter="1" Content="1" Background="#333333" Foreground="White" Height="38" Margin="3" CornerRadius="19" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="15" FontWeight="Medium" BorderThickness="0"/>
+                                 <Button Grid.Row="3" Grid.Column="1" Command="{Binding CalculatorPressCommand}" CommandParameter="2" Content="2" Background="#333333" Foreground="White" Height="38" Margin="3" CornerRadius="19" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="15" FontWeight="Medium" BorderThickness="0"/>
+                                 <Button Grid.Row="3" Grid.Column="2" Command="{Binding CalculatorPressCommand}" CommandParameter="3" Content="3" Background="#333333" Foreground="White" Height="38" Margin="3" CornerRadius="19" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="15" FontWeight="Medium" BorderThickness="0"/>
+                                 <Button Grid.Row="3" Grid.Column="3" Command="{Binding CalculatorPressCommand}" CommandParameter="+" Content="+" Background="#FF9F0A" Foreground="White" Height="38" Margin="3" CornerRadius="19" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="17" FontWeight="Bold" BorderThickness="0"/>
+ 
+                                 <!-- Row 4: 0, ., ⌫, = -->
+                                 <Button Grid.Row="4" Grid.Column="0" Command="{Binding CalculatorPressCommand}" CommandParameter="0" Content="0" Background="#333333" Foreground="White" Height="38" Margin="3" CornerRadius="19" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="15" FontWeight="Medium" BorderThickness="0"/>
+                                 <Button Grid.Row="4" Grid.Column="1" Command="{Binding CalculatorPressCommand}" CommandParameter="." Content="." Background="#333333" Foreground="White" Height="38" Margin="3" CornerRadius="19" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="15" FontWeight="Medium" BorderThickness="0"/>
+                                 <Button Grid.Row="4" Grid.Column="2" Command="{Binding CalculatorPressCommand}" CommandParameter="DEL" Content="⌫" Background="#333333" Foreground="White" Height="38" Margin="3" CornerRadius="19" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="15" FontWeight="Medium" BorderThickness="0"/>
+                                 <Button Grid.Row="4" Grid.Column="3" Command="{Binding CalculatorPressCommand}" CommandParameter="=" Content="=" Background="#FF9F0A" Foreground="White" Height="38" Margin="3" CornerRadius="19" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="17" FontWeight="Bold" BorderThickness="0"/>
+                             </Grid>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- RIGHT COLUMN -->
+                <StackPanel Grid.Column="1" Margin="10,0,0,0" Spacing="20">
+                     <!-- World Clocks / Stopwatch / Countdown tabbed card -->
+                     <Border Classes="GlassCard">
+                         <StackPanel Spacing="12">
+                             <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,0,0,4">
+                                 <PathIcon Data="{StaticResource IconLocation}" Width="15" Height="15" Foreground="{DynamicResource AccentBlue}"/>
+                                 <TextBlock Text="{Binding ToolsClocksTitle, Source={x:Static services:LocalizationService.Instance}}" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                             </StackPanel>
+ 
+                             <Separator Background="{DynamicResource BorderGray}" Margin="0,-5"/>
+ 
+                             <!-- Tab Selector -->
+                             <Border CornerRadius="8" Background="{DynamicResource SidebarBg}" BorderBrush="{DynamicResource BorderGray}" BorderThickness="1" Padding="2" HorizontalAlignment="Stretch" Margin="0,4,0,4">
+                                 <Grid ColumnDefinitions="*, *, *">
+                                     <Button Grid.Column="0" Command="{Binding SetClockTabCommand}" CommandParameter="0" Classes="SystemButton" Classes.active="{Binding IsClockTab0}" Height="28" Padding="0" MinHeight="0" MinWidth="0" CornerRadius="6" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+                                         <TextBlock Text="{Binding ToolsClockTabClocks, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                     </Button>
+                                     <Button Grid.Column="1" Command="{Binding SetClockTabCommand}" CommandParameter="1" Classes="SystemButton" Classes.active="{Binding IsClockTab1}" Height="28" Padding="0" Margin="2,0" MinHeight="0" MinWidth="0" CornerRadius="6" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+                                         <TextBlock Text="{Binding ToolsClockTabStopwatch, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                     </Button>
+                                     <Button Grid.Column="2" Command="{Binding SetClockTabCommand}" CommandParameter="2" Classes="SystemButton" Classes.active="{Binding IsClockTab2}" Height="28" Padding="0" MinHeight="0" MinWidth="0" CornerRadius="6" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+                                         <TextBlock Text="{Binding ToolsClockTabTimer, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                     </Button>
+                                 </Grid>
+                             </Border>
+
+                              <!-- Tab 0: World Clocks -->
+                              <Grid IsVisible="{Binding IsClockTab0}" RowDefinitions="Auto, Auto" ColumnDefinitions="*, *" Margin="0,4,0,0">
+                                  <!-- Local Time Card -->
+                                  <Border Grid.Row="0" Grid.Column="0" Classes="GlassCard" Background="#0CFFFFFF" CornerRadius="12" Padding="14" BorderBrush="{DynamicResource BorderGray}" BorderThickness="1" Margin="0,0,6,6">
+                                      <Grid RowDefinitions="Auto, *, Auto">
+                                          <Grid Grid.Row="0" ColumnDefinitions="*, Auto">
+                                              <StackPanel Grid.Column="0" Spacing="2">
+                                                  <TextBlock Text="{Binding ToolsClockLocalTime, Source={x:Static services:LocalizationService.Instance}}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource AccentBlue}"/>
+                                                  <TextBlock Text="{Binding ToolsClockCurrentLocation, Source={x:Static services:LocalizationService.Instance}}" FontSize="9.5" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap"/>
+                                              </StackPanel>
+                                              <TextBlock Grid.Column="1" Text="{Binding LocalIcon}" FontSize="20" VerticalAlignment="Top" Margin="5,0,0,0"/>
+                                          </Grid>
+                                          <TextBlock Grid.Row="1" Text="{Binding LocalTime}" FontSize="25" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" HorizontalAlignment="Center" Margin="0,12" LetterSpacing="0.5"/>
+                                          <TextBlock Grid.Row="2" Text="{Binding LocalDate}" FontSize="10.5" FontWeight="Medium" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center"/>
+                                      </Grid>
+                                  </Border>
+
+                                  <!-- New York Time Card -->
+                                  <Border Grid.Row="0" Grid.Column="1" Classes="GlassCard" Background="#06FFFFFF" CornerRadius="12" Padding="14" BorderBrush="{DynamicResource BorderGray}" BorderThickness="1" Margin="6,0,0,6">
+                                      <Grid RowDefinitions="Auto, *, Auto">
+                                          <Grid Grid.Row="0" ColumnDefinitions="*, Auto">
+                                              <StackPanel Grid.Column="0" Spacing="2">
+                                                  <TextBlock Text="{Binding ToolsClockNewYork, Source={x:Static services:LocalizationService.Instance}}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}"/>
+                                                  <TextBlock Text="{Binding NewYorkOffset}" FontSize="9.5" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap"/>
+                                              </StackPanel>
+                                              <TextBlock Grid.Column="1" Text="{Binding NewYorkIcon}" FontSize="20" VerticalAlignment="Top" Margin="5,0,0,0"/>
+                                          </Grid>
+                                          <TextBlock Grid.Row="1" Text="{Binding NewYorkTime}" FontSize="25" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" HorizontalAlignment="Center" Margin="0,12" LetterSpacing="0.5"/>
+                                          <TextBlock Grid.Row="2" Text="{Binding NewYorkDate}" FontSize="10.5" FontWeight="Medium" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center"/>
+                                      </Grid>
+                                  </Border>
+
+                                  <!-- London Time Card -->
+                                  <Border Grid.Row="1" Grid.Column="0" Classes="GlassCard" Background="#06FFFFFF" CornerRadius="12" Padding="14" BorderBrush="{DynamicResource BorderGray}" BorderThickness="1" Margin="0,6,6,0">
+                                      <Grid RowDefinitions="Auto, *, Auto">
+                                          <Grid Grid.Row="0" ColumnDefinitions="*, Auto">
+                                              <StackPanel Grid.Column="0" Spacing="2">
+                                                  <TextBlock Text="{Binding ToolsClockLondon, Source={x:Static services:LocalizationService.Instance}}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}"/>
+                                                  <TextBlock Text="{Binding LondonOffset}" FontSize="9.5" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap"/>
+                                              </StackPanel>
+                                              <TextBlock Grid.Column="1" Text="{Binding LondonIcon}" FontSize="20" VerticalAlignment="Top" Margin="5,0,0,0"/>
+                                          </Grid>
+                                          <TextBlock Grid.Row="1" Text="{Binding LondonTime}" FontSize="25" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" HorizontalAlignment="Center" Margin="0,12" LetterSpacing="0.5"/>
+                                          <TextBlock Grid.Row="2" Text="{Binding LondonDate}" FontSize="10.5" FontWeight="Medium" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center"/>
+                                      </Grid>
+                                  </Border>
+
+                                  <!-- Tokyo Time Card -->
+                                  <Border Grid.Row="1" Grid.Column="1" Classes="GlassCard" Background="#06FFFFFF" CornerRadius="12" Padding="14" BorderBrush="{DynamicResource BorderGray}" BorderThickness="1" Margin="6,6,0,0">
+                                      <Grid RowDefinitions="Auto, *, Auto">
+                                          <Grid Grid.Row="0" ColumnDefinitions="*, Auto">
+                                              <StackPanel Grid.Column="0" Spacing="2">
+                                                  <TextBlock Text="{Binding ToolsClockTokyo, Source={x:Static services:LocalizationService.Instance}}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}"/>
+                                                  <TextBlock Text="{Binding TokyoOffset}" FontSize="9.5" Foreground="{DynamicResource TextSecondary}" TextWrapping="Wrap"/>
+                                              </StackPanel>
+                                              <TextBlock Grid.Column="1" Text="{Binding TokyoIcon}" FontSize="20" VerticalAlignment="Top" Margin="5,0,0,0"/>
+                                          </Grid>
+                                          <TextBlock Grid.Row="1" Text="{Binding TokyoTime}" FontSize="25" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}" HorizontalAlignment="Center" Margin="0,12" LetterSpacing="0.5"/>
+                                          <TextBlock Grid.Row="2" Text="{Binding TokyoDate}" FontSize="10.5" FontWeight="Medium" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center"/>
+                                      </Grid>
+                                  </Border>
+                              </Grid>
+ 
+                             <!-- Tab 1: Stopwatch -->
+                             <StackPanel Spacing="10" Margin="0,4,0,0" IsVisible="{Binding IsClockTab1}">
+                                 <Border Background="#06FFFFFF" CornerRadius="8" Padding="16,20" BorderBrush="{DynamicResource BorderGray}" BorderThickness="1">
+                                     <StackPanel Spacing="15" HorizontalAlignment="Center">
+                                         <!-- Main Digital Counter -->
+                                         <Border Background="#15000000" CornerRadius="10" Padding="20,10" BorderBrush="#20FFFFFF" BorderThickness="1">
+                                             <TextBlock Text="{Binding StopwatchDisplay}" FontSize="36" FontWeight="Bold" FontFamily="Courier New" Foreground="{DynamicResource TextPrimary}" HorizontalAlignment="Center" LetterSpacing="1"/>
+                                         </Border>
+                                         
+                                         <!-- Controls -->
+                                         <Grid ColumnDefinitions="*, *">
+                                             <!-- Start/Stop Button with conditional colors -->
+                                             <Button Grid.Column="0" Command="{Binding ToggleStopwatchCommand}" Height="34" Margin="0,0,6,0" Padding="0" Background="Transparent" BorderThickness="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                                                 <Panel>
+                                                     <!-- Start (Green) -->
+                                                     <Border Background="#2034C759" BorderBrush="#FF34C759" BorderThickness="1.5" CornerRadius="8" IsVisible="{Binding !IsStopwatchRunning}">
+                                                         <TextBlock Text="{Binding ToolsClockStart, Source={x:Static services:LocalizationService.Instance}}" Foreground="#FF34C759" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12" FontWeight="Bold"/>
+                                                     </Border>
+                                                     <!-- Stop (Red) -->
+                                                     <Border Background="#20FF3B30" BorderBrush="#FFFF3B30" BorderThickness="1.5" CornerRadius="8" IsVisible="{Binding IsStopwatchRunning}">
+                                                         <TextBlock Text="{Binding ToolsClockStop, Source={x:Static services:LocalizationService.Instance}}" Foreground="#FFFF3B30" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12" FontWeight="Bold"/>
+                                                     </Border>
+                                                 </Panel>
+                                             </Button>
+                                             <!-- Reset Button (Gray) -->
+                                             <Button Grid.Column="1" Command="{Binding ResetStopwatchCommand}" Height="34" Margin="6,0,0,0" Padding="0" Background="Transparent" BorderThickness="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                                                 <Border Background="#1CFFFFFF" BorderBrush="#40FFFFFF" BorderThickness="1" CornerRadius="8">
+                                                     <TextBlock Text="{Binding ToolsClockReset, Source={x:Static services:LocalizationService.Instance}}" Foreground="{DynamicResource TextPrimary}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold"/>
+                                                 </Border>
+                                             </Button>
+                                         </Grid>
+                                     </StackPanel>
+                                 </Border>
+                             </StackPanel>
+ 
+                             <!-- Tab 2: Countdown Timer -->
+                             <StackPanel Spacing="10" Margin="0,4,0,0" IsVisible="{Binding IsClockTab2}">
+                                 <Border Background="#06FFFFFF" CornerRadius="8" Padding="16" BorderBrush="{DynamicResource BorderGray}" BorderThickness="1">
+                                     <StackPanel Spacing="12">
+                                         <Grid ColumnDefinitions="*, Auto">
+                                             <StackPanel Spacing="2">
+                                                 <TextBlock Text="{Binding ToolsTimerTimeRemaining, Source={x:Static services:LocalizationService.Instance}}" FontSize="10" Foreground="{DynamicResource TextSecondary}"/>
+                                                 <TextBlock Text="{Binding CountdownDisplay}" FontSize="28" FontWeight="Bold" FontFamily="Courier New" Foreground="{DynamicResource TextPrimary}"/>
+                                             </StackPanel>
+                                             
+                                             <!-- Input setup -->
+                                             <StackPanel Grid.Column="1" Spacing="4" VerticalAlignment="Center">
+                                                 <TextBlock Text="{Binding ToolsTimerMinutesInput, Source={x:Static services:LocalizationService.Instance}}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondary}"/>
+                                                 <NumericUpDown Value="{Binding CountdownInputMinutes}" ShowButtonSpinner="False" Minimum="1" Maximum="300" Increment="1" FormatString="0" Height="28" FontSize="12" Width="80" IsEnabled="{Binding !IsCountdownRunning}" CornerRadius="6"/>
+                                             </StackPanel>
+                                         </Grid>
+                                         
+                                         <!-- Visual Progress line -->
+                                         <ProgressBar Value="{Binding CountdownProgress}" Minimum="0" Maximum="100" Height="6" CornerRadius="3" Foreground="{DynamicResource AccentBlue}" Background="#1CFFFFFF"/>
+                                         
+                                         <!-- Controls -->
+                                         <Grid ColumnDefinitions="*, *">
+                                             <Button Grid.Column="0" Command="{Binding ToggleCountdownCommand}" Height="34" Margin="0,0,6,0" Padding="0" Background="Transparent" BorderThickness="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                                                 <Panel>
+                                                     <!-- Start (Blue) -->
+                                                     <Border Background="#20007AFF" BorderBrush="#FF007AFF" BorderThickness="1.5" CornerRadius="8" IsVisible="{Binding !IsCountdownRunning}">
+                                                         <TextBlock Text="{Binding ToolsClockStart, Source={x:Static services:LocalizationService.Instance}}" Foreground="#FF007AFF" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12" FontWeight="Bold"/>
+                                                     </Border>
+                                                     <!-- Pause (Orange) -->
+                                                     <Border Background="#20FF9500" BorderBrush="#FFFF9500" BorderThickness="1.5" CornerRadius="8" IsVisible="{Binding IsCountdownRunning}">
+                                                         <TextBlock Text="{Binding ToolsTimerPause, Source={x:Static services:LocalizationService.Instance}}" Foreground="#FFFF9500" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12" FontWeight="Bold"/>
+                                                     </Border>
+                                                 </Panel>
+                                             </Button>
+                                             <Button Grid.Column="1" Command="{Binding ResetCountdownCommand}" Height="34" Margin="6,0,0,0" Padding="0" Background="Transparent" BorderThickness="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                                                 <Border Background="#1CFFFFFF" BorderBrush="#40FFFFFF" BorderThickness="1" CornerRadius="8">
+                                                     <TextBlock Text="{Binding ToolsTimerReset, Source={x:Static services:LocalizationService.Instance}}" Foreground="{DynamicResource TextPrimary}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold"/>
+                                                 </Border>
+                                             </Button>
+                                         </Grid>
+                                     </StackPanel>
+                                 </Border>
+                             </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+
+                    <!-- Image Converter Card -->
+                    <Border Classes="GlassCard">
+                        <StackPanel Spacing="12">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="{StaticResource IconFolder}" Width="15" Height="15" Foreground="{DynamicResource AccentBlue}"/>
+                                <TextBlock Text="{Binding ToolsConverterTitle, Source={x:Static services:LocalizationService.Instance}}" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
+                            </StackPanel>
+                            <Separator Background="{DynamicResource BorderGray}" Margin="0,-5"/>
+                            
+                            <!-- Drag and drop zone & File picker -->
+                            <Border Name="DragDropConverter" Height="80" CornerRadius="8" Background="#0AFFFFFF" BorderBrush="{DynamicResource BorderGray}" BorderThickness="1.5" DragDrop.AllowDrop="True">
+                                <Grid>
+                                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="6" IsVisible="{Binding !SelectedImagePath.Length}">
+                                        <PathIcon Data="{StaticResource IconFolder}" Width="18" Height="18" Foreground="{DynamicResource TextSecondary}"/>
+                                        <TextBlock Text="{Binding ToolsConverterDragPrompt, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="4" IsVisible="{Binding SelectedImagePath.Length}">
+                                        <PathIcon Data="{StaticResource IconCheck}" Width="18" Height="18" Foreground="{DynamicResource AccentBlue}"/>
+                                        <TextBlock Text="{Binding ImageNameDisplay}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" MaxWidth="250"/>
+                                        <TextBlock Text="{Binding ToolsConverterDragReplace, Source={x:Static services:LocalizationService.Instance}}" FontSize="9" Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <Grid ColumnDefinitions="*, Auto">
+                                <Button Grid.Column="0" Command="{Binding SelectImageCommand}" Content="{Binding ToolsConverterSelectFile, Source={x:Static services:LocalizationService.Instance}}" Classes="SystemButton" Height="30" Margin="0,0,10,0" HorizontalAlignment="Stretch" FontSize="11"/>
+                                <Button Grid.Column="1" Command="{Binding ClearImageSelectionCommand}" Content="{Binding ToolsConverterClear, Source={x:Static services:LocalizationService.Instance}}" Classes="SystemButton" Height="30" FontSize="11" IsVisible="{Binding SelectedImagePath.Length}"/>
+                            </Grid>
+                            
+                            <TextBlock Text="{Binding ImageConverterStatus}" Foreground="{DynamicResource AccentBlue}" FontSize="12" FontWeight="Medium" IsVisible="{Binding ImageConverterStatus, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" HorizontalAlignment="Center"/>
+                            
+                            <TextBlock Text="{Binding ToolsConverterConvertFormat, Source={x:Static services:LocalizationService.Instance}}" FontSize="11" Foreground="{DynamicResource TextSecondary}"/>
+                            <Grid ColumnDefinitions="*, *, *">
+                                <Button Grid.Column="0" Command="{Binding ConvertImageCommand}" CommandParameter="png" Content="PNG 🖼️" Classes="SystemButton" Height="30" Margin="0,0,4,0" HorizontalAlignment="Stretch" FontSize="11" IsEnabled="{Binding SelectedImagePath.Length}"/>
+                                <Button Grid.Column="1" Command="{Binding ConvertImageCommand}" CommandParameter="jpg" Content="JPG 📷" Classes="SystemButton" Height="30" Margin="4,0,4,0" HorizontalAlignment="Stretch" FontSize="11" IsEnabled="{Binding SelectedImagePath.Length}"/>
+                                <Button Grid.Column="2" Command="{Binding ConvertImageCommand}" CommandParameter="webp" Content="WebP 🌐" Classes="SystemButton" Height="30" Margin="4,0,0,0" HorizontalAlignment="Stretch" FontSize="11" IsEnabled="{Binding SelectedImagePath.Length}"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
+

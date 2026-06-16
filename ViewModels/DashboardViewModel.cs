@@ -2,9 +2,9 @@ using System;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MacStyleHub.Services;
+using SystemHub.Services;
 
-namespace MacStyleHub.ViewModels
+namespace SystemHub.ViewModels
 {
     public partial class DashboardViewModel : ViewModelBase
     {
@@ -177,3 +177,4 @@ namespace MacStyleHub.ViewModels
         }
     }
 }
+

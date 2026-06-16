@@ -1,0 +1,24 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="SystemHub.Views.OcrOverlayWindow"
+        Title="Select Area for OCR"
+        WindowState="Maximized"
+        WindowStartupLocation="Manual"
+        WindowDecorations="None"
+        Topmost="True"
+        Background="Transparent"
+        TransparencyLevelHint="Transparent"
+        Cursor="Cross">
+    
+    <Canvas Name="MainCanvas" Background="Transparent" PointerPressed="Canvas_PointerPressed" PointerMoved="Canvas_PointerMoved" PointerReleased="Canvas_PointerReleased">
+        <!-- Background Screen Image -->
+        <Image Name="ScreenImage" Stretch="Fill"/>
+        
+        <!-- Dimmed Overlay Path -->
+        <Path Name="DimPath" Fill="#70000000"/>
+        
+        <!-- Selection Highlight Border -->
+        <Border Name="SelectionBorder" BorderBrush="#0A84FF" BorderThickness="2" Background="Transparent" IsVisible="False"/>
+    </Canvas>
+</Window>
+

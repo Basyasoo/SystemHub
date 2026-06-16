@@ -1,6 +1,6 @@
 using Avalonia.Controls;
 
-namespace MacStyleHub.Views
+namespace SystemHub.Views
 {
     public partial class SystemInfoView : UserControl
     {
@@ -10,3 +10,4 @@ namespace MacStyleHub.Views
         }
     }
 }
+

@@ -1,8 +1,8 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             x:Class="MacStyleHub.App"
-             xmlns:local="using:MacStyleHub"
-             xmlns:services="using:MacStyleHub.Services"
+             x:Class="SystemHub.App"
+             xmlns:local="using:SystemHub"
+             xmlns:services="using:SystemHub.Services"
              RequestedThemeVariant="Dark">
 
     <Application.DataTemplates>

@@ -3,10 +3,10 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MacStyleHub.Services;
+using SystemHub.Services;
 using Avalonia.Threading;
 
-namespace MacStyleHub.ViewModels
+namespace SystemHub.ViewModels
 {
     public partial class ProgramInstallItemViewModel : ObservableObject
     {
@@ -350,7 +350,14 @@ namespace MacStyleHub.ViewModels
             OnPropertyChanged(nameof(ActiveModalRegularText));
             OnPropertyChanged(nameof(ActiveModalModText));
             OnPropertyChanged(nameof(ActiveModalIsModSelected));
+            OnPropertyChanged(nameof(IsSpotXInstructionsActive));
+            OnPropertyChanged(nameof(SpotXModalInstructions));
+            OnPropertyChanged(nameof(SpotXModalInstructionsHeader));
         }
+
+        public bool IsSpotXInstructionsActive => ActiveModalProg != null && ActiveModalProg.Id == "spotify" && ActiveModalProg.IsModSelected;
+        public string SpotXModalInstructions => LocalizationService.Instance.SpotXModalInstructions;
+        public string SpotXModalInstructionsHeader => LocalizationService.Instance.SpotXModalInstructionsHeader;
 
         public string ModalTitle => IsZapretModalActive 
             ? ZapretModalTitle 
@@ -534,3 +541,4 @@ namespace MacStyleHub.ViewModels
         }
     }
 }
+

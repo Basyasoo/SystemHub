@@ -1,6 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace MacStyleHub.Services
+namespace SystemHub.Services
 {
     public partial class LocalizationService : ObservableObject
     {
@@ -1352,6 +1352,20 @@ namespace MacStyleHub.Services
             _ => "Для обхода блокировок YouTube и Discord сейчас начнется установка службы zapret.\n\nПосле распаковки откроется черное окно командной строки администратора «ZAPRET SERVICE MANAGER v1.9.9a».\n\nВ открывшемся консольном окне вам нужно:\n1. Написать цифру 1 и нажать Enter (для установки службы)\n2. Написать цифру 12 и нажать Enter (для выхода)\n\nНажмите «Установить» для скачивания и запуска скрипта установки."
         };
 
+        public string SpotXModalInstructions => CurrentLanguage switch
+        {
+            "EN" => "To successfully configure SpotX:\n1. Click «Install» below to start the download.\n2. Wait for PowerShell to launch (a blue/black console window will open).\n3. Spotify will download and install inside the opened console window (this might take a moment).\n4. When prompted «Hide podcasts, shows and audiobooks on the main page? [Y/N]»:\n5. Type «y» and press Enter.\n6. Wait for the installer to finish.",
+            "ZH" => "成功配置 SpotX 的步骤：\n1. 点击下方的“安装”开始下载。\n2. 等待 PowerShell 启动（将打开一个蓝色/黑色的控制台窗口）。\n3. Spotify 本身将在打开的控制台窗口内进行下载并安装（这可能需要一些时间）。\n4. 当提示 «Hide podcasts, shows and audiobooks on the main page? [Y/N]»（是否在主页隐藏播客、节目和有声书？）时：\n5. 输入 «y» 并按回车键。\n6. 等待安装程序运行完毕。",
+            _ => "Для успешной настройки SpotX:\n1. Нажмите «Установить» ниже, чтобы начать загрузку.\n2. Дождитесь запуска PowerShell (откроется синее/черное консольное окно).\n3. Начнется скачивание и установка Spotify внутри открывшегося окна (это может занять некоторое время).\n4. В консоли появится вопрос «Hide podcasts, shows and audiobooks on the main page? [Y/N]» (Скрыть подкасты, шоу и аудиокниги на главной странице?).\n5. Напишите «y» на клавиатуре и нажмите Enter.\n6. Дождитесь завершения работы установщика."
+        };
+
+        public string SpotXModalInstructionsHeader => CurrentLanguage switch
+        {
+            "EN" => "⚠️ Installation Instructions:",
+            "ZH" => "⚠️ 安装向导：",
+            _ => "⚠️ Инструкция по установке:"
+        };
+
         // Media player launcher localizations
         public string PlayerOpenSpotify => CurrentLanguage switch
         {
@@ -1514,6 +1528,290 @@ namespace MacStyleHub.Services
         public string HardwareDiskHealthWarning => CurrentLanguage switch { "EN" => "Warning (Degraded)", "ZH" => "警告 (有磨损)", _ => "Внимание (Есть износ)" };
         public string HardwareDiskHealthCritical => CurrentLanguage switch { "EN" => "Critical! Replace SSD/HDD!", "ZH" => "严重！请更换硬盘！", _ => "Критическое! Замените диск!" };
 
+        // Weather Widget
+        public string WeatherWidgetRefresh => CurrentLanguage switch { "EN" => "Refresh", "ZH" => "刷新", _ => "Обновить" };
+        public string WeatherWidgetHumidity => CurrentLanguage switch { "EN" => "Humidity", "ZH" => "湿度", _ => "Влажность" };
+        public string WeatherWindSpeed => CurrentLanguage switch { "EN" => "Wind speed", "ZH" => "风速", _ => "Скорость ветра" };
+
+        // Tweaks Page
+        public string TweakSubheader => CurrentLanguage switch { "EN" => "Configure interface and Windows parameters in one click", "ZH" => "一键配置界面和 Windows 参数", _ => "Настройка интерфейса и параметров Windows в один клик" };
+        public string TweakAdminDesc => CurrentLanguage switch { "EN" => "Some settings require administrator privileges. Run as administrator?", "ZH" => "某些设置需要管理员权限。以管理员身份运行吗？", _ => "Некоторые настройки требуют прав администратора. Запустить от имени администратора?" };
+        public string TweakRestartBtn => CurrentLanguage switch { "EN" => "Restart App", "ZH" => "重新启动", _ => "Перезапустить" };
+        public string TweakDynamicIslandTitle => CurrentLanguage switch { "EN" => "Dynamic Island Settings", "ZH" => "灵动岛设置", _ => "Настройки Dynamic Island" };
+        public string TweakDynamicIslandDesc => CurrentLanguage switch { "EN" => "Show the smart Dynamic Island panel at the top of the screen and configure active modules.", "ZH" => "在屏幕顶部显示智能灵动岛面板并配置活动模块。", _ => "Показать умную панель Dynamic Island вверху экрана и настроить активные модули." };
+        public string TweakDiWidth => CurrentLanguage switch { "EN" => "Width when collapsed:", "ZH" => "折叠状态下的宽度:", _ => "Ширина в сложенном состоянии:" };
+        public string TweakDiTopMargin => CurrentLanguage switch { "EN" => "Top margin:", "ZH" => "顶部间距:", _ => "Отступ сверху:" };
+        public string TweakDiScreen => CurrentLanguage switch { "EN" => "Select screen:", "ZH" => "选择屏幕:", _ => "Выбор экрана:" };
+        public string TweakDiModules => CurrentLanguage switch { "EN" => "Enabled modules:", "ZH" => "启用的模块:", _ => "Включенные модули:" };
+        public string TweakModuleMusic => CurrentLanguage switch { "EN" => "Music player", "ZH" => "音乐播放器", _ => "Музыкальный плеер" };
+        public string TweakModuleOverheat => CurrentLanguage switch { "EN" => "Overheat warning", "ZH" => "过热警告", _ => "Предупреждение о перегреве" };
+        public string TweakModuleFocus => CurrentLanguage switch { "EN" => "Focus timer (Pomodoro)", "ZH" => "专注番茄钟", _ => "Таймер фокуса (Pomodoro)" };
+        public string TweakModuleScreenshot => CurrentLanguage switch { "EN" => "Screenshot preview", "ZH" => "屏幕截图预览", _ => "Превью снимков экрана" };
+        public string TweakModuleVpn => CurrentLanguage switch { "EN" => "VPN indicator", "ZH" => "VPN 指示器", _ => "Индикатор VPN" };
+        public string TweakModuleCamMic => CurrentLanguage switch { "EN" => "Camera/Microphone indicators", "ZH" => "摄像头/麦克风指示器", _ => "Индикаторы Камеры/Микрофона" };
+        public string TweakCurrentFont => CurrentLanguage switch { "EN" => "Current font: ", "ZH" => "当前字体: ", _ => "Текущий шрифт: " };
+        public string TweakFontSelectApply => CurrentLanguage switch { "EN" => "Select and apply (.ttf/.otf)", "ZH" => "选择并应用 (.ttf/.otf)", _ => "Выбрать и применить (.ttf/.otf)" };
+        public string TweakFontRestoreDefault => CurrentLanguage switch { "EN" => "Restore default", "ZH" => "恢复默认", _ => "Вернуть стандартный" };
+        public string TweakFontRestartRequired => CurrentLanguage switch { "EN" => "Restart is required", "ZH" => "需要重启电脑", _ => "Требуется перезагрузка компьютера" };
+        public string TweakFontRestartDesc => CurrentLanguage switch { "EN" => "To fully apply system font changes, you need to restart your computer.", "ZH" => "为了完全应用系统字体更改，您需要重启电脑。", _ => "Для полного применения изменений шрифта необходимо перезапустить компьютер." };
+        public string TweakFontRestartNow => CurrentLanguage switch { "EN" => "Restart now", "ZH" => "立即重启", _ => "Перезагрузить сейчас" };
+        public string TweakFontDisclaimer => CurrentLanguage switch { "EN" => "* Computer restart is required to fully apply the system font.", "ZH" => "* 需要重启电脑以完全应用系统字体。", _ => "* Для полного применения системного шрифта требуется перезагрузка ПК." };
+        public string TweakStatusAdminRequired => CurrentLanguage switch { "EN" => "Administrator privileges are required!", "ZH" => "需要管理员权限！", _ => "Требуются права Администратора!" };
+        public string TweakStatusFontApplied => CurrentLanguage switch { "EN" => "Font applied successfully! Please restart the computer.", "ZH" => "字体应用成功！请重启电脑。", _ => "Шрифт успешно применен! Перезапустите ПК." };
+        public string TweakStatusFontError => CurrentLanguage switch { "EN" => "Error selecting/applying font", "ZH" => "选择/应用字体时出错", _ => "Ошибка при выборе/применении шрифта" };
+        public string TweakStatusFontRestored => CurrentLanguage switch { "EN" => "Default font restored! Please restart the computer.", "ZH" => "默认字体已恢复！请重启电脑。", _ => "Стандартный шрифт восстановлен! Перезапустите ПК." };
+        public string TweakStatusFontRestoreError => CurrentLanguage switch { "EN" => "Error restoring font", "ZH" => "恢复字体时出错", _ => "Ошибка при восстановлении шрифта" };
+        public string TweakStatusSoundsEnabled => CurrentLanguage switch { "EN" => "Windows system sounds enabled!", "ZH" => "Windows 系统声音已启用！", _ => "Системные звуки Windows включены!" };
+        public string TweakStatusSoundsDisabled => CurrentLanguage switch { "EN" => "Windows system sounds disabled!", "ZH" => "Windows 系统声音已禁用！", _ => "Системные звуки Windows отключены!" };
+        public string TweakStatusPasswordChanged => CurrentLanguage switch { "EN" => "App lock password changed!", "ZH" => "应用锁密码已更改！", _ => "Пароль приложения изменен!" };
+        public string TweakStatusAppAdded => CurrentLanguage switch { "EN" => "App added to block list!", "ZH" => "应用已添加到锁定列表！", _ => "Приложение добавлено в список блокировки!" };
+        public string TweakStatusAppRemoved => CurrentLanguage switch { "EN" => "App removed from block list!", "ZH" => "应用已从锁定列表移除！", _ => "Приложение удалено из списка блокировки!" };
+        public string TweakScreenLabel => CurrentLanguage switch { "EN" => "Screen", "ZH" => "屏幕", _ => "Экран" };
+        public string TweakPrimaryLabel => CurrentLanguage switch { "EN" => " (Primary)", "ZH" => " (主屏幕)", _ => " (Основной)" };
+
+        // Tools Page
+        public string ToolsSubheader => CurrentLanguage switch { "EN" => "A collection of helpful micro-utilities for work and focus", "ZH" => "一系列有助于工作和专注的实用微工具", _ => "Набор полезных микро-утилит для работы и фокуса" };
+        public string ToolsTabFocus => CurrentLanguage switch { "EN" => "Focus", "ZH" => "专注", _ => "Фокус" };
+        public string ToolsTabUtils => CurrentLanguage switch { "EN" => "Utilities", "ZH" => "工具", _ => "Утилиты" };
+        public string ToolsFocusWork => CurrentLanguage switch { "EN" => "Work (minutes):", "ZH" => "工作（分钟）:", _ => "Работа (минут):" };
+        public string ToolsFocusBreak => CurrentLanguage switch { "EN" => "Break (minutes):", "ZH" => "休息（分钟）:", _ => "Отдых (минут):" };
+        public string ToolsMailPlaceholder => CurrentLanguage switch { "EN" => "Click 'Generate Inbox'", "ZH" => "点击 '生成邮箱'", _ => "Нажмите 'Создать ящик'" };
+        public string ToolsMailCopy => CurrentLanguage switch { "EN" => "Copy Address", "ZH" => "复制地址", _ => "Копировать адрес" };
+        public string ToolsMailIncoming => CurrentLanguage switch { "EN" => "Incoming Messages:", "ZH" => "收件箱邮件:", _ => "Входящие сообщения:" };
+        public string ToolsCalcTitle => CurrentLanguage switch { "EN" => "Calculator", "ZH" => "计算器", _ => "Калькулятор" };
+        public string ToolsClocksTitle => CurrentLanguage switch { "EN" => "Time & Timers", "ZH" => "时间与定时器", _ => "Время и Таймеры" };
+        public string ToolsClockTabClocks => CurrentLanguage switch { "EN" => "Clock", "ZH" => "时钟", _ => "Часы" };
+        public string ToolsClockTabStopwatch => CurrentLanguage switch { "EN" => "Stopwatch", "ZH" => "秒表", _ => "Секундомер" };
+        public string ToolsClockTabTimer => CurrentLanguage switch { "EN" => "Timer", "ZH" => "定时器", _ => "Таймер" };
+        public string ToolsClockLocalTime => CurrentLanguage switch { "EN" => "Local Time", "ZH" => "本地时间", _ => "Местное время" };
+        public string ToolsClockCurrentLocation => CurrentLanguage switch { "EN" => "Current Location", "ZH" => "当前位置", _ => "Текущее местоположение" };
+        public string ToolsClockNewYork => CurrentLanguage switch { "EN" => "New York", "ZH" => "纽约", _ => "Нью-Йорк" };
+        public string ToolsClockLondon => CurrentLanguage switch { "EN" => "London", "ZH" => "伦敦", _ => "Лондон" };
+        public string ToolsClockTokyo => CurrentLanguage switch { "EN" => "Tokyo", "ZH" => "东京", _ => "Токио" };
+        public string ToolsClockStart => CurrentLanguage switch { "EN" => "Start", "ZH" => "开始", _ => "Старт" };
+        public string ToolsClockStop => CurrentLanguage switch { "EN" => "Stop", "ZH" => "停止", _ => "Стоп" };
+        public string ToolsClockReset => CurrentLanguage switch { "EN" => "Reset", "ZH" => "复位", _ => "Сбросить" };
+        public string ToolsTimerTimeRemaining => CurrentLanguage switch { "EN" => "Time Remaining", "ZH" => "剩余时间", _ => "Оставшееся время" };
+        public string ToolsTimerMinutesInput => CurrentLanguage switch { "EN" => "Minutes:", "ZH" => "分钟:", _ => "Минут:" };
+        public string ToolsTimerPause => CurrentLanguage switch { "EN" => "Pause", "ZH" => "暂停", _ => "Пауза" };
+        public string ToolsTimerReset => CurrentLanguage switch { "EN" => "Reset", "ZH" => "重置", _ => "Сброс" };
+        public string ToolsConverterTitle => CurrentLanguage switch { "EN" => "Image Converter", "ZH" => "图片转换器", _ => "Конвертер изображений" };
+        public string ToolsConverterDragPrompt => CurrentLanguage switch { "EN" => "Drag and drop image here", "ZH" => "将图片拖放到这里", _ => "Перетащите изображение сюда" };
+        public string ToolsConverterDragReplace => CurrentLanguage switch { "EN" => "Drag another one to replace", "ZH" => "拖放另一张进行替换", _ => "Перетащите другое для замены" };
+        public string ToolsConverterSelectFile => CurrentLanguage switch { "EN" => "Select File...", "ZH" => "选择文件...", _ => "Выбрать файл..." };
+        public string ToolsConverterClear => CurrentLanguage switch { "EN" => "Clear", "ZH" => "清除", _ => "Очистить" };
+        public string ToolsConverterConvertFormat => CurrentLanguage switch { "EN" => "Quick convert to format:", "ZH" => "快速转换为格式:", _ => "Быстрое конвертирование в формат:" };
+        public string ToolsMailCreatingInbox => CurrentLanguage switch { "EN" => "Creating inbox...", "ZH" => "正在生成邮箱...", _ => "Создание ящика..." };
+        public string ToolsMailAuthError => CurrentLanguage switch { "EN" => "Error: Failed to authenticate.", "ZH" => "错误: 身份验证失败。", _ => "Ошибка: не удалось авторизоваться." };
+        public string ToolsMailDomainError => CurrentLanguage switch { "EN" => "Error: Domains unavailable.", "ZH" => "错误: 域名不可用。", _ => "Ошибка: домены недоступны." };
+        public string ToolsMailNetworkError => CurrentLanguage switch { "EN" => "Network error: ", "ZH" => "网络错误: ", _ => "Ошибка сети: " };
+        public string ToolsShredderErasing => CurrentLanguage switch { "EN" => "Shredding files...", "ZH" => "正在粉碎文件...", _ => "Затирание файлов..." };
+        public string ToolsShredderError => CurrentLanguage switch { "EN" => "Error: ", "ZH" => "错误: ", _ => "Ошибка: " };
+        public string ToolsDaysPluralZeroOne => CurrentLanguage switch { "EN" => "days", "ZH" => "天", _ => "дней" };
+        public string ToolsDaysPluralTwoFour => CurrentLanguage switch { "EN" => "days", "ZH" => "天", _ => "дня" };
+        public string ToolsDaysPluralMany => CurrentLanguage switch { "EN" => "days", "ZH" => "天", _ => "дней" };
+        public string ToolsDaysPluralOne => CurrentLanguage switch { "EN" => "day", "ZH" => "天", _ => "день" };
+        public string ToolsClocksOffsetMatchesLocal => CurrentLanguage switch { "EN" => "same as local", "ZH" => "与本地一致", _ => "совпадает с местным" };
+        public string ToolsClocksOffsetHourFromLocal => CurrentLanguage switch { "EN" => "h from local", "ZH" => "小时（相比本地）", _ => "ч от местного" };
+        public string ToolsTimerCountdownDone => CurrentLanguage switch { "EN" => "Countdown timer finished!", "ZH" => "倒计时已结束！", _ => "Таймер обратного отсчета завершен!" };
+        public string ToolsOcrHighlightPrompt => CurrentLanguage switch { "EN" => "Select an area on the screen...", "ZH" => "在屏幕上选择一个区域...", _ => "Выделите область на экране..." };
+        public string ToolsOcrRecognizing => CurrentLanguage switch { "EN" => "Recognizing text...", "ZH" => "正在识别文本...", _ => "Распознавание текста..." };
+        public string ToolsOcrNotFound => CurrentLanguage switch { "EN" => "Text not found in the selected area.", "ZH" => "选定区域内未检测到文本。", _ => "Текст в выделенной области не обнаружен." };
+        public string ToolsOcrCopiedSuccess => CurrentLanguage switch { "EN" => "Text copied to clipboard successfully!", "ZH" => "文本已成功复制到剪贴板！", _ => "Текст успешно скопирован в буфер обмена!" };
+        public string ToolsOcrPackNotInstalled => CurrentLanguage switch { "EN" => "OCR language pack is not installed in Windows.", "ZH" => "Windows 中未安装 OCR 语言包。", _ => "Языковой пакет OCR не установлен в Windows." };
+        public string ToolsOcrProcessingError => CurrentLanguage switch { "EN" => "Failed to process selected area.", "ZH" => "无法处理选定区域。", _ => "Не удалось обработать выделенную область." };
+        public string ToolsOcrGenericError => CurrentLanguage switch { "EN" => "OCR Error: ", "ZH" => "OCR 错误: ", _ => "Ошибка OCR: " };
+        public string ToolsOcrSelectionCanceled => CurrentLanguage switch { "EN" => "Selection canceled.", "ZH" => "选择已取消。", _ => "Выделение отменено." };
+        public string ToolsCableInstalling => CurrentLanguage switch { "EN" => "Installing virtual cable...", "ZH" => "正在安装虚拟电缆...", _ => "Установка виртуального кабеля..." };
+        public string ToolsCableDownloading => CurrentLanguage switch { "EN" => "Downloading driver (vb-audio.com)...", "ZH" => "正在下载驱动程序 (vb-audio.com)...", _ => "Скачивание драйвера (vb-audio.com)..." };
+        public string ToolsCableExtracting => CurrentLanguage switch { "EN" => "Unpacking installer...", "ZH" => "正在解压安装程序...", _ => "Распаковка установщика..." };
+        public string ToolsCableLaunchingUac => CurrentLanguage switch { "EN" => "Running installer (allow in UAC)...", "ZH" => "正在运行安装程序（请在 UAC 中允许）...", _ => "Запуск установки (разрешите в окне UAC)..." };
+        public string ToolsCableInstallSuccess => CurrentLanguage switch { "EN" => "Installation completed successfully!", "ZH" => "安装成功完成！", _ => "Установка успешно завершена!" };
+        public string ToolsCableInstallError => CurrentLanguage switch { "EN" => "Installation error: ", "ZH" => "安装出错: ", _ => "Ошибка установки: " };
+        public string ToolsCableNotInstalled => CurrentLanguage switch { "EN" => "Virtual cable is not installed", "ZH" => "未安装虚拟电缆", _ => "Виртуальный кабель не установлен" };
+        public string ToolsPlayerNoFile => CurrentLanguage switch { "EN" => "No file selected", "ZH" => "未选择文件", _ => "Не выбран" };
+        public string ToolsPlayerError => CurrentLanguage switch { "EN" => "Playback error: ", "ZH" => "播放错误: ", _ => "Ошибка воспроизведения: " };
+        public string ToolsPlayerFileNotSelected => CurrentLanguage switch { "EN" => "File not selected", "ZH" => "文件未选择", _ => "Файл не выбран" };
+        public string ToolsConverterImageSuccess => CurrentLanguage switch { "EN" => "Image converted successfully!", "ZH" => "图片转换成功！", _ => "Изображение успешно сконвертировано!" };
+        public string ToolsConverterError => CurrentLanguage switch { "EN" => "Conversion error: ", "ZH" => "转换错误: ", _ => "Ошибка конвертирования: " };
+        public string ToolsActionCanceled => CurrentLanguage switch { "EN" => "Action canceled.", "ZH" => "操作已取消。", _ => "Действие отменено." };
+        public string ToolsFileNotSelected => CurrentLanguage switch { "EN" => "File not selected", "ZH" => "文件未选择", _ => "Файл не выбран" };
+        public string ToolsOcrFileSelectorTitle => CurrentLanguage switch { "EN" => "Select executable file (.exe)", "ZH" => "选择可执行文件 (.exe)", _ => "Выберите исполняемый файл (.exe)" };
+        public string ToolsOcrFileSelectorApps => CurrentLanguage switch { "EN" => "Applications", "ZH" => "程序", _ => "Программы" };
+        public string ToolsFileFontPickerTitle => CurrentLanguage switch { "EN" => "Select font file", "ZH" => "选择字体文件", _ => "Выберите файл шрифта" };
+        public string ToolsFileFontPickerFilter => CurrentLanguage switch { "EN" => "Font Files (*.ttf, *.otf)", "ZH" => "字体文件 (*.ttf, *.otf)", _ => "Файлы шрифтов (*.ttf, *.otf)" };
+        public string ToolsWallpapersPickerTitle => CurrentLanguage switch { "EN" => "Select wallpaper file (.mp4, .html)", "ZH" => "选择壁纸文件 (.mp4, .html)", _ => "Выберите файл обоев (.mp4, .html)" };
+        public string ToolsWallpapersPickerFilter => CurrentLanguage switch { "EN" => "Wallpaper Files", "ZH" => "壁纸文件", _ => "Файлы обоев" };
+        public string ToolsError => CurrentLanguage switch { "EN" => "Error", "ZH" => "错误", _ => "Ошибка" };
+
+        // App Lock (PasswordPromptWindow & LockScreenView)
+        public string AppLockTitle => CurrentLanguage switch { "EN" => "SystemHub - App Protection", "ZH" => "SystemHub - 应用保护", _ => "SystemHub - Защита приложений" };
+        public string AppLockAccessDenied => CurrentLanguage switch { "EN" => "Access Blocked", "ZH" => "Доступ заблокирован", _ => "Доступ заблокирован" };
+        public string AppLockEnterPassword => CurrentLanguage switch { "EN" => "Enter password", "ZH" => "输入密码", _ => "Введите пароль" };
+        public string AppLockInvalidPassword => CurrentLanguage switch { "EN" => "Invalid password!", "ZH" => "密码错误！", _ => "Неверный пароль!" };
+        public string AppLockClose => CurrentLanguage switch { "EN" => "Close", "ZH" => "关闭", _ => "Закрыть" };
+        public string AppLockUnlock => CurrentLanguage switch { "EN" => "Unlock", "ZH" => "解锁", _ => "Разблокировать" };
+        public string AppLockPromptFormat => CurrentLanguage switch { "EN" => "Launch of application \"{0}\" is temporarily suspended. Enter password to continue.", "ZH" => "应用程序 \"{0}\" 的启动已被临时挂起。请输入密码以继续。", _ => "Запуск приложения \"{0}\" временно приостановлен. Введите пароль для продолжения." };
+        public string AppLockScreenTitle => CurrentLanguage switch { "EN" => "Application Blocked", "ZH" => "应用已锁定", _ => "Приложение заблокировано" };
+        public string AppLockInputPlaceholder => CurrentLanguage switch { "EN" => "Enter password", "ZH" => "输入密码", _ => "Введите пароль" };
+
+        // Profile (ProfileView & ProfileViewModel)
+        public string ProfileTitle => CurrentLanguage switch { "EN" => "User Profile", "ZH" => "个人中心", _ => "Личный кабинет" };
+        public string ProfileRegDateLabel => CurrentLanguage switch { "EN" => "Registration Date:", "ZH" => "注册日期:", _ => "Дата регистрации:" };
+        public string ProfileEditHeader => CurrentLanguage switch { "EN" => "Edit Profile", "ZH" => "编辑个人资料", _ => "Редактировать профиль" };
+        public string ProfileSelectPhoto => CurrentLanguage switch { "EN" => "Select Photo", "ZH" => "选择照片", _ => "Выбрать фото" };
+        public string ProfileDeletePhoto => CurrentLanguage switch { "EN" => "Delete Photo", "ZH" => "删除照片", _ => "Удалить фото" };
+        public string ProfileUsernameLabel => CurrentLanguage switch { "EN" => "Username:", "ZH" => "用户名:", _ => "Имя пользователя:" };
+        public string ProfileUsernamePlaceholder => CurrentLanguage switch { "EN" => "Your nickname...", "ZH" => "您的昵称...", _ => "Ваш ник..." };
+        public string ProfileSaveBtn => CurrentLanguage switch { "EN" => "Save", "ZH" => "保存", _ => "Сохранить" };
+        public string ProfileSecurityHeader => CurrentLanguage switch { "EN" => "Security", "ZH" => "安全设置", _ => "Безопасность" };
+        public string ProfileOldPasswordLabel => CurrentLanguage switch { "EN" => "Current Password:", "ZH" => "当前密码:", _ => "Текущий пароль:" };
+        public string ProfileOldPasswordPlaceholder => CurrentLanguage switch { "EN" => "Enter current password...", "ZH" => "输入当前密码...", _ => "Введите текущий пароль..." };
+        public string ProfileNewPasswordLabel => CurrentLanguage switch { "EN" => "New Password:", "ZH" => "新密码:", _ => "Новый пароль:" };
+        public string ProfileNewPasswordPlaceholder => CurrentLanguage switch { "EN" => "New password...", "ZH" => "新密码...", _ => "Новый пароль..." };
+        public string ProfileConfirmPasswordLabel => CurrentLanguage switch { "EN" => "Confirm Password:", "ZH" => "确认密码:", _ => "Подтверждение:" };
+        public string ProfileConfirmPasswordPlaceholder => CurrentLanguage switch { "EN" => "Repeat new password...", "ZH" => "重复新密码...", _ => "Повторите новый пароль..." };
+        public string ProfileChangePasswordBtn => CurrentLanguage switch { "EN" => "Change Password", "ZH" => "修改密码", _ => "Изменить пароль" };
+        public string ProfileAuthSettingsHeader => CurrentLanguage switch { "EN" => "Authentication & Interface Settings", "ZH" => "认证与界面设置", _ => "Настройки авторизации и интерфейса" };
+        public string ProfileAutoLoginTitle => CurrentLanguage switch { "EN" => "Automatic Login", "ZH" => "自动登录", _ => "Автоматический вход" };
+        public string ProfileAutoLoginDesc => CurrentLanguage switch { "EN" => "Remember me on this device for automatic login on startup", "ZH" => "在此设备上记住我，以便在启动时自动登录", _ => "Запомнить меня на этом устройстве для автоматического входа при запуске" };
+        public string ProfileShowNicknameTitle => CurrentLanguage switch { "EN" => "Show Nickname in Greetings", "ZH" => "在问候中显示昵称", _ => "Показывать никнейм в приветствиях" };
+        public string ProfileShowNicknameDesc => CurrentLanguage switch { "EN" => "Display your name in the welcome screen when the application launches", "ZH" => "应用程序启动时在欢迎屏幕中显示您的名字", _ => "Отображать ваше имя в приветственном окне при запуске приложения" };
+        public string ProfileLogoutHeader => CurrentLanguage switch { "EN" => "End Session", "ZH" => "结束会话", _ => "Завершение сеанса" };
+        public string ProfileLogoutDesc => CurrentLanguage switch { "EN" => "Log out of the current account and return to the login screen", "ZH" => "退出当前账户并返回登录页面", _ => "Выйти из текущего аккаунта и вернуться к экрану авторизации" };
+        public string ProfileLogoutBtn => CurrentLanguage switch { "EN" => "Log Out", "ZH" => "退出", _ => "Выйти" };
+        public string ProfileSelectAvatarTitle => CurrentLanguage switch { "EN" => "Select Avatar", "ZH" => "选择头像", _ => "Выберите аватар" };
+        public string ProfileImagesFilter => CurrentLanguage switch { "EN" => "Images", "ZH" => "图片", _ => "Изображения" };
+        public string ProfileSavedSuccess => CurrentLanguage switch { "EN" => "Profile saved successfully", "ZH" => "个人资料保存成功", _ => "Профиль сохранен" };
+        public string ProfileFillAllFields => CurrentLanguage switch { "EN" => "Please fill in all password fields", "ZH" => "请填写所有密码字段", _ => "Заполните все поля паролей" };
+        public string ProfilePasswordsMismatch => CurrentLanguage switch { "EN" => "New passwords do not match", "ZH" => "新密码不匹配", _ => "Новые пароли не совпадают" };
+        public string ProfilePasswordChangedSuccess => CurrentLanguage switch { "EN" => "Password changed successfully", "ZH" => "密码修改成功", _ => "Пароль успешно изменен" };
+
+        // System Info (SystemInfoView & SystemInfoViewModel)
+        public string SysInfoTempHistory => CurrentLanguage switch { "EN" => "Temperature History:", "ZH" => "温度历史:", _ => "История температуры:" };
+        public string SysInfoTotal => CurrentLanguage switch { "EN" => "Total:", "ZH" => "总量:", _ => "Всего:" };
+        public string SysInfoNetworkSpeed => CurrentLanguage switch { "EN" => "Network Speed", "ZH" => "网络速度", _ => "Скорость сети" };
+        public string SysInfoDownload => CurrentLanguage switch { "EN" => "Download", "ZH" => "загрузка", _ => "Загрузка" };
+        public string SysInfoUpload => CurrentLanguage switch { "EN" => "Upload", "ZH" => "отдача", _ => "Отдача" };
+        public string SysInfoMotherboardShort => CurrentLanguage switch { "EN" => "Board:", "ZH" => "主板:", _ => "Плата:" };
+        public string SysInfoFan => CurrentLanguage switch { "EN" => "Fan:", "ZH" => "风扇:", _ => "Вентилятор:" };
+        public string SysInfoTopProcesses => CurrentLanguage switch { "EN" => "Heavyweights (Top 5 Processes)", "ZH" => "高负载进程 (前5个)", _ => "Тяжеловесы (Топ-5 процессов)" };
+        public string SysInfoProcessCol => CurrentLanguage switch { "EN" => "Process", "ZH" => "进程", _ => "Процесс" };
+        public string SysInfoCpuCol => CurrentLanguage switch { "EN" => "CPU", "ZH" => "ЦПУ", _ => "ЦПУ" };
+        public string SysInfoRamCol => CurrentLanguage switch { "EN" => "Memory", "ZH" => "内存", _ => "Память" };
+        public string SysInfoDiskBenchmark => CurrentLanguage switch { "EN" => "Disk Speed Test (Benchmark)", "ZH" => "磁盘速度测试", _ => "Тест скорости дисков (Benchmark)" };
+        public string SysInfoBenchmarkDesc => CurrentLanguage switch { "EN" => "Run disk performance benchmark using the button in the drives list below. Test measures read and write speeds of a 100 MB file.", "ZH" => "点击下方磁盘列表中的按钮运行磁盘性能基准测试。测试将测量 100 MB 文件的读写速度。", _ => "Запустите тест производительности диска с помощью кнопки в списке дисков ниже. Тест замерит скорость записи и чтения файла 100 МБ." };
+        public string SysInfoSeqWrite => CurrentLanguage switch { "EN" => "Write (Sequential)", "ZH" => "写入 (顺序)", _ => "Запись (Sequential Write)" };
+        public string SysInfoSeqRead => CurrentLanguage switch { "EN" => "Read (Sequential)", "ZH" => "读取 (顺序)", _ => "Чтение (Sequential Read)" };
+        public string SysInfoBenchmarkBtn => CurrentLanguage switch { "EN" => "Test", "ZH" => "测试", _ => "Тест" };
+        public string SysInfoMissing => CurrentLanguage switch { "EN" => "Missing", "ZH" => "不存在", _ => "Отсутствует" };
+        public string SysInfoUndefined => CurrentLanguage switch { "EN" => "Undefined", "ZH" => "未定义", _ => "Не определена" };
+        public string SysInfoBenchmarkPreparing => CurrentLanguage switch { "EN" => "Preparing...", "ZH" => "准备中...", _ => "Подготовка..." };
+        public string SysInfoBenchmarkWriting => CurrentLanguage switch { "EN" => "Writing test...", "ZH" => "写入测试中...", _ => "Тест записи..." };
+        public string SysInfoBenchmarkReading => CurrentLanguage switch { "EN" => "Reading test...", "ZH" => "读取测试中...", _ => "Тест чтения..." };
+        public string SysInfoBenchmarkCompleted => CurrentLanguage switch { "EN" => "Completed", "ZH" => "已完成", _ => "Завершено" };
+        public string SysInfoWriteError => CurrentLanguage switch { "EN" => "Failed to write test file: ", "ZH" => "无法写入测试文件: ", _ => "Не удалось записать тестовый файл: " };
+        public string SysInfoReadError => CurrentLanguage switch { "EN" => "Failed to read test file: ", "ZH" => "无法读取测试文件: ", _ => "Не удалось прочитать тестовый файл: " };
+
+        // Media Playback (MediaPlaybackView & MediaPlaybackViewModel)
+        public string MediaEqTooltip => CurrentLanguage switch { "EN" => "Open/close equalizer", "ZH" => "打开/关闭均衡器", _ => "Открыть/закрыть эквалайзер" };
+        public string MediaEqHeader => CurrentLanguage switch { "EN" => "Equalizer", "ZH" => "均衡器", _ => "Эквалайзер" };
+        public string MediaVisualizerHeader => CurrentLanguage switch { "EN" => "Spectrum Visualizer", "ZH" => "频谱可视化", _ => "Визуализатор спектра" };
+        public string MediaVisualizerDesc => CurrentLanguage switch { "EN" => "Analysis and display of system sound playback frequencies", "ZH" => "系统音频播放频率的分析与显示", _ => "Анализ и отображение частот воспроизведения системного звука" };
+        public string MediaEqPresetsHeader => CurrentLanguage switch { "EN" => "Equalizer Presets:", "ZH" => "均衡器预设:", _ => "Пресеты эквалайзера:" };
+        public string MediaSavePresetTooltip => CurrentLanguage switch { "EN" => "Save changes to preset", "ZH" => "保存更改到预设", _ => "Сохранить изменения в пресет" };
+        public string MediaDeletePresetTooltip => CurrentLanguage switch { "EN" => "Delete preset", "ZH" => "删除预设", _ => "Удалить пресет" };
+        public string MediaImportPresetTooltip => CurrentLanguage switch { "EN" => "Import preset (.json)", "ZH" => "导入预设 (.json)", _ => "Импортировать пресет (.json)" };
+        public string MediaExportPresetTooltip => CurrentLanguage switch { "EN" => "Export selected preset (.json)", "ZH" => "导出所选预设 (.json)", _ => "Экспортировать выбранный пресет (.json)" };
+        public string MediaNewPresetPlaceholder => CurrentLanguage switch { "EN" => "New preset name...", "ZH" => "新预设名称...", _ => "Имя нового пресета..." };
+        public string MediaSaveBtn => CurrentLanguage switch { "EN" => "Save", "ZH" => "保存", _ => "Сохранить" };
+        public string MediaOutputDeviceLabel => CurrentLanguage switch { "EN" => "Output Device:", "ZH" => "输出设备:", _ => "Устройство вывода:" };
+        public string MediaEchoNotice => CurrentLanguage switch { "EN" => "If you hear echo/duplication: in Windows, open recording properties of 'CABLE Output' -> 'Listen' tab -> uncheck 'Listen to this device'.", "ZH" => "如果您听到回声/重复：请在 Windows 中打开“CABLE Output”的录制属性 -> “监听”选项卡 -> 取消勾选“监听此设备”。", _ => "Если слышно эхо/дублирование: в Windows откройте свойства записи 'CABLE Output' -> вкладка 'Прослушивать' -> снимите флажок 'Прослушивать с данного устройства'." };
+        public string MediaMasterLevelLabel => CurrentLanguage switch { "EN" => "level", "ZH" => "电平", _ => "уровень" };
+        public string MediaSystemSounds => CurrentLanguage switch { "EN" => "System Sounds", "ZH" => "系统声音", _ => "Системные звуки" };
+        public string MediaNothingPlaying => CurrentLanguage switch { "EN" => "Nothing Playing", "ZH" => "未播放任何内容", _ => "Ничего не играет" };
+        public string MediaYandexMusic => CurrentLanguage switch { "EN" => "Yandex.Music", "ZH" => "Yandex 音乐", _ => "Яндекс.Музыка" };
+
+        // Main Window (MainWindow & MainWindowViewModel)
+        public string MainSidebarToggleTooltip => CurrentLanguage switch { "EN" => "Collapse/Expand sidebar", "ZH" => "折叠/展开侧边栏", _ => "Свернуть/Развернуть боковую панель" };
+        public string MainGreetingMorning => CurrentLanguage switch { "EN" => "Good morning", "ZH" => "早上好", _ => "Доброе утро" };
+        public string MainGreetingAfternoon => CurrentLanguage switch { "EN" => "Good afternoon", "ZH" => "下午好", _ => "Добрый день" };
+        public string MainGreetingEvening => CurrentLanguage switch { "EN" => "Good evening", "ZH" => "晚上好", _ => "Добрый вечер" };
+        public string MainGreetingNight => CurrentLanguage switch { "EN" => "Good night", "ZH" => "晚安", _ => "Доброй ночи" };
+        public string MainWelcomeSubtext => CurrentLanguage switch { "EN" => "Welcome to SystemHub", "ZH" => "欢迎使用 SystemHub", _ => "Добро пожаловать в SystemHub" };
+
+        // Auth (AuthView & AuthViewModel)
+        public string AuthLoginTitle => CurrentLanguage switch { "EN" => "Sign In", "ZH" => "登录账号", _ => "Вход в аккаунт" };
+        public string AuthRegisterTitle => CurrentLanguage switch { "EN" => "Register", "ZH" => "用户注册", _ => "Регистрация" };
+        public string AuthVerifyEmailTitle => CurrentLanguage switch { "EN" => "Confirm Email", "ZH" => "验证邮箱", _ => "Подтверждение почты" };
+        public string AuthForgotPasswordTitle => CurrentLanguage switch { "EN" => "Reset Password", "ZH" => "重置密码", _ => "Восстановление доступа" };
+        public string AuthResetPasswordTitle => CurrentLanguage switch { "EN" => "New Password", "ZH" => "新密码", _ => "Новый пароль" };
+        public string AuthTabLogin => CurrentLanguage switch { "EN" => "Login", "ZH" => "登录", _ => "Вход" };
+        public string AuthTabRegister => CurrentLanguage switch { "EN" => "Register", "ZH" => "注册", _ => "Регистрация" };
+        public string AuthEmailUserLabel => CurrentLanguage switch { "EN" => "Email or Username:", "ZH" => "电子邮箱或用户名:", _ => "Почта или имя пользователя:" };
+        public string AuthEmailUserPlaceholder => CurrentLanguage switch { "EN" => "Enter email or username...", "ZH" => "请输入邮箱或用户名...", _ => "Введите почту или ник..." };
+        public string AuthPasswordLabel => CurrentLanguage switch { "EN" => "Password:", "ZH" => "密码:", _ => "Пароль:" };
+        public string AuthPasswordPlaceholder => CurrentLanguage switch { "EN" => "Enter password...", "ZH" => "请输入密码...", _ => "Введите пароль..." };
+        public string AuthRememberMe => CurrentLanguage switch { "EN" => "Remember Me", "ZH" => "记住我", _ => "Запомнить меня" };
+        public string AuthForgotPasswordLink => CurrentLanguage switch { "EN" => "Forgot Password?", "ZH" => "忘记密码？", _ => "Забыли пароль?" };
+        public string AuthUsernameLabel => CurrentLanguage switch { "EN" => "Username:", "ZH" => "用户名:", _ => "Имя пользователя:" };
+        public string AuthUsernamePlaceholder => CurrentLanguage switch { "EN" => "Username...", "ZH" => "用户名...", _ => "Имя пользователя..." };
+        public string AuthEmailLabel => CurrentLanguage switch { "EN" => "Email address:", "ZH" => "电子邮箱:", _ => "Адрес электронной почты (Email):" };
+        public string AuthPasswordNewPlaceholder => CurrentLanguage switch { "EN" => "Enter new password...", "ZH" => "请输入新密码...", _ => "Введите новый пароль..." };
+        public string AuthVerifyEmailDesc => CurrentLanguage switch { "EN" => "We sent a 6-digit confirmation code to your email. Please enter it below to complete registration.", "ZH" => "我们已向您的邮箱发送了 6 位验证码。请在下方输入以完成注册。", _ => "Мы отправили 6-значный код подтверждения на вашу почту. Пожалуйста, введите его ниже для завершения регистрации." };
+        public string AuthVerifyCodeLabel => CurrentLanguage switch { "EN" => "Verification Code:", "ZH" => "验证码:", _ => "Код подтверждения:" };
+        public string AuthVerifyCodePlaceholder => CurrentLanguage switch { "EN" => "Enter 6 digits...", "ZH" => "请输入 6 位数字...", _ => "Введите 6 цифр..." };
+        public string AuthForgotPasswordDesc => CurrentLanguage switch { "EN" => "Enter your registered email address. We will send you a reset code.", "ZH" => "输入您注册的电子邮箱地址。我们将向您发送重置密码的验证码。", _ => "Введите зарегистрированный адрес электронной почты. Мы вышлем вам код сброса пароля." };
+        public string AuthEmailResetLabel => CurrentLanguage switch { "EN" => "Email address:", "ZH" => "Email 地址:", _ => "Email адрес:" };
+        public string AuthResetPasswordDesc => CurrentLanguage switch { "EN" => "Reset code sent. Please enter it below along with a new password.", "ZH" => "密码重置验证码已发送。请在下方输入验证码及新密码。", _ => "Код восстановления отправлен. Пожалуйста, введите его ниже вместе с новым паролем." };
+        public string AuthResetCodeLabel => CurrentLanguage switch { "EN" => "Reset Code:", "ZH" => "重置验证码:", _ => "Код сброса пароля:" };
+        public string AuthResetCodePlaceholder => CurrentLanguage switch { "EN" => "Enter 6 digits...", "ZH" => "请输入 6 位数字...", _ => "Введите 6 цифр..." };
+        public string AuthPasswordNew => CurrentLanguage switch { "EN" => "New Password:", "ZH" => "新密码:", _ => "Новый пароль:" };
+        public string AuthPasswordConfirmLabel => CurrentLanguage switch { "EN" => "Confirm new password:", "ZH" => "确认新密码:", _ => "Подтвердите новый пароль:" };
+        public string AuthPasswordConfirmPlaceholder => CurrentLanguage switch { "EN" => "Repeat new password...", "ZH" => "重复新密码...", _ => "Повторите новый пароль..." };
+        public string AuthLoginBtn => CurrentLanguage switch { "EN" => "Log In", "ZH" => "立即登录", _ => "Войти" };
+        public string AuthRegisterBtn => CurrentLanguage switch { "EN" => "Register", "ZH" => "立即注册", _ => "Зарегистрироваться" };
+        public string AuthConfirmBtn => CurrentLanguage switch { "EN" => "Confirm", "ZH" => "确认", _ => "Подтвердить" };
+        public string AuthSendResetBtn => CurrentLanguage switch { "EN" => "Send Reset Code", "ZH" => "发送重置码", _ => "Отправить код сброса" };
+        public string AuthSavePasswordBtn => CurrentLanguage switch { "EN" => "Save New Password", "ZH" => "保存新密码", _ => "Сохранить новый пароль" };
+        public string AuthBackBtn => CurrentLanguage switch { "EN" => "Back", "ZH" => "返回", _ => "Назад" };
+        public string AuthErrRegisterFirst => CurrentLanguage switch { "EN" => "User must be registered first", "ZH" => "必须先注册用户", _ => "Сначала необходимо зарегистрировать пользователя" };
+        public string AuthErrEnterUserEmail => CurrentLanguage switch { "EN" => "Please enter username or email", "ZH" => "请输入用户名或电子邮箱", _ => "Введите имя пользователя или Email" };
+        public string AuthErrEnterPassword => CurrentLanguage switch { "EN" => "Please enter password", "ZH" => "请输入密码", _ => "Введите пароль" };
+        public string AuthErrEnterUsername => CurrentLanguage switch { "EN" => "Please enter username", "ZH" => "请输入用户名", _ => "Введите имя пользователя" };
+        public string AuthErrEnterEmail => CurrentLanguage switch { "EN" => "Please enter email", "ZH" => "请输入电子邮箱", _ => "Введите почту" };
+        public string AuthErrInvalidEmail => CurrentLanguage switch { "EN" => "Please enter a valid email address.", "ZH" => "请输入有效的电子邮箱地址。", _ => "Пожалуйста, введите корректный Email." };
+        public string AuthErrEnterCode => CurrentLanguage switch { "EN" => "Please enter verification code", "ZH" => "请输入验证码", _ => "Введите код подтверждения" };
+        public string AuthErrPasswordsMismatch => CurrentLanguage switch { "EN" => "Passwords do not match", "ZH" => "密码不匹配", _ => "Пароли не совпадают" };
+
+        // Cleaner (CleanerView)
+        public string CleanerBrowserCache => CurrentLanguage switch { "EN" => "Browser Cache", "ZH" => "浏览器缓存", _ => "Кэш браузеров" };
+        public string CleanerBrowserCacheDesc => CurrentLanguage switch { "EN" => "Temporary files of Chrome, Edge, Firefox", "ZH" => "Chrome、Edge、Firefox 临时文件", _ => "Временные файлы Chrome, Edge, Firefox" };
+
+        // Dock (DockWindow)
+        public string DockTooltipExplorer => CurrentLanguage switch { "EN" => "Explorer", "ZH" => "资源管理器", _ => "Проводник" };
+        public string DockTooltipNotepad => CurrentLanguage switch { "EN" => "Notepad", "ZH" => "记事本", _ => "Блокнот" };
+        public string DockTooltipCalculator => CurrentLanguage switch { "EN" => "Calculator", "ZH" => "计算器", _ => "Калькулятор" };
+        public string DockTooltipBrowser => CurrentLanguage switch { "EN" => "Browser", "ZH" => "浏览器", _ => "Браузер" };
+        public string DockTooltipYandexMusic => CurrentLanguage switch { "EN" => "Yandex Music", "ZH" => "Yandex 音乐", _ => "Яндекс.Музыка" };
+
+        // Dynamic Island Window (DynamicIslandWindow & CS)
+        public string DiScreenshotSaved => CurrentLanguage switch { "EN" => "Screenshot saved", "ZH" => "截图已保存", _ => "Снимок экрана сохранен" };
+        public string DiCopy => CurrentLanguage switch { "EN" => "Copy", "ZH" => "复制", _ => "Копия" };
+        public string DiSave => CurrentLanguage switch { "EN" => "Save", "ZH" => "保存", _ => "Сохранить" };
+        public string DiFocusPrefix => CurrentLanguage switch { "EN" => "Focus: ", "ZH" => "专注: ", _ => "Фокус: " };
+        public string DiOverheatAlert => CurrentLanguage switch { "EN" => "SYSTEM OVERHEAT!", "ZH" => "系统过热警告！", _ => "ПЕРЕГРЕВ СИСТЕМЫ!" };
+
+        // Tools Additional Localization
+        public string ToolsErrorCableNotFound => CurrentLanguage switch { "EN" => "Error: CABLE Input device not found.", "ZH" => "错误：未找到 CABLE Input 设备。", _ => "Ошибка: Устройство CABLE Input не найдено." };
+        public string ToolsVolumeProfileGames => CurrentLanguage switch { "EN" => "Volume profile: Games (80%)", "ZH" => "音量模式: 游戏 (80%)", _ => "Профиль громкости: Игры (80%)" };
+        public string ToolsVolumeProfileMovies => CurrentLanguage switch { "EN" => "Volume profile: Movies (60%)", "ZH" => "音量模式: 电影 (60%)", _ => "Профиль громкости: Фильмы (60%)" };
+        public string ToolsVolumeProfileWork => CurrentLanguage switch { "EN" => "Volume profile: Work (20%)", "ZH" => "音量模式: 工作 (20%)", _ => "Профиль громкости: Работа (20%)" };
+        public string ToolsPresetReset => CurrentLanguage switch { "EN" => "Reset", "ZH" => "重置", _ => "Сброс" };
+        public string ToolsPresetRock => CurrentLanguage switch { "EN" => "Rock 🎸", "ZH" => "摇滚 🎸", _ => "Рок 🎸" };
+        public string ToolsPresetPop => CurrentLanguage switch { "EN" => "Pop 🎤", "ZH" => "流行 🎤", _ => "Поп 🎤" };
+        public string ToolsPresetBass => CurrentLanguage switch { "EN" => "Bass 🔊", "ZH" => "低音 🔊", _ => "Бас 🔊" };
     }
 }
+
 

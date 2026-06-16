@@ -2,11 +2,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:vm="using:MacStyleHub.ViewModels"
-             xmlns:views="using:MacStyleHub.Views"
-             xmlns:services="using:MacStyleHub.Services"
+             xmlns:vm="using:SystemHub.ViewModels"
+             xmlns:views="using:SystemHub.Views"
+             xmlns:services="using:SystemHub.Services"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="550"
-             x:Class="MacStyleHub.Views.DashboardView"
+             x:Class="SystemHub.Views.DashboardView"
              x:DataType="vm:DashboardViewModel">
 
     <UserControl.Styles>
@@ -258,3 +258,4 @@
         </StackPanel>
     </ScrollViewer>
 </UserControl>
+

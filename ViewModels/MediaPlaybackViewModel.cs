@@ -7,9 +7,9 @@ using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MacStyleHub.Services;
+using SystemHub.Services;
 
-namespace MacStyleHub.ViewModels
+namespace SystemHub.ViewModels
 {
     public partial class AppVolumeSessionViewModel : ObservableObject
     {
@@ -39,12 +39,7 @@ namespace MacStyleHub.ViewModels
             {
                 if (IsSystemSounds || DisplayName == "System Sounds" || DisplayName == "Системные звуки" || DisplayName == "系统声音")
                 {
-                    return LocalizationService.Instance.CurrentLanguage switch
-                    {
-                        "EN" => "System Sounds",
-                        "ZH" => "系统声音",
-                        _ => "Системные звуки"
-                    };
+                    return LocalizationService.Instance.MediaSystemSounds;
                 }
                 return DisplayName;
             }
@@ -177,6 +172,7 @@ namespace MacStyleHub.ViewModels
                 {
                     s.NotifyLocalizationChanged();
                 }
+                RefreshActiveSessions();
             };
 
             // Initial refresh of volume sessions
@@ -477,12 +473,7 @@ namespace MacStyleHub.ViewModels
             }
             else
             {
-                MediaText = LocalizationService.Instance.CurrentLanguage switch
-                {
-                    "EN" => "Nothing playing",
-                    "ZH" => "无媒体播放",
-                    _ => "Ничего не играет"
-                };
+                MediaText = LocalizationService.Instance.MediaNothingPlaying;
             }
         }
 
@@ -566,7 +557,7 @@ namespace MacStyleHub.ViewModels
                     string player = appId;
                     if (player.Contains("Spotify", StringComparison.OrdinalIgnoreCase)) player = "Spotify";
                     else if (player.Contains("Chrome", StringComparison.OrdinalIgnoreCase)) player = "Google Chrome";
-                    else if (player.Contains("YandexMusic", StringComparison.OrdinalIgnoreCase) || (player.Contains("Yandex", StringComparison.OrdinalIgnoreCase) && player.Contains("music", StringComparison.OrdinalIgnoreCase))) player = "Яндекс.Музыка";
+                    else if (player.Contains("YandexMusic", StringComparison.OrdinalIgnoreCase) || (player.Contains("Yandex", StringComparison.OrdinalIgnoreCase) && player.Contains("music", StringComparison.OrdinalIgnoreCase))) player = LocalizationService.Instance.MediaYandexMusic;
                     else if (player.Contains("VLC", StringComparison.OrdinalIgnoreCase)) player = "VLC Media Player";
                     else if (player.Contains("Telegram", StringComparison.OrdinalIgnoreCase)) player = "Telegram";
                     else if (player.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
@@ -733,3 +724,4 @@ namespace MacStyleHub.ViewModels
         public IAsyncRelayCommand PrevCommand { get; set; } = null!;
     }
 }
+

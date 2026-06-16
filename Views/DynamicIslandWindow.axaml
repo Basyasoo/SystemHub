@@ -1,0 +1,172 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:SystemHub.ViewModels"
+        xmlns:services="using:SystemHub.Services"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        x:Class="SystemHub.Views.DynamicIslandWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Width="380" Height="120"
+        Title="Dynamic Island"
+        WindowDecorations="None"
+        CanResize="False"
+        Background="Transparent"
+        TransparencyLevelHint="Transparent"
+        Topmost="True"
+        ShowInTaskbar="False">
+
+    <Grid Name="MainGrid" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,10,0,0">
+        <!-- Animated Main Container -->
+        <Border Name="IslandBorder"
+                Background="#FC0E0E10"
+                BorderBrush="#26FFFFFF"
+                BorderThickness="1"
+                CornerRadius="22"
+                ClipToBounds="True"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Top"
+                PointerEntered="OnPointerEntered"
+                PointerExited="OnPointerExited">
+            
+            <Border.Transitions>
+                <Transitions>
+                    <DoubleTransition Property="Width" Duration="0:0:0.32">
+                        <DoubleTransition.Easing>
+                            <CircularEaseOut/>
+                        </DoubleTransition.Easing>
+                    </DoubleTransition>
+                    <DoubleTransition Property="Height" Duration="0:0:0.32">
+                        <DoubleTransition.Easing>
+                            <CircularEaseOut/>
+                        </DoubleTransition.Easing>
+                    </DoubleTransition>
+                    <CornerRadiusTransition Property="CornerRadius" Duration="0:0:0.32">
+                        <CornerRadiusTransition.Easing>
+                            <CircularEaseOut/>
+                        </CornerRadiusTransition.Easing>
+                    </CornerRadiusTransition>
+                </Transitions>
+            </Border.Transitions>
+
+            <!-- Content Grid switching based on Hover / Size state -->
+            <Grid>
+                <!-- COLLAPSED CONTENT (Visible when border is small) -->
+                <Grid Name="CollapsedContent" IsVisible="True" ColumnDefinitions="Auto, *, Auto" Margin="12,0" Height="36" VerticalAlignment="Center">
+                    <!-- Left: Mini Album Art / Music Icon / Focus / Overheat -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                        <TextBlock Name="OverheatIcon" Text="⚠️" FontSize="11" VerticalAlignment="Center" IsVisible="False"/>
+                        <TextBlock Name="FocusIcon" Text="⏱️" FontSize="10.5" VerticalAlignment="Center" IsVisible="False"/>
+                        <Grid Name="MusicMiniArtGrid" Width="22" Height="22" VerticalAlignment="Center">
+                            <!-- Fallback Music Icon -->
+                            <PathIcon Data="{Binding PlaybackVM.AppIconGeometry}" Width="12" Height="12" Foreground="{StaticResource AccentBlue}" IsVisible="{Binding PlaybackVM.AlbumArt, Converter={x:Static ObjectConverters.IsNull}}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <!-- Loaded Album Art -->
+                            <Border Width="22" Height="22" CornerRadius="11" ClipToBounds="True" IsVisible="{Binding PlaybackVM.AlbumArt, Converter={x:Static ObjectConverters.IsNotNull}}">
+                                <Image Source="{Binding PlaybackVM.AlbumArt}" Stretch="UniformToFill"/>
+                            </Border>
+                        </Grid>
+                    </StackPanel>
+                    
+                    <!-- Dynamic Title display in pill -->
+                    <TextBlock Grid.Column="1" Name="IslandTitleText" Text="{Binding PlaybackVM.Title}" FontSize="11.5" FontWeight="SemiBold" Foreground="White" 
+                               TextAlignment="Center" VerticalAlignment="Center" Margin="8,0" TextTrimming="CharacterEllipsis"/>
+                    
+                    <!-- Right: Dynamic Music Flow Visualizer (iPhone style) / VPN / Mic / Cam -->
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+                        <TextBlock Name="VpnIcon" Text="🌐" FontSize="11" VerticalAlignment="Center" IsVisible="False" RenderTransformOrigin="50%,50%">
+                            <TextBlock.RenderTransform>
+                                <RotateTransform Angle="0"/>
+                            </TextBlock.RenderTransform>
+                        </TextBlock>
+                        <StackPanel Name="MiniVisualizerPanel" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center" Height="20">
+                            <Border Name="Bar1" Width="2.5" Height="6" Background="#30D158" CornerRadius="1.25" VerticalAlignment="Center"/>
+                            <Border Name="Bar2" Width="2.5" Height="12" Background="#30D158" CornerRadius="1.25" VerticalAlignment="Center"/>
+                            <Border Name="Bar3" Width="2.5" Height="5" Background="#30D158" CornerRadius="1.25" VerticalAlignment="Center"/>
+                            <Border Name="Bar4" Width="2.5" Height="9" Background="#30D158" CornerRadius="1.25" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <Ellipse Name="MicIndicatorDot" Width="6" Height="6" Fill="#FF9500" VerticalAlignment="Center" IsVisible="False"/>
+                        <Ellipse Name="CamIndicatorDot" Width="6" Height="6" Fill="#30D158" VerticalAlignment="Center" IsVisible="False"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- SCREENSHOT PREVIEW CONTENT -->
+                <Grid Name="ScreenshotContent" IsVisible="False" ColumnDefinitions="Auto, *" Margin="15,10" VerticalAlignment="Stretch">
+                    <!-- Left: Screenshot Thumbnail -->
+                    <Border Grid.Column="0" Width="80" Height="60" CornerRadius="6" BorderBrush="#26FFFFFF" BorderThickness="1" ClipToBounds="True" Background="#1DFFFFFF" VerticalAlignment="Center" Margin="0,0,10,0">
+                        <Image Name="ScreenshotThumbnail" Stretch="Uniform"/>
+                    </Border>
+
+                    <!-- Right: Title, Save & Copy buttons -->
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="6">
+                        <TextBlock Text="Снимок экрана сохранен" FontSize="12" FontWeight="SemiBold" Foreground="White"/>
+                        <Grid ColumnDefinitions="*, *, Auto" Width="230">
+                            <Button Grid.Column="0" Name="CopyScreenshotBtn" Click="CopyScreenshot_Click" Content="Копия" Classes="SystemButton" Height="26" FontSize="10" Padding="4,2" Margin="0,0,3,0" HorizontalAlignment="Stretch"/>
+                            <Button Grid.Column="1" Name="SaveScreenshotBtn" Click="SaveScreenshot_Click" Content="Сохранить" Classes="AccentButton" Height="26" FontSize="10" Padding="4,2" Margin="3,0,3,0" HorizontalAlignment="Stretch"/>
+                            <Button Grid.Column="2" Name="DismissScreenshotBtn" Click="DismissScreenshot_Click" Content="✕" Classes="SystemButton" Height="26" Width="26" FontSize="10" Padding="0" Margin="3,0,0,0"/>
+                        </Grid>
+                    </StackPanel>
+                </Grid>
+
+                <!-- EXPANDED CONTENT (Visible when border is large) -->
+                <Grid Name="ExpandedContent" IsVisible="False" RowDefinitions="Auto, Auto" Margin="15,10" VerticalAlignment="Stretch">
+                    <!-- Top Row: Track & Player details -->
+                    <Grid Grid.Row="0" ColumnDefinitions="Auto, *, Auto" VerticalAlignment="Center" Margin="0,0,0,10">
+                        <!-- Left: Large Album Art / Music Icon -->
+                        <Border Grid.Column="0" Width="36" Height="36" CornerRadius="18" Background="#1DFFFFFF" Margin="0,0,12,0" ClipToBounds="True">
+                            <Grid>
+                                <PathIcon Data="{Binding PlaybackVM.AppIconGeometry}" Width="16" Height="16" Foreground="{StaticResource AccentBlue}" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="{Binding PlaybackVM.AlbumArt, Converter={x:Static ObjectConverters.IsNull}}"/>
+                                <Image Source="{Binding PlaybackVM.AlbumArt}" Stretch="UniformToFill" IsVisible="{Binding PlaybackVM.AlbumArt, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Titles -->
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                            <TextBlock Text="{Binding PlaybackVM.Title}" FontSize="13" FontWeight="Bold" Foreground="White" TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Text="{Binding PlaybackVM.Artist}" FontSize="10.5" Foreground="#8E8E93" TextTrimming="CharacterEllipsis"/>
+                        </StackPanel>
+
+                        <!-- Right Column: Player name + Visualizer -->
+                        <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="6" HorizontalAlignment="Right">
+                            <Border Background="#1AFFFFFF" CornerRadius="4" Padding="5,2" HorizontalAlignment="Right">
+                                <TextBlock Text="{Binding PlaybackVM.PlayerName}" FontSize="8" Foreground="#8E8E93" FontWeight="Bold"/>
+                            </Border>
+                            
+                            <!-- Larger Equalizer / Visualizer -->
+                            <StackPanel Orientation="Horizontal" Spacing="2.5" HorizontalAlignment="Right" Height="16" VerticalAlignment="Center">
+                                <Border Name="ExpBar1" Width="2.5" Height="6" Background="#30D158" CornerRadius="1.25" VerticalAlignment="Center"/>
+                                <Border Name="ExpBar2" Width="2.5" Height="12" Background="#30D158" CornerRadius="1.25" VerticalAlignment="Center"/>
+                                <Border Name="ExpBar3" Width="2.5" Height="5" Background="#30D158" CornerRadius="1.25" VerticalAlignment="Center"/>
+                                <Border Name="ExpBar4" Width="2.5" Height="9" Background="#30D158" CornerRadius="1.25" VerticalAlignment="Center"/>
+                                <Border Name="ExpBar5" Width="2.5" Height="14" Background="#30D158" CornerRadius="1.25" VerticalAlignment="Center"/>
+                                <Border Name="ExpBar6" Width="2.5" Height="7" Background="#30D158" CornerRadius="1.25" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Bottom Row: Media Controls -->
+                    <Grid Grid.Row="1" ColumnDefinitions="*, Auto, *" VerticalAlignment="Center">
+                        <TextBlock Grid.Column="0" Text="Dynamic Island" FontSize="9.5" Foreground="#555" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                        
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="16" HorizontalAlignment="Center">
+                            <Button Width="26" Height="26" Padding="0" Background="Transparent" BorderThickness="0" Command="{Binding PlaybackVM.PrevCommand}">
+                                <PathIcon Data="{StaticResource IconPlay}" Width="9" Height="9" Foreground="White" RenderTransform="rotate(180deg)"/>
+                            </Button>
+                            
+                            <Button Width="28" Height="28" Padding="0" CornerRadius="14" Background="White" BorderThickness="0" Command="{Binding PlaybackVM.TogglePlayCommand}">
+                                <Grid>
+                                    <PathIcon Data="{StaticResource IconPause}" Width="9" Height="9" Foreground="Black" IsVisible="{Binding PlaybackVM.IsPlaying}"/>
+                                    <PathIcon Data="{StaticResource IconPlay}" Width="9" Height="9" Foreground="Black" IsVisible="{Binding !PlaybackVM.IsPlaying}"/>
+                                </Grid>
+                            </Button>
+                            
+                            <Button Width="26" Height="26" Padding="0" Background="Transparent" BorderThickness="0" Command="{Binding PlaybackVM.NextCommand}">
+                                <PathIcon Data="{StaticResource IconPlay}" Width="9" Height="9" Foreground="White"/>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
+

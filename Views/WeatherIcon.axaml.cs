@@ -1,7 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 
-namespace MacStyleHub.Views
+namespace SystemHub.Views
 {
     public partial class WeatherIcon : UserControl
     {
@@ -29,3 +29,4 @@ namespace MacStyleHub.Views
         }
     }
 }
+

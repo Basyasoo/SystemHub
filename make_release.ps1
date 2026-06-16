@@ -2,8 +2,8 @@
 Write-Host "Checking for running instances of SystemHub..."
 Stop-Process -Name "SystemHub" -ErrorAction SilentlyContinue
 
-# Read current version from MacStyleHub.csproj
-[xml]$csproj = Get-Content MacStyleHub.csproj
+# Read current version from SystemHub.csproj
+[xml]$csproj = Get-Content SystemHub.csproj
 $currentVersion = $csproj.Project.PropertyGroup.Version
 Write-Host "Current version: $currentVersion"
 

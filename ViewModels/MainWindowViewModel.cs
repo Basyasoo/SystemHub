@@ -1,9 +1,9 @@
 using System;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MacStyleHub.Services;
+using SystemHub.Services;
 
-namespace MacStyleHub.ViewModels
+namespace SystemHub.ViewModels
 {
     public partial class MainWindowViewModel : ViewModelBase
     {
@@ -131,10 +131,10 @@ namespace MacStyleHub.ViewModels
             int hour = DateTime.Now.Hour;
             string greetStr = hour switch
             {
-                >= 5 and < 12 => "Доброе утро",
-                >= 12 and < 18 => "Добрый день",
-                >= 18 and < 23 => "Добрый вечер",
-                _ => "Доброй ночи"
+                >= 5 and < 12 => LocalizationService.Instance.MainGreetingMorning,
+                >= 12 and < 18 => LocalizationService.Instance.MainGreetingAfternoon,
+                >= 18 and < 23 => LocalizationService.Instance.MainGreetingEvening,
+                _ => LocalizationService.Instance.MainGreetingNight
             };
 
             if (UserService.Instance.Settings.ShowUsernameInGreeting)
@@ -146,7 +146,7 @@ namespace MacStyleHub.ViewModels
                 WelcomeGreeting = $"{greetStr}!";
             }
 
-            WelcomeSubText = "Добро пожаловать в SystemHub";
+            WelcomeSubText = LocalizationService.Instance.MainWelcomeSubtext;
 
             WelcomeOverlayOpacity = 1.0;
             AnimateWelcomeText = false;
@@ -236,3 +236,4 @@ namespace MacStyleHub.ViewModels
         }
     }
 }
+

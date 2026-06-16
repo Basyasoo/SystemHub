@@ -5,7 +5,7 @@ using System.IO.Compression;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace MacStyleHub.Services
+namespace SystemHub.Services
 {
     public enum InstallState
     {
@@ -586,18 +586,53 @@ namespace MacStyleHub.Services
                     _statusMessages[key] = "Скачивание SpotX...";
                     ProgramStateChanged?.Invoke(key, InstallState.Installing, 20, _statusMessages[key]);
 
-                    // Download the Source Code ZIP of the main branch from GitHub (so Spotify version is up to date and doesn't 404)
-                    using (var client = new HttpClient())
+                    var downloadUrls = new[]
                     {
-                        client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
-                        using (var response = await client.GetAsync("https://github.com/SpotX-Official/SpotX/archive/refs/heads/main.zip"))
+                        "https://github.com/SpotX-Official/SpotX/archive/refs/heads/main.zip",
+                        "https://ghproxy.com/https://github.com/SpotX-Official/SpotX/archive/refs/heads/main.zip",
+                        "https://ghproxy.net/https://github.com/SpotX-Official/SpotX/archive/refs/heads/main.zip",
+                        "https://github.moeyy.xyz/https://github.com/SpotX-Official/SpotX/archive/refs/heads/main.zip",
+                        "https://kkgithub.com/SpotX-Official/SpotX/archive/refs/heads/main.zip"
+                    };
+
+                    bool downloadSuccess = false;
+                    Exception? lastException = null;
+
+                    for (int i = 0; i < downloadUrls.Length; i++)
+                    {
+                        string url = downloadUrls[i];
+                        string host = new Uri(url).Host;
+                        _statusMessages[key] = $"Скачивание SpotX ({host})...";
+                        ProgramStateChanged?.Invoke(key, InstallState.Installing, 20, _statusMessages[key]);
+
+                        try
                         {
-                            response.EnsureSuccessStatusCode();
-                            using (var fs = new FileStream(tempZip, FileMode.Create, FileAccess.Write, FileShare.None))
+                            using (var client = new HttpClient())
                             {
-                                await response.Content.CopyToAsync(fs);
+                                client.Timeout = TimeSpan.FromSeconds(30);
+                                client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
+                                using (var response = await client.GetAsync(url))
+                                {
+                                    response.EnsureSuccessStatusCode();
+                                    using (var fs = new FileStream(tempZip, FileMode.Create, FileAccess.Write, FileShare.None))
+                                    {
+                                        await response.Content.CopyToAsync(fs);
+                                    }
+                                }
                             }
+                            downloadSuccess = true;
+                            break;
                         }
+                        catch (Exception ex)
+                        {
+                            lastException = ex;
+                            try { if (File.Exists(tempZip)) File.Delete(tempZip); } catch {}
+                        }
+                    }
+
+                    if (!downloadSuccess)
+                    {
+                        throw new Exception($"Не удалось скачать SpotX. Последняя ошибка: {lastException?.Message}", lastException);
                     }
 
                     _progress[key] = 50;
@@ -620,12 +655,25 @@ namespace MacStyleHub.Services
                     }
                     string runPs1Path = ps1Files[0];
 
+                    // Kill any running Spotify processes to unlock files before installation (avoids Error 18)
+                    try
+                    {
+                        foreach (var proc in System.Diagnostics.Process.GetProcessesByName("Spotify"))
+                        {
+                            proc.Kill(true);
+                        }
+                    }
+                    catch { }
+
+
+
                     _progress[key] = 60;
-                    _statusMessages[key] = "Установка SpotX в фоне...";
+                    _statusMessages[key] = "Установка SpotX...";
                     ProgramStateChanged?.Invoke(key, InstallState.Installing, 60, _statusMessages[key]);
 
-                    // Run the local script with silent parameters directly using -File parameter
-                    string arguments = $"-NoProfile -ExecutionPolicy Bypass -NonInteractive -WindowStyle Hidden -File \"{runPs1Path}\" -confirm_uninstall_ms_spoti -confirm_spoti_recomended_over -block_update_on -new_theme -podcasts_off";
+                    // Run the local script in a visible window to allow interactive choices.
+                    // Omit -confirm_spoti_recomended_over to prevent downloading Spotify from blocked workers.dev.
+                    string arguments = $"-NoProfile -ExecutionPolicy Bypass -File \"{runPs1Path}\" -m -confirm_uninstall_ms_spoti -block_update_on -new_theme";
 
                     var startInfo = new System.Diagnostics.ProcessStartInfo
                     {
@@ -635,16 +683,6 @@ namespace MacStyleHub.Services
                         UseShellExecute = true,
                         Verb = "runas"
                     };
-
-                    // Kill any running Spotify processes to unlock files
-                    try
-                    {
-                        foreach (var proc in System.Diagnostics.Process.GetProcessesByName("Spotify"))
-                        {
-                            proc.Kill(true);
-                        }
-                    }
-                    catch { }
 
                     using var process = System.Diagnostics.Process.Start(startInfo);
                     if (process == null)
@@ -1108,3 +1146,4 @@ namespace MacStyleHub.Services
         }
     }
 }
+

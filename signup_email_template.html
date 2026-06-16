@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Подтверждение регистрации - SystemHub</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #F8F9FC; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased;">
+  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #F8F9FC; padding: 30px 10px;">
+    <tr>
+      <td align="center">
+        <table width="100%" max-width="500" style="max-width: 500px; width: 100%; border-radius: 24px; overflow: hidden; background-color: #ffffff; box-shadow: 0 10px 30px rgba(0,0,0,0.04); border-collapse: separate;" cellspacing="0" cellpadding="0">
+          
+          <!-- Blue Header -->
+          <tr>
+            <td style="background-color: #3562FF; padding: 35px 30px; color: #ffffff;">
+              <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td style="font-size: 14px; font-weight: 600; opacity: 0.9; letter-spacing: 0.5px; text-transform: uppercase;">
+                    SystemHub
+                  </td>
+                </tr>
+                <tr>
+                  <td style="font-size: 32px; font-weight: 800; padding-top: 15px; letter-spacing: -0.5px; line-height: 1.2;">
+                    Регистрация
+                  </td>
+                </tr>
+                <tr>
+                  <td style="font-size: 14px; opacity: 0.85; padding-top: 8px; line-height: 1.4;">
+                    Используйте этот код для подтверждения регистрации в SystemHub.
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          
+          <!-- Content Body -->
+          <tr>
+            <td style="padding: 35px 30px;">
+              <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td style="font-size: 14px; color: #8E8E93; padding-bottom: 15px;">
+                    Ваш одноразовый код подтверждения:
+                  </td>
+                </tr>
+                <!-- Code Box -->
+                <tr>
+                  <td align="center" style="background-color: #F2F5FF; border-radius: 14px; padding: 22px 10px;">
+                    <span style="font-size: 38px; font-weight: 800; color: #3562FF; letter-spacing: 10px; font-family: 'Courier New', Courier, monospace; display: inline-block; padding-left: 10px;">
+                      {{ .Token }}
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="font-size: 13px; color: #1C1C1E; padding-top: 20px; line-height: 1.4;">
+                    Код действует <b>10 мин</b>. Никому его не сообщайте.
+                  </td>
+                </tr>
+                <!-- Separator -->
+                <tr>
+                  <td style="padding-top: 25px; border-bottom: 1px solid #E5E5EA;"></td>
+                </tr>
+                <!-- Footer Text -->
+                <tr>
+                  <td style="font-size: 11px; color: #AEAEB2; text-align: center; padding-top: 25px; line-height: 1.4;">
+                    Если вы не запрашивали регистрацию, просто проигнорируйте это письмо.
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
