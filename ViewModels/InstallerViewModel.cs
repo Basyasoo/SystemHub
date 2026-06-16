@@ -46,7 +46,16 @@ namespace SystemHub.ViewModels
                     }
                     catch
                     {
-                        return null;
+                        try
+                        {
+                            var uri = new Uri($"avares://SystemHub/Assets/{Id}.ico");
+                            var assets = Avalonia.Platform.AssetLoader.Open(uri);
+                            return new Avalonia.Media.Imaging.Bitmap(assets);
+                        }
+                        catch
+                        {
+                            return null;
+                        }
                     }
                 }
             }

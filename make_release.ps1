@@ -18,7 +18,7 @@ $setupContent | Set-Content setup.iss
 
 # Clean and publish app
 Write-Host "Publishing application..."
-dotnet publish -c Release -r win-x86 -o publish --self-contained true
+dotnet publish -c Release -r win-x64 -o publish --self-contained true
 
 if ($LASTEXITCODE -ne 0) {
     Write-Error "Publish failed!"

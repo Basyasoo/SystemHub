@@ -3,7 +3,7 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net9.0-windows10.0.19041.0</TargetFramework>
     <AssemblyName>SystemHub</AssemblyName>
-    <Version>1.1.6</Version>
+    <Version>1.1.7</Version>
     <Nullable>enable</Nullable>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
@@ -28,7 +28,8 @@
       <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
     </PackageReference>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.1" />
+    <PackageReference Include="LibreHardwareMonitorLib" Version="0.9.6" />
     <PackageReference Include="NAudio" Version="2.2.1" />
-    <PackageReference Include="System.Management" Version="9.0.0" />
+    <PackageReference Include="System.Management" Version="10.0.2" />
   </ItemGroup>
 </Project>

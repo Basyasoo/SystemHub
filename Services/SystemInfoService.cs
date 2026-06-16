@@ -4,6 +4,7 @@ using System.IO;
 using System.Management;
 using System.Runtime.InteropServices;
 using System.Net.NetworkInformation;
+using LibreHardwareMonitor.Hardware;
 
 namespace SystemHub.Services
 {
@@ -106,6 +107,34 @@ namespace SystemHub.Services
         private static double _currentCpuTemp = 38.0;
         private static double _currentGpuTemp = 40.0;
         private static double _currentMbTemp = 32.0;
+
+        private static LibreHardwareMonitor.Hardware.Computer? _computer;
+        private static readonly object _computerLock = new object();
+
+        private static void InitializeComputer()
+        {
+            if (_computer != null) return;
+            lock (_computerLock)
+            {
+                if (_computer != null) return;
+                try
+                {
+                    _computer = new LibreHardwareMonitor.Hardware.Computer
+                    {
+                        IsCpuEnabled = true,
+                        IsGpuEnabled = true,
+                        IsMotherboardEnabled = true,
+                        IsControllerEnabled = true
+                    };
+                    _computer.Open();
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine("Failed to initialize LibreHardwareMonitor: " + ex.Message);
+                    _computer = null;
+                }
+            }
+        }
 
         public SystemInfoService()
         {
@@ -340,7 +369,53 @@ namespace SystemHub.Services
 
         public double GetCPUTemperature()
         {
-            // 1. Try LibreHardwareMonitor / OpenHardwareMonitor WMI
+            // 1. Try LibreHardwareMonitor
+            InitializeComputer();
+            if (_computer != null)
+            {
+                try
+                {
+                    foreach (var hardware in _computer.Hardware)
+                    {
+                        if (hardware.HardwareType == LibreHardwareMonitor.Hardware.HardwareType.Cpu)
+                        {
+                            hardware.Update();
+                            foreach (var sensor in hardware.Sensors)
+                            {
+                                if (sensor.SensorType == LibreHardwareMonitor.Hardware.SensorType.Temperature)
+                                {
+                                    if (sensor.Name.Contains("Core (Max)", StringComparison.OrdinalIgnoreCase) ||
+                                        sensor.Name.Contains("Package", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        if (sensor.Value.HasValue && sensor.Value.Value > 0)
+                                        {
+                                            return Math.Round(sensor.Value.Value, 1);
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            // Fallback to any temperature sensor on CPU
+                            foreach (var sensor in hardware.Sensors)
+                            {
+                                if (sensor.SensorType == LibreHardwareMonitor.Hardware.SensorType.Temperature)
+                                {
+                                    if (sensor.Value.HasValue && sensor.Value.Value > 0)
+                                    {
+                                        return Math.Round(sensor.Value.Value, 1);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine("Error reading CPU temp via LHM: " + ex.Message);
+                }
+            }
+
+            // 2. Try OpenHardwareMonitor WMI (if running in background)
             try
             {
                 using (var searcher = new ManagementObjectSearcher(@"root\OpenHardwareMonitor", "SELECT Value FROM Sensor WHERE SensorType = 'Temperature' AND Name LIKE '%CPU%'"))
@@ -357,25 +432,7 @@ namespace SystemHub.Services
             }
             catch { }
 
-            // 2. Try Standard ACPI WMI (often requires Admin)
-            try
-            {
-                using (var searcher = new ManagementObjectSearcher(@"root\WMI", "SELECT CurrentTemperature FROM MSAcpi_ThermalZoneTemperature"))
-                {
-                    foreach (var obj in searcher.Get())
-                    {
-                        double tempKelvin = Convert.ToDouble(obj["CurrentTemperature"]);
-                        double tempCelcius = (tempKelvin / 10.0) - 273.15;
-                        if (tempCelcius >= 32.0 && tempCelcius < 105.0)
-                        {
-                            return Math.Round(tempCelcius, 1);
-                        }
-                    }
-                }
-            }
-            catch { }
-
-            // 3. Fallback: Thermal mass simulation (prevents instant jumping/dropping)
+            // 3. Fallback: Thermal mass simulation (correlates CPU usage with temp)
             double usage = _lastCpuUsage;
             double targetTemp = 36.0 + (usage * 0.45); // 36C idle, 81C full load
             
@@ -399,35 +456,60 @@ namespace SystemHub.Services
 
         public double GetGPUTemperature()
         {
-            // 1. Try LibreHardwareMonitor / OpenHardwareMonitor WMI
-            try
+            // 1. Try LibreHardwareMonitor
+            InitializeComputer();
+            if (_computer != null)
             {
-                using (var searcher = new ManagementObjectSearcher(@"root\OpenHardwareMonitor", "SELECT Value FROM Sensor WHERE SensorType = 'Temperature' AND Name LIKE '%GPU%'"))
+                try
                 {
-                    foreach (var obj in searcher.Get())
+                    foreach (var hardware in _computer.Hardware)
                     {
-                        double val = Convert.ToDouble(obj["Value"]);
-                        if (val >= 20.0 && val < 110.0)
+                        if (hardware.HardwareType == LibreHardwareMonitor.Hardware.HardwareType.GpuNvidia ||
+                            hardware.HardwareType == LibreHardwareMonitor.Hardware.HardwareType.GpuAmd ||
+                            hardware.HardwareType == LibreHardwareMonitor.Hardware.HardwareType.GpuIntel)
                         {
-                            return Math.Round(val, 1);
+                            hardware.Update();
+                            foreach (var sensor in hardware.Sensors)
+                            {
+                                if (sensor.SensorType == LibreHardwareMonitor.Hardware.SensorType.Temperature &&
+                                    (sensor.Name.Contains("Core", StringComparison.OrdinalIgnoreCase) ||
+                                     sensor.Name.Contains("GPU", StringComparison.OrdinalIgnoreCase)))
+                                {
+                                    if (sensor.Value.HasValue && sensor.Value.Value > 0)
+                                    {
+                                        return Math.Round(sensor.Value.Value, 1);
+                                    }
+                                }
+                            }
                         }
                     }
                 }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine("Error reading GPU temp via LHM: " + ex.Message);
+                }
             }
-            catch { }
 
-            // 2. Try Standard Video Controller
+            // 2. Try nvidia-smi (reliable CLI for Nvidia GPUs)
             try
             {
-                using (var searcher = new ManagementObjectSearcher(@"root\cimv2", "SELECT Temperature FROM Win32_VideoController"))
+                var psi = new System.Diagnostics.ProcessStartInfo
                 {
-                    foreach (var obj in searcher.Get())
+                    FileName = "nvidia-smi",
+                    Arguments = "--query-gpu=temperature.gpu --format=csv,noheader",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+                using (var proc = System.Diagnostics.Process.Start(psi))
+                {
+                    if (proc != null)
                     {
-                        var temp = obj["Temperature"];
-                        if (temp != null)
+                        string output = proc.StandardOutput.ReadToEnd();
+                        proc.WaitForExit();
+                        if (double.TryParse(output.Trim(), out double temp) && temp > 0)
                         {
-                            double t = Convert.ToDouble(temp);
-                            if (t > 5 && t < 120) return Math.Round(t, 1);
+                            return temp;
                         }
                     }
                 }
@@ -513,28 +595,59 @@ namespace SystemHub.Services
 
         public double GetMotherboardTemperature()
         {
-            // 1. Try Standard Temperature Sensor
-            try
+            // 1. Try LibreHardwareMonitor
+            InitializeComputer();
+            if (_computer != null)
             {
-                using (var searcher = new ManagementObjectSearcher(@"root\cimv2", "SELECT CurrentReading FROM Win32_TemperatureSensor"))
+                try
                 {
-                    foreach (var obj in searcher.Get())
+                    foreach (var hardware in _computer.Hardware)
                     {
-                        double val = Convert.ToDouble(obj["CurrentReading"]);
-                        if (val > 0) return val;
+                        if (hardware.HardwareType == LibreHardwareMonitor.Hardware.HardwareType.Motherboard)
+                        {
+                            hardware.Update();
+                            foreach (var subHardware in hardware.SubHardware)
+                            {
+                                subHardware.Update();
+                                foreach (var sensor in subHardware.Sensors)
+                                {
+                                    if (sensor.SensorType == LibreHardwareMonitor.Hardware.SensorType.Temperature)
+                                    {
+                                        if (sensor.Value.HasValue && sensor.Value.Value > 15.0 && sensor.Value.Value < 100.0)
+                                        {
+                                            return Math.Round(sensor.Value.Value, 1);
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            foreach (var sensor in hardware.Sensors)
+                            {
+                                if (sensor.SensorType == LibreHardwareMonitor.Hardware.SensorType.Temperature)
+                                {
+                                    if (sensor.Value.HasValue && sensor.Value.Value > 15.0 && sensor.Value.Value < 100.0)
+                                    {
+                                        return Math.Round(sensor.Value.Value, 1);
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine("Error reading Motherboard temp via LHM: " + ex.Message);
+                }
             }
-            catch { }
-            
+
             // 2. Fallback: Thermal mass simulation correlating with CPU
             double cpuTemp = GetCPUTemperature();
-            double targetTemp = cpuTemp - 8.0;
+            double targetTemp = cpuTemp - 10.0;
             if (targetTemp < 30.0) targetTemp = 32.0;
 
             if (_currentMbTemp < targetTemp)
             {
-                _currentMbTemp += (targetTemp - _currentMbTemp) * 0.05;
+                _currentMbTemp += (targetTemp - _currentMbTemp) * 0.04;
             }
             else
             {
@@ -549,26 +662,55 @@ namespace SystemHub.Services
 
         public int GetCpuFanSpeed()
         {
-            try
+            // 1. Try LibreHardwareMonitor
+            InitializeComputer();
+            if (_computer != null)
             {
-                using (var searcher = new ManagementObjectSearcher(@"root\cimv2", "SELECT DesiredSpeed FROM Win32_Fan"))
+                try
                 {
-                    foreach (var obj in searcher.Get())
+                    foreach (var hardware in _computer.Hardware)
                     {
-                        int speed = Convert.ToInt32(obj["DesiredSpeed"]);
-                        if (speed > 0) return speed;
+                        hardware.Update();
+                        foreach (var subHardware in hardware.SubHardware)
+                        {
+                            subHardware.Update();
+                            foreach (var sensor in subHardware.Sensors)
+                            {
+                                if (sensor.SensorType == LibreHardwareMonitor.Hardware.SensorType.Fan)
+                                {
+                                    if (sensor.Value.HasValue && sensor.Value.Value > 100)
+                                    {
+                                        return (int)sensor.Value.Value;
+                                    }
+                                }
+                            }
+                        }
+                        
+                        foreach (var sensor in hardware.Sensors)
+                        {
+                            if (sensor.SensorType == LibreHardwareMonitor.Hardware.SensorType.Fan)
+                            {
+                                if (sensor.Value.HasValue && sensor.Value.Value > 100)
+                                {
+                                    return (int)sensor.Value.Value;
+                                }
+                            }
+                        }
                     }
                 }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine("Error reading Fan speed via LHM: " + ex.Message);
+                }
             }
-            catch { }
-            
-            // Simulation fallback
+
+            // 2. Fallback: Simulation based on actual CPU temperature
             double cpuTemp = GetCPUTemperature();
             double speedFactor = (cpuTemp - 35.0) / 45.0; // 0 to 1
             if (speedFactor < 0) speedFactor = 0;
             if (speedFactor > 1) speedFactor = 1;
-            int rpm = 800 + (int)(speedFactor * 1400);
-            int fluctuation = new Random().Next(-15, 15);
+            int rpm = 650 + (int)(speedFactor * 1350); // 650 RPM to 2000 RPM
+            int fluctuation = new Random().Next(-20, 20);
             return rpm + fluctuation;
         }
 

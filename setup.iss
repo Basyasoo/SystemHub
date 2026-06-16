@@ -1,5 +1,5 @@
 #define AppName "SystemHub"
-#define AppVersion "1.1.6"
+#define AppVersion "1.1.7"
 #define AppPublisher "Basyasoo"
 #define AppExeName "SystemHub.exe"
 
@@ -8,7 +8,7 @@ AppId={{D3F4366A-91D7-4BFA-814E-BC949D6CEE52}
 AppName={#AppName}
 AppVersion={#AppVersion}
 AppPublisher={#AppPublisher}
-DefaultDirName={pf32}\{#AppName}
+DefaultDirName={autopf}\{#AppName}
 DefaultGroupName={#AppName}
 DisableProgramGroupPage=yes
 OutputDir=.
@@ -17,6 +17,7 @@ Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
 PrivilegesRequired=admin
+ArchitecturesInstallIn64BitMode=x64
 SetupIconFile=Assets\app.ico
 
 [Languages]

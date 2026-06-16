@@ -136,7 +136,7 @@
                                     <TextBlock Grid.Column="0" Text="{Binding SystemCpuLoad, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" Foreground="{DynamicResource TextPrimary}" FontWeight="Medium"/>
                                     <TextBlock Grid.Column="1" Text="{Binding CpuUsage, StringFormat={}{0}%}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}"/>
                                 </Grid>
-                                <ProgressBar Value="{Binding CpuUsage}" Minimum="0" Maximum="100" Height="8" CornerRadius="4" Background="#222224" Foreground="{DynamicResource AccentBlue}"/>
+                                <ProgressBar Value="{Binding CpuUsage}" Minimum="0" Maximum="100" Height="8" CornerRadius="4" Background="{DynamicResource BorderGray}" Foreground="{DynamicResource AccentBlue}"/>
                                 
                                 <!-- CPU Temp History Sparkline -->
                                 <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
@@ -155,7 +155,7 @@
                                     <TextBlock Grid.Column="0" Text="{Binding SystemRamLabel, Source={x:Static services:LocalizationService.Instance}}" FontSize="13" Foreground="{DynamicResource TextPrimary}" FontWeight="Medium" TextTrimming="CharacterEllipsis"/>
                                     <TextBlock Grid.Column="1" Text="{Binding RamUsed, StringFormat={}{0:F1} GB}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPrimary}"/>
                                 </Grid>
-                                <ProgressBar Value="{Binding RamUsagePercent}" Minimum="0" Maximum="100" Height="8" CornerRadius="4" Background="#222224" Foreground="#34C759"/>
+                                <ProgressBar Value="{Binding RamUsagePercent}" Minimum="0" Maximum="100" Height="8" CornerRadius="4" Background="{DynamicResource BorderGray}" Foreground="#34C759"/>
                                 <StackPanel Orientation="Horizontal" Spacing="5" Margin="0,2,0,0">
                                     <TextBlock Text="{Binding SysInfoTotal, Source={x:Static services:LocalizationService.Instance}}" FontSize="10" Foreground="{DynamicResource TextSecondary}"/>
                                     <TextBlock Text="{Binding TotalRam, StringFormat={}{0:F1} GB}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
@@ -299,7 +299,7 @@
                                                 <TextBlock Text="{Binding Label}" FontSize="15" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimary}"/>
                                                 <TextBlock Text="{Binding Name, StringFormat=({0})}" FontSize="13" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Bottom"/>
                                             </StackPanel>
-                                            <ProgressBar Value="{Binding UsedPercent}" Minimum="0" Maximum="100" Height="6" CornerRadius="3" Background="#222224" Foreground="{DynamicResource AccentBlue}"/>
+                                            <ProgressBar Value="{Binding UsedPercent}" Minimum="0" Maximum="100" Height="6" CornerRadius="3" Background="{DynamicResource BorderGray}" Foreground="{DynamicResource AccentBlue}"/>
                                             
                                             <!-- SMART Health details -->
                                             <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,2,0,0">
