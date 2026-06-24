@@ -65,7 +65,9 @@ namespace SystemHub.ViewModels
         public void LoadCurrentStates()
         {
             SelectedFont = TweaksService.GetSystemFont();
+#pragma warning disable MVVMTK0034
             _isWindowsSoundsEnabled = TweaksService.AreWindowsSoundsEnabled();
+#pragma warning restore MVVMTK0034
             OnPropertyChanged(nameof(IsWindowsSoundsEnabled));
             PopulateScreens();
         }

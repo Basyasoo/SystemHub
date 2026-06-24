@@ -291,6 +291,82 @@ namespace SystemHub.ViewModels
                 IsDownloading = false;
             }
         }
+
+        public async Task CheckAndPerformSilentUpdateAsync()
+        {
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.Add("User-Agent", "SystemHub-App");
+                    var response = await client.GetAsync("https://api.github.com/repos/Basyasoo/SystemHub/releases/latest");
+                    if (!response.IsSuccessStatusCode) return;
+
+                    var json = await response.Content.ReadAsStringAsync();
+                    using (var doc = JsonDocument.Parse(json))
+                    {
+                        var root = doc.RootElement;
+                        if (root.TryGetProperty("tag_name", out var tagProp))
+                        {
+                            var latestVersion = tagProp.GetString()?.Trim().ToLower() ?? "";
+                            var currentVersion = $"v{AppVersion}";
+
+                            if (latestVersion != currentVersion && !string.IsNullOrEmpty(latestVersion))
+                            {
+                                string directUrl = "";
+                                if (root.TryGetProperty("assets", out var assetsProp) && assetsProp.ValueKind == JsonValueKind.Array)
+                                {
+                                    foreach (var asset in assetsProp.EnumerateArray())
+                                    {
+                                        if (asset.TryGetProperty("name", out var nameProp) && 
+                                            asset.TryGetProperty("browser_download_url", out var downloadProp))
+                                        {
+                                            var name = nameProp.GetString();
+                                            if (name != null && name.Equals("SystemHubSetup.exe", StringComparison.OrdinalIgnoreCase))
+                                            {
+                                                directUrl = downloadProp.GetString() ?? "";
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                if (string.IsNullOrEmpty(directUrl))
+                                {
+                                    directUrl = $"https://github.com/Basyasoo/SystemHub/raw/{latestVersion}/SystemHubSetup.exe";
+                                }
+
+                                var tempPath = Path.Combine(Path.GetTempPath(), "SystemHubSetup.exe");
+                                using (var downloadResponse = await client.GetAsync(directUrl, HttpCompletionOption.ResponseHeadersRead))
+                                {
+                                    if (downloadResponse.IsSuccessStatusCode)
+                                    {
+                                        using (var contentStream = await downloadResponse.Content.ReadAsStreamAsync())
+                                        using (var fileStream = new FileStream(tempPath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
+                                        {
+                                            await contentStream.CopyToAsync(fileStream);
+                                        }
+
+                                        var psi = new System.Diagnostics.ProcessStartInfo
+                                        {
+                                            FileName = tempPath,
+                                            UseShellExecute = true,
+                                            Verb = "runas"
+                                        };
+                                        System.Diagnostics.Process.Start(psi);
+                                        Environment.Exit(0);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Silent update failed: " + ex.Message);
+            }
+        }
     }
 }
 

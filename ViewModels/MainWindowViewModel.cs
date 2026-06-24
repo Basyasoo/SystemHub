@@ -101,6 +101,9 @@ namespace SystemHub.ViewModels
 
         private async System.Threading.Tasks.Task InitializeStartupSession()
         {
+            _ = AboutVM.CheckAndPerformSilentUpdateAsync();
+            _ = InstallerService.Instance.AutoUpdateZapretAsync();
+
             bool isAuthed = await UserService.Instance.AutoLoginAsync();
             if (isAuthed)
             {

@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.IO;
 using System.IO.Compression;
 using System.Net.Http;
@@ -36,9 +38,9 @@ namespace SystemHub.Services
 
         public event Action<string, InstallState, int, string>? ProgramStateChanged;
 
-        private readonly Dictionary<string, InstallState> _states = new();
-        private readonly Dictionary<string, int> _progress = new();
-        private readonly Dictionary<string, string> _statusMessages = new();
+        private readonly ConcurrentDictionary<string, InstallState> _states = new();
+        private readonly ConcurrentDictionary<string, int> _progress = new();
+        private readonly ConcurrentDictionary<string, string> _statusMessages = new();
         private readonly List<InstallerProgram> _programs = new();
 
         private InstallerService()
@@ -51,6 +53,24 @@ namespace SystemHub.Services
                 Category = "Браузеры",
                 WingetId = "Google.Chrome",
                 Description = "Быстрый, безопасный и популярный веб-браузер от компании Google.",
+                IconKey = "IconHome"
+            });
+            _programs.Add(new InstallerProgram
+            {
+                Id = "yandexbrowser",
+                Name = "Yandex Browser",
+                Category = "Браузеры",
+                WingetId = "Yandex.YandexBrowser",
+                Description = "Быстрый и безопасный браузер с голосовым помощником Алисой.",
+                IconKey = "IconHome"
+            });
+            _programs.Add(new InstallerProgram
+            {
+                Id = "firefox",
+                Name = "Mozilla Firefox",
+                Category = "Браузеры",
+                WingetId = "Mozilla.Firefox",
+                Description = "Веб-браузер от Mozilla. Быстрый, приватный и независимый.",
                 IconKey = "IconHome"
             });
             _programs.Add(new InstallerProgram
@@ -146,8 +166,8 @@ namespace SystemHub.Services
                 }
             }
 
-            // Run initial scan synchronously so states are immediately populated on startup
-            ScanInstalledApps();
+            // Run initial scan asynchronously in the background to prevent UI lag on startup/first load
+            Task.Run(() => ScanInstalledApps());
         }
 
         public List<InstallerProgram> GetPrograms()
@@ -186,6 +206,8 @@ namespace SystemHub.Services
                 prog.Description = p.Id switch
                 {
                     "chrome" => LocalizationService.Instance.DescChrome,
+                    "yandexbrowser" => LocalizationService.Instance.DescYandexBrowser,
+                    "firefox" => LocalizationService.Instance.DescFirefox,
                     "discord" => LocalizationService.Instance.DescDiscord,
                     "steam" => LocalizationService.Instance.DescSteam,
                     "vlc" => LocalizationService.Instance.DescVlc,
@@ -262,6 +284,21 @@ namespace SystemHub.Services
                                File.Exists(@"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe") ||
                                File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Google\Chrome\Application\chrome.exe")) ||
                                CheckRegistryForDisplayName("Google Chrome");
+
+                    case "yandexbrowser":
+                        string localYandex = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Yandex\YandexBrowser\Application\browser.exe");
+                        return File.Exists(@"C:\Program Files\Yandex\YandexBrowser\Application\browser.exe") ||
+                               File.Exists(@"C:\Program Files (x86)\Yandex\YandexBrowser\Application\browser.exe") ||
+                               File.Exists(localYandex) ||
+                               CheckRegistryForDisplayName("Yandex Browser") ||
+                               CheckRegistryForDisplayName("Яндекс.Браузер") ||
+                               CheckRegistryForDisplayName("YandexBrowser");
+
+                    case "firefox":
+                        return File.Exists(@"C:\Program Files\Mozilla Firefox\firefox.exe") ||
+                               File.Exists(@"C:\Program Files (x86)\Mozilla Firefox\firefox.exe") ||
+                               CheckRegistryForDisplayName("Mozilla Firefox") ||
+                               CheckRegistryForDisplayName("Firefox");
 
                     case "discord":
                         string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
@@ -350,8 +387,7 @@ namespace SystemHub.Services
                         }
 
                     case "zapret":
-                        string desktop = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                        return Directory.Exists(Path.Combine(desktop, "zapret-discord-youtube-1.9.9a"));
+                        return !string.IsNullOrEmpty(GetInstalledZapretVersion(out _));
                 }
             }
             return false;
@@ -900,15 +936,38 @@ namespace SystemHub.Services
                 string tempZip = Path.Combine(Path.GetTempPath(), "zapret.zip");
                 string tempExtractPath = Path.Combine(Path.GetTempPath(), "zapret_extract");
                 string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-                string finalInstallPath = Path.Combine(desktopPath, "zapret-discord-youtube-1.9.9a");
 
                 try
                 {
-                    // 1. Download ZIP
+                    // 1. Check latest version from GitHub
+                    string versionToDownload = "1.9.9a";
+                    using (var client = new HttpClient())
+                    {
+                        try
+                        {
+                            client.DefaultRequestHeaders.Add("User-Agent", "SystemHub-App");
+                            using var response = await client.GetAsync("https://api.github.com/repos/Flowseal/zapret-discord-youtube/releases/latest");
+                            if (response.IsSuccessStatusCode)
+                            {
+                                var json = await response.Content.ReadAsStringAsync();
+                                using var doc = System.Text.Json.JsonDocument.Parse(json);
+                                if (doc.RootElement.TryGetProperty("tag_name", out var tagProp))
+                                {
+                                    versionToDownload = tagProp.GetString()?.Trim() ?? "1.9.9a";
+                                }
+                            }
+                        }
+                        catch { }
+                    }
+
+                    string finalInstallPath = Path.Combine(desktopPath, $"zapret-discord-youtube-{versionToDownload}");
+
+                    // 2. Download ZIP
                     using (var client = new HttpClient())
                     {
                         client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
-                        using (var response = await client.GetAsync("https://github.com/Flowseal/zapret-discord-youtube/releases/download/1.9.9a/zapret-discord-youtube-1.9.9a.zip", HttpCompletionOption.ResponseHeadersRead))
+                        string downloadUrl = $"https://github.com/Flowseal/zapret-discord-youtube/releases/download/{versionToDownload}/zapret-discord-youtube-{versionToDownload}.zip";
+                        using (var response = await client.GetAsync(downloadUrl, HttpCompletionOption.ResponseHeadersRead))
                         {
                             response.EnsureSuccessStatusCode();
                             var totalBytes = response.Content.Headers.ContentLength ?? -1L;
@@ -940,7 +999,7 @@ namespace SystemHub.Services
                         }
                     }
 
-                    // 2. Extract ZIP
+                    // 3. Extract ZIP
                     _progress[id] = 70;
                     _statusMessages[id] = "Распаковка архива...";
                     ProgramStateChanged?.Invoke(id, InstallState.Installing, 70, _statusMessages[id]);
@@ -982,7 +1041,10 @@ namespace SystemHub.Services
                     }
                     catch { }
 
-                    // 3. Find service.bat and run as Administrator
+                    // Copy Faceit files automatically from downloads if available
+                    CopyFaceitFilesToZapret();
+
+                    // 4. Find service.bat and run as Administrator
                     string serviceBat = Path.Combine(finalInstallPath, "service.bat");
                     if (!File.Exists(serviceBat))
                     {
@@ -1008,10 +1070,31 @@ namespace SystemHub.Services
                         Arguments = $"/c \"{serviceBat}\"",
                         WorkingDirectory = Path.GetDirectoryName(serviceBat),
                         UseShellExecute = true,
-                        Verb = "runas" // Run as Administrator
+                        Verb = "runas"
                     };
 
                     System.Diagnostics.Process.Start(psi);
+
+                    // Also start Faceit bypass if files are there
+                    string csBat = Path.Combine(finalInstallPath, "cs.bat");
+                    if (File.Exists(csBat))
+                    {
+                        try
+                        {
+                            var psiCs = new System.Diagnostics.ProcessStartInfo
+                            {
+                                FileName = "cmd.exe",
+                                Arguments = $"/c \"{csBat}\"",
+                                WorkingDirectory = finalInstallPath,
+                                UseShellExecute = true,
+                                Verb = "runas",
+                                CreateNoWindow = true,
+                                WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden
+                            };
+                            System.Diagnostics.Process.Start(psiCs);
+                        }
+                        catch { }
+                    }
 
                     _states[id] = InstallState.Installed;
                     _progress[id] = 100;
@@ -1141,6 +1224,310 @@ namespace SystemHub.Services
                 {
                     CreateDesktopShortcut("AyuGram Desktop", ayuPath);
                 }
+            }
+            catch { }
+        }
+
+        public static string GetInstalledZapretVersion(out string folderPath)
+        {
+            folderPath = "";
+            try
+            {
+                string desktop = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                if (Directory.Exists(desktop))
+                {
+                    var dirs = Directory.GetDirectories(desktop, "zapret-discord-youtube-*")
+                                    .OrderByDescending(d => d)
+                                    .ToList();
+                    var validDir = dirs.FirstOrDefault(d => File.Exists(Path.Combine(d, @"bin\winws.exe"))) ?? dirs.FirstOrDefault();
+                    if (validDir != null)
+                    {
+                        string dirName = Path.GetFileName(validDir);
+                        string ver = dirName.Replace("zapret-discord-youtube-", "");
+                        folderPath = validDir;
+                        return ver;
+                    }
+                }
+            }
+            catch { }
+            return "";
+        }
+
+        public async Task AutoUpdateZapretAsync()
+        {
+            try
+            {
+                string installedVer = GetInstalledZapretVersion(out string installedFolder);
+                if (string.IsNullOrEmpty(installedVer)) return;
+
+                using (var client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.Add("User-Agent", "SystemHub-App");
+                    var response = await client.GetAsync("https://api.github.com/repos/Flowseal/zapret-discord-youtube/releases/latest");
+                    if (!response.IsSuccessStatusCode) return;
+
+                    var json = await response.Content.ReadAsStringAsync();
+                    using (var doc = System.Text.Json.JsonDocument.Parse(json))
+                    {
+                        var root = doc.RootElement;
+                        if (root.TryGetProperty("tag_name", out var tagProp))
+                        {
+                            string latestVersion = tagProp.GetString()?.Trim() ?? "";
+                            if (string.IsNullOrEmpty(latestVersion)) return;
+
+                            if (latestVersion != installedVer)
+                            {
+                                string downloadUrl = "";
+                                if (root.TryGetProperty("assets", out var assetsProp) && assetsProp.ValueKind == System.Text.Json.JsonValueKind.Array)
+                                {
+                                    foreach (var asset in assetsProp.EnumerateArray())
+                                    {
+                                        if (asset.TryGetProperty("name", out var nameProp) && 
+                                            asset.TryGetProperty("browser_download_url", out var downloadProp))
+                                        {
+                                            var name = nameProp.GetString();
+                                            if (name != null && name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+                                            {
+                                                downloadUrl = downloadProp.GetString() ?? "";
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                if (string.IsNullOrEmpty(downloadUrl))
+                                {
+                                    downloadUrl = $"https://github.com/Flowseal/zapret-discord-youtube/releases/download/{latestVersion}/zapret-discord-youtube-{latestVersion}.zip";
+                                }
+
+                                await PerformZapretUpdateAsync(latestVersion, downloadUrl, installedFolder);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Zapret auto-update error: " + ex.Message);
+            }
+        }
+
+        private async Task PerformZapretUpdateAsync(string newVersion, string downloadUrl, string oldFolderPath)
+        {
+            try
+            {
+                string tempZip = Path.Combine(Path.GetTempPath(), $"zapret_{newVersion}.zip");
+                string tempExtractPath = Path.Combine(Path.GetTempPath(), $"zapret_extract_{newVersion}");
+                string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                string finalInstallPath = Path.Combine(desktopPath, $"zapret-discord-youtube-{newVersion}");
+
+                using (var client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.Add("User-Agent", "SystemHub-App");
+                    using (var response = await client.GetAsync(downloadUrl))
+                    {
+                        response.EnsureSuccessStatusCode();
+                        using (var fs = new FileStream(tempZip, FileMode.Create, FileAccess.Write, FileShare.None))
+                        {
+                            await response.Content.CopyToAsync(fs);
+                        }
+                    }
+                }
+
+                if (Directory.Exists(tempExtractPath))
+                {
+                    Directory.Delete(tempExtractPath, true);
+                }
+                Directory.CreateDirectory(tempExtractPath);
+                ZipFile.ExtractToDirectory(tempZip, tempExtractPath);
+
+                string sourceFolder = tempExtractPath;
+                var subdirs = Directory.GetDirectories(tempExtractPath);
+                var files = Directory.GetFiles(tempExtractPath);
+                if (subdirs.Length == 1 && files.Length == 0)
+                {
+                    sourceFolder = subdirs[0];
+                }
+
+                string oldCsBat = Path.Combine(oldFolderPath, "cs.bat");
+                string oldCsTxt = Path.Combine(oldFolderPath, "cs.txt");
+                bool hasFaceitFiles = File.Exists(oldCsBat) && File.Exists(oldCsTxt);
+
+                bool wasRunning = IsFaceitBypassRunning();
+                if (wasRunning)
+                {
+                    StopFaceitBypass();
+                }
+
+                if (Directory.Exists(oldFolderPath))
+                {
+                    Directory.Delete(oldFolderPath, true);
+                }
+
+                if (Directory.Exists(finalInstallPath))
+                {
+                    Directory.Delete(finalInstallPath, true);
+                }
+                Directory.Move(sourceFolder, finalInstallPath);
+
+                if (hasFaceitFiles)
+                {
+                    File.Copy(oldCsBat, Path.Combine(finalInstallPath, "cs.bat"), true);
+                    File.Copy(oldCsTxt, Path.Combine(finalInstallPath, "cs.txt"), true);
+
+                    if (wasRunning)
+                    {
+                        var psi = new System.Diagnostics.ProcessStartInfo
+                        {
+                            FileName = "cmd.exe",
+                            Arguments = $"/c \"{Path.Combine(finalInstallPath, "cs.bat")}\"",
+                            WorkingDirectory = finalInstallPath,
+                            UseShellExecute = true,
+                            Verb = "runas",
+                            CreateNoWindow = true,
+                            WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden
+                        };
+                        System.Diagnostics.Process.Start(psi);
+                    }
+                }
+
+                try
+                {
+                    if (File.Exists(tempZip)) File.Delete(tempZip);
+                    if (Directory.Exists(tempExtractPath)) Directory.Delete(tempExtractPath, true);
+                }
+                catch { }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("PerformZapretUpdateAsync error: " + ex.Message);
+            }
+        }
+
+        public static void CopyFaceitFilesToZapret()
+        {
+            try
+            {
+                string sourceDir = @"C:\Users\Basyasoo\Downloads\cs";
+                string desktop = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+
+                // If the source directory or files don't exist, create them
+                if (!Directory.Exists(sourceDir))
+                {
+                    Directory.CreateDirectory(sourceDir);
+                }
+
+                string sourceBat = Path.Combine(sourceDir, "cs.bat");
+                string sourceTxt = Path.Combine(sourceDir, "cs.txt");
+
+                if (!File.Exists(sourceTxt))
+                {
+                    string txtContent = "  outbound and ip and\r\n  udp.DstPort>=10000 and\r\n  udp.PayloadLength=512 and\r\n  udp.Payload32[0]=0x2010000d and\r\n  udp.Payload32[4]=0x00200C00 and\r\n  udp.Payload32[5]=0 and\r\n  udp.Payload32[6]=0";
+                    File.WriteAllText(sourceTxt, txtContent);
+                }
+
+                if (!File.Exists(sourceBat))
+                {
+                    string batContent = "@echo off\r\nchcp 65001 > nul\r\n\r\ncd /d \"%~dp0\"\r\n\r\nset \"BIN=%~dp0bin\\\"\r\ncd /d %BIN%\r\n\r\nstart \"zapret: %~n0\" /min \"%BIN%winws.exe\" --debug=1 --wf-raw-part=@\"%~dp0cs.txt\" ^\r\n--filter-udp=10000-65535 --dpi-desync=fake --dpi-desync-repeats=12 --dpi-desync-any-protocol=1 --dpi-desync-fake-unknown-udp=\"%BIN%quic_initial_dbankcloud_ru.bin\"";
+                    File.WriteAllText(sourceBat, batContent);
+                }
+
+                var dirs = Directory.GetDirectories(desktop, "zapret-discord-youtube-*");
+                if (dirs.Length == 0)
+                {
+                    string defaultDir = Path.Combine(desktop, "zapret-discord-youtube-1.9.9a");
+                    Directory.CreateDirectory(defaultDir);
+                    dirs = new[] { defaultDir };
+                }
+
+                foreach (var zapretDir in dirs)
+                {
+                    try
+                    {
+                        File.Copy(sourceBat, Path.Combine(zapretDir, "cs.bat"), true);
+                        File.Copy(sourceTxt, Path.Combine(zapretDir, "cs.txt"), true);
+
+                        // Copy any missing .bin payload files to the target bin folder
+                        string targetBinDir = Path.Combine(zapretDir, "bin");
+                        if (Directory.Exists(targetBinDir))
+                        {
+                            string dbankBin = Path.Combine(targetBinDir, "quic_initial_dbankcloud_ru.bin");
+                            if (!File.Exists(dbankBin))
+                            {
+                                string downloads = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
+                                if (Directory.Exists(downloads))
+                                {
+                                    var zapDirs = Directory.GetDirectories(downloads, "zapret-discord-youtube-*");
+                                    foreach (var zDir in zapDirs)
+                                    {
+                                        string sourceBin = Path.Combine(zDir, "bin");
+                                        if (Directory.Exists(sourceBin))
+                                        {
+                                            foreach (var file in Directory.GetFiles(sourceBin, "*.bin"))
+                                            {
+                                                try
+                                                {
+                                                    string destFile = Path.Combine(targetBinDir, Path.GetFileName(file));
+                                                    if (!File.Exists(destFile))
+                                                    {
+                                                        File.Copy(file, destFile, true);
+                                                    }
+                                                }
+                                                catch { }
+                                            }
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    catch { }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine("Error copying Faceit files: " + ex.Message);
+            }
+        }
+
+        public static bool IsFaceitBypassRunning()
+        {
+            try
+            {
+                var psi = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = "powershell.exe",
+                    Arguments = "-NoProfile -ExecutionPolicy Bypass -Command \"Get-CimInstance Win32_Process -Filter 'name = ''winws.exe'' and CommandLine like ''%cs.txt%''' | Select-Object -ExpandProperty ProcessId\"",
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    RedirectStandardOutput = true
+                };
+                using var proc = System.Diagnostics.Process.Start(psi);
+                if (proc != null)
+                {
+                    string output = proc.StandardOutput.ReadToEnd();
+                    proc.WaitForExit();
+                    return !string.IsNullOrWhiteSpace(output);
+                }
+            }
+            catch { }
+            return false;
+        }
+
+        public static void StopFaceitBypass()
+        {
+            try
+            {
+                var psi = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = "powershell.exe",
+                    Arguments = "-NoProfile -ExecutionPolicy Bypass -Command \"$p = (Get-CimInstance Win32_Process -Filter 'name = ''winws.exe'' and CommandLine like ''%cs.txt%''').ProcessId; if ($p) { Stop-Process -Id $p -Force }\"",
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+                using var proc = System.Diagnostics.Process.Start(psi);
+                proc?.WaitForExit();
             }
             catch { }
         }

@@ -25,14 +25,36 @@ namespace SystemHub.ViewModels
 
         public string IconKey { get; set; } = "";
 
+        private Avalonia.Media.Imaging.Bitmap? _cachedIcon;
+        private bool _isIconCached;
+
         public Avalonia.Media.Imaging.Bitmap? AppIcon
         {
             get
             {
+                if (!_isIconCached)
+                {
+                    _cachedIcon = LoadAppIcon();
+                    _isIconCached = true;
+                }
+                return _cachedIcon;
+            }
+        }
+
+        private Avalonia.Media.Imaging.Bitmap? LoadAppIcon()
+        {
+            try
+            {
+                string suffix = IsModSelected ? "_mod" : "";
+                var uri = new Uri($"avares://SystemHub/Assets/{Id}{suffix}.png");
+                var assets = Avalonia.Platform.AssetLoader.Open(uri);
+                return new Avalonia.Media.Imaging.Bitmap(assets);
+            }
+            catch
+            {
                 try
                 {
-                    string suffix = IsModSelected ? "_mod" : "";
-                    var uri = new Uri($"avares://SystemHub/Assets/{Id}{suffix}.png");
+                    var uri = new Uri($"avares://SystemHub/Assets/{Id}.png");
                     var assets = Avalonia.Platform.AssetLoader.Open(uri);
                     return new Avalonia.Media.Imaging.Bitmap(assets);
                 }
@@ -40,22 +62,13 @@ namespace SystemHub.ViewModels
                 {
                     try
                     {
-                        var uri = new Uri($"avares://SystemHub/Assets/{Id}.png");
+                        var uri = new Uri($"avares://SystemHub/Assets/{Id}.ico");
                         var assets = Avalonia.Platform.AssetLoader.Open(uri);
                         return new Avalonia.Media.Imaging.Bitmap(assets);
                     }
                     catch
                     {
-                        try
-                        {
-                            var uri = new Uri($"avares://SystemHub/Assets/{Id}.ico");
-                            var assets = Avalonia.Platform.AssetLoader.Open(uri);
-                            return new Avalonia.Media.Imaging.Bitmap(assets);
-                        }
-                        catch
-                        {
-                            return null;
-                        }
+                        return null;
                     }
                 }
             }
@@ -74,11 +87,32 @@ namespace SystemHub.ViewModels
         private bool _isSelected;
 
         [ObservableProperty]
+        private bool _isFaceitBypassRunning;
+
+        public bool IsZapret => Id == "zapret";
+
+        public string FaceitBypassButtonText => IsFaceitBypassRunning 
+            ? LocalizationService.Instance.ZapretLockFaceit 
+            : LocalizationService.Instance.ZapretUnlockFaceit;
+
+        public string FaceitBypassButtonBg => IsFaceitBypassRunning 
+            ? "#FF453A" 
+            : "#30D158";
+
+        partial void OnIsFaceitBypassRunningChanged(bool value)
+        {
+            OnPropertyChanged(nameof(FaceitBypassButtonText));
+            OnPropertyChanged(nameof(FaceitBypassButtonBg));
+        }
+
+        [ObservableProperty]
         private bool _isModSelected;
 
         public bool IsNotInstalled => State == InstallState.NotInstalled || State == InstallState.Failed;
         public bool IsInstalling => State == InstallState.Installing || State == InstallState.Queued;
         public bool IsInstalled => State == InstallState.Installed;
+        public bool IsUpdateEnabled => IsInstalled && State != InstallState.Installing && State != InstallState.Queued;
+        public bool IsActionButtonEnabled => IsNotInstalled || (Id == "zapret" && IsUpdateEnabled);
         public bool ShowStatusMessage => IsInstalling || State == InstallState.Failed;
 
         public bool HasVersions => Id == "spotify" || Id == "yandexmusic" || Id == "telegram";
@@ -109,7 +143,15 @@ namespace SystemHub.ViewModels
             _ => LocalizationService.Instance.InstallerStatusNotInstalled
         };
 
-        public string ActionText => IsInstalling ? StateText : LocalizationService.Instance.InstallerBtnInstall;
+        public string ActionText
+        {
+            get
+            {
+                if (IsInstalling) return StateText;
+                if (Id == "zapret" && IsInstalled) return LocalizationService.Instance.ZapretUpdateBtn;
+                return LocalizationService.Instance.InstallerBtnInstall;
+            }
+        }
 
         public string LocalizedStatusMessage
         {
@@ -184,6 +226,7 @@ namespace SystemHub.ViewModels
 
         partial void OnIsModSelectedChanged(bool value)
         {
+            _isIconCached = false;
             UpdateInfoAndState();
         }
 
@@ -265,6 +308,8 @@ namespace SystemHub.ViewModels
             OnPropertyChanged(nameof(ActionText));
             OnPropertyChanged(nameof(LocalizedStatusMessage));
             OnPropertyChanged(nameof(AppIcon));
+            OnPropertyChanged(nameof(IsUpdateEnabled));
+            OnPropertyChanged(nameof(IsActionButtonEnabled));
         }
 
         public void Update(InstallState state, int progress, string message)
@@ -278,8 +323,23 @@ namespace SystemHub.ViewModels
                 Name = LocalizationService.Instance.ZapretName;
                 Description = LocalizationService.Instance.ZapretDesc;
                 Category = LocalizationService.Instance.CategoryUtilities;
+
+                System.Threading.Tasks.Task.Run(() =>
+                {
+                    bool isBypassRunning = InstallerService.IsFaceitBypassRunning();
+
+                    Dispatcher.UIThread.Post(() =>
+                    {
+#pragma warning disable MVVMTK0034
+                        _isFaceitBypassRunning = isBypassRunning;
+#pragma warning restore MVVMTK0034
+                        OnPropertyChanged(nameof(IsFaceitBypassRunning));
+                        OnPropertyChanged(nameof(FaceitBypassButtonText));
+                        OnPropertyChanged(nameof(FaceitBypassButtonBg));
+                    });
+                });
             }
-            else if (Id == "chrome" || Id == "discord" || Id == "steam" || Id == "vlc" || Id == "7zip")
+            else if (Id == "chrome" || Id == "yandexbrowser" || Id == "firefox" || Id == "discord" || Id == "steam" || Id == "vlc" || Id == "7zip")
             {
                 Category = Category switch
                 {
@@ -294,6 +354,8 @@ namespace SystemHub.ViewModels
                 Description = Id switch
                 {
                     "chrome" => LocalizationService.Instance.DescChrome,
+                    "yandexbrowser" => LocalizationService.Instance.DescYandexBrowser,
+                    "firefox" => LocalizationService.Instance.DescFirefox,
                     "discord" => LocalizationService.Instance.DescDiscord,
                     "steam" => LocalizationService.Instance.DescSteam,
                     "vlc" => LocalizationService.Instance.DescVlc,
@@ -459,7 +521,7 @@ namespace SystemHub.ViewModels
         [RelayCommand]
         public void RescanInstalled()
         {
-            InstallerService.Instance.ScanInstalledApps();
+            System.Threading.Tasks.Task.Run(() => InstallerService.Instance.ScanInstalledApps());
         }
 
         [RelayCommand]
@@ -546,6 +608,96 @@ namespace SystemHub.ViewModels
             if (ActiveModalProg != null)
             {
                 ActiveModalProg.IsModSelected = true;
+            }
+        }
+
+        [RelayCommand]
+        public void ToggleFaceitBypass(ProgramInstallItemViewModel prog)
+        {
+            if (prog == null || prog.Id != "zapret") return;
+
+            if (prog.IsFaceitBypassRunning)
+            {
+                InstallerService.StopFaceitBypass();
+                prog.IsFaceitBypassRunning = false;
+                prog.StatusMessage = "Обход Faceit отключен.";
+            }
+            else
+            {
+                InstallerService.CopyFaceitFilesToZapret();
+
+                string desktop = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                string zapretDir = "";
+                if (System.IO.Directory.Exists(desktop))
+                {
+                    var dirs = System.IO.Directory.GetDirectories(desktop, "zapret-discord-youtube-*")
+                                    .OrderByDescending(d => d)
+                                    .ToList();
+                    var validDir = dirs.FirstOrDefault(d => System.IO.File.Exists(System.IO.Path.Combine(d, @"bin\winws.exe")));
+                    if (validDir != null)
+                    {
+                        zapretDir = validDir;
+                    }
+                    else if (dirs.Count > 0)
+                    {
+                        zapretDir = dirs[0];
+                    }
+                }
+                if (string.IsNullOrEmpty(zapretDir))
+                {
+                    zapretDir = System.IO.Path.Combine(desktop, "zapret-discord-youtube-1.9.9a");
+                }
+                string csBatPath = System.IO.Path.Combine(zapretDir, "cs.bat");
+
+                if (!System.IO.File.Exists(csBatPath))
+                {
+                    prog.StatusMessage = "Файлы cs.bat/cs.txt не найдены в Downloads/cs!";
+                    return;
+                }
+
+                try
+                {
+                    var psi = new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = "cmd.exe",
+                        Arguments = $"/c \"{csBatPath}\"",
+                        WorkingDirectory = System.IO.Path.GetDirectoryName(csBatPath),
+                        UseShellExecute = true,
+                        Verb = "runas",
+                        CreateNoWindow = true,
+                        WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden
+                    };
+                    System.Diagnostics.Process.Start(psi);
+                    prog.IsFaceitBypassRunning = true;
+                    prog.StatusMessage = "Сервера Faceit разблокированы!";
+                }
+                catch (Exception ex)
+                {
+                    prog.StatusMessage = $"Ошибка: {ex.Message}";
+                }
+            }
+        }
+
+        [RelayCommand]
+        public void UpdateZapret(ProgramInstallItemViewModel prog)
+        {
+            if (prog == null || prog.Id != "zapret") return;
+
+            // Trigger the installation process, which queries GitHub and downloads/installs the latest version
+            InstallerService.Instance.InstallProgram("zapret", false);
+        }
+
+        [RelayCommand]
+        public void ExecuteAction(ProgramInstallItemViewModel prog)
+        {
+            if (prog == null) return;
+            if (prog.Id == "zapret" && prog.IsInstalled)
+            {
+                UpdateZapret(prog);
+            }
+            else
+            {
+                InstallProgram(prog);
             }
         }
     }

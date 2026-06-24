@@ -1338,6 +1338,28 @@ namespace SystemHub.Services
             _ => "Обход ограничений и замедления YouTube и Discord в России."
         };
 
+        public string ZapretUnlockFaceit => CurrentLanguage switch
+        {
+            "EN" => "Unlock Faceit Servers",
+            "ZH" => "解锁 Faceit 服务器",
+            _ => "Разблокировать зарубежные сервера"
+        };
+
+        public string ZapretLockFaceit => CurrentLanguage switch
+        {
+            "EN" => "Lock Faceit Servers",
+            "ZH" => "锁定 Faceit 服务器",
+            _ => "Заблокировать Faceit сервера"
+        };
+
+
+        public string ZapretUpdateBtn => CurrentLanguage switch
+        {
+            "EN" => "Update",
+            "ZH" => "更新",
+            _ => "Обновить"
+        };
+
         public string ZapretModalTitle => CurrentLanguage switch
         {
             "EN" => "Zapret Installation Guide",
@@ -1415,6 +1437,18 @@ namespace SystemHub.Services
             "EN" => "Fast, secure, and popular web browser by Google.", 
             "ZH" => "谷歌公司出品的快速、安全且流行的网页浏览器。", 
             _ => "Быстрый, безопасный и популярный веб-браузер от компании Google." 
+        };
+        public string DescFirefox => CurrentLanguage switch 
+        { 
+            "EN" => "Web browser by Mozilla. Fast, private and independent.", 
+            "ZH" => "火狐浏览器。快速、私密且独立。", 
+            _ => "Веб-браузер от Mozilla. Быстрый, приватный и независимый." 
+        };
+        public string DescYandexBrowser => CurrentLanguage switch 
+        { 
+            "EN" => "Fast and secure browser with voice assistant Alice and translation features.", 
+            "ZH" => "快速安全的浏览器，配备语音助手 Alice 和翻译功能。", 
+            _ => "Быстрый и безопасный браузер с голосовым помощником Алисой и переводчиком." 
         };
         public string DescDiscord => CurrentLanguage switch 
         { 
